@@ -8,6 +8,6 @@ Created on Tue May 30 15:08:10 2017
 
 #Calculations for the WING MODEL
 
-import Parameters.py as p
+import Parameters as p
 
 print p.S
