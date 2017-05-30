@@ -13,4 +13,4 @@ git commit -m “MESSAGE”
 
 
 Then you push it to the server:
-git push FILENAME
+git push
