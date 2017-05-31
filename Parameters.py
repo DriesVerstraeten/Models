@@ -11,7 +11,7 @@ Author: Dries
 from math import *
 
 Lt =  5.7 #m - Tail length
-Lf = 9.05 #m - fuselage length
+Lf = 9.04#m - fuselage length
 
 #Mission Parameters
 Nz = 9 #ultimate load factor
