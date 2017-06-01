@@ -61,4 +61,9 @@ V_fuel = Lf/3 * (S1+S2 + (S1*S2)**0.5) #maximum fuel volume in main wing
 
 CL = 0.5
 
+#TAIL
+S_ht = 21.634 * 0.092903 #ft2 to m2
+cr_ht = 0.7857
+ct_ht = 0.629
+b_ht = 2.828
 
