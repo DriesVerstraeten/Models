@@ -36,9 +36,9 @@ L_n = 0.7 #nose gear length, cm
 #WING PARAMETERS
 S = 14.31 #m2 - Wing surface area
 A = 7.35 #Aspect Ratio
-b = 10.8 #m - wing span
+b = 10.35 #m - wing span
 bh = 2.997 #m - horizontal wing span
-c_r = 2.11 #m - root chord
+c_r = 2.011 #m - root chord
 c_t = 0.844 #m - tip chord
 c_rh = 0.832 #m - horizontal root chord
 c_th = 0.67 #m - horizontal tip chord
