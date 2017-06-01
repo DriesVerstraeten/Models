@@ -27,6 +27,8 @@ e = 0.85 #Oswald's factor
 cp = 0.000000113 #kg/J - turboprop SFC
 Cd0 = 0.02 #-
 n_p = 0.82 #propeller efficiency 
+L_m = 0.7 #main gear length, cm
+L_n = 0.7 #nose gear length, cm
 
 
 #WING PARAMETERS
