@@ -23,9 +23,9 @@ g = 9.80665 #gravitational acceleration
 Nz = 9 #ultimate load factor
 h_cruise = 5486.4 #5486.4m or 18000 ft - cruise altitude
 V_cruise = 92.6 #m/s or 180 knots - cruise speed
-W_PL = 444 #kg - Payload
-d_range = 1400 #km - Design Range
-t_loiter = 2700 #s - loiter time
+W_PL = 444. #kg - Payload
+d_range = 1400. #km - Design Range
+t_loiter = 2700. #s - loiter time
 
 
 #Aircraft Parameters
@@ -35,7 +35,7 @@ Cd0 = 0.02 #-
 n_p = 0.82 #propeller efficiency 
 L_m = 0.7 #main gear length, cm
 L_n = 0.7 #nose gear length, cm
-MTOW = 1635 #max TO weight, in kg!!!!!!!!
+MTOW = 1635. #max TO weight, in kg!!!!!!!!
 
 
 #WING PARAMETERS
@@ -61,7 +61,7 @@ ht2 = 0.0123 #m - UPDATE IF AIRFOIL IS UPDATED
 wt = fuel_chord_length * c_t
 S1 = 0.5*(hr1+hr2)*wr #surface area at root
 S2 = 0.5*(ht1+ht2)*wt #surface area at tip
-V_fuel = Lf/3 * (S1+S2 + (S1*S2)**0.5) #maximum fuel volume in main wing
+V_fuel = Lf/3. * (S1+S2 + (S1*S2)**0.5) #maximum fuel volume in main wing
 
 CL = 0.5
 
