@@ -63,7 +63,7 @@ CL = 0.5
 
 #TAIL
 S_ht = 21.634 * 0.092903 #ft2 to m2
-cr_ht = 0.7857
-ct_ht = 0.629
-b_ht = 2.828
-
+cr_ht = 0.7857 #root cord hor tail
+ct_ht = 0.629 #tip cord hor tail
+b_ht = 2.828 #span hor tail
+W_ht = 13.432 #mass hor tail
