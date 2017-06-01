@@ -31,6 +31,7 @@ Cd0 = 0.02 #-
 n_p = 0.82 #propeller efficiency 
 L_m = 0.7 #main gear length, cm
 L_n = 0.7 #nose gear length, cm
+MTOW = 1635 #max TO weight, in kg!!!!!!!!
 
 
 #WING PARAMETERS
@@ -58,6 +59,6 @@ S1 = 0.5*(hr1+hr2)*wr #surface area at root
 S2 = 0.5*(ht1+ht2)*wt #surface area at tip
 V_fuel = Lf/3 * (S1+S2 + (S1*S2)**0.5) #maximum fuel volume in main wing
 
-CL = 0.1
+CL = 0.5
 
 
