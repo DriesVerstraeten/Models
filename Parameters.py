@@ -13,12 +13,16 @@ import numpy as np
 Lt =  5.7 #m - Tail length
 Lf = 9.04#m - fuselage length
 
+#Atmosphere parameters
+rho_0 = 1.225 #density at sea level
+rho_cruise = 0.698145 #density at cruise altitude
+g = 9.80665 #gravitational acceleration
+
+
 #Mission Parameters
 Nz = 9 #ultimate load factor
 h_cruise = 5486.4 #5486.4m or 18000 ft - cruise altitude
 V_cruise = 92.6 #m/s or 180 knots - cruise speed
-rho_0 = 1.225 #density at sea level
-rho_cruise = 0.698145 #density at cruise altitude
 W_PL = 444 #kg - Payload
 d_range = 1400 #km - Design Range
 t_loiter = 2700 #s - loiter time
