@@ -41,7 +41,7 @@ MTOW = 1635. #max TO weight, in kg!!!!!!!!
 #WING PARAMETERS
 S = 14.31 #m2 - Wing surface area
 A = 7.35 #Aspect Ratio
-b = 10.35 #m - wing span
+b = 10 #m - wing span
 bh = 2.997 #m - horizontal wing span
 c_r = 2.011 #m - root chord
 c_t = 0.844 #m - tip chord
