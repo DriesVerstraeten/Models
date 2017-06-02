@@ -10,16 +10,14 @@ Author: Dries
 
 import numpy as np 
 
-Lt =  5.7 #m - Tail length
-Lf = 9.04#m - fuselage length
 
-#Atmosphere parameters
+#ATMOSPHERIC PARAMETERS
 rho_0 = 1.225 #density at sea level
 rho_cruise = 0.698145 #density at cruise altitude
 g = 9.80665 #gravitational acceleration
 
 
-#Mission Parameters
+#MISSION PARAMETERS
 Nz = 9 #ultimate load factor
 h_cruise = 5486.4 #5486.4m or 18000 ft - cruise altitude
 V_cruise = 92.6 #m/s or 180 knots - cruise speed
@@ -28,7 +26,7 @@ d_range = 1400. #km - Design Range
 t_loiter = 2700. #s - loiter time
 
 
-#Aircraft Parameters
+#AIRCRAFT PARAMETERS
 e = 0.85 #Oswald's factor
 cp = 0.000000113 #kg/J - turboprop SFC
 Cd0 = 0.02 #-
@@ -36,6 +34,11 @@ n_p = 0.82 #propeller efficiency
 L_m = 0.7 #main gear length, cm
 L_n = 0.7 #nose gear length, cm
 MTOW = 1635. #max TO weight, in kg!!!!!!!!
+
+
+#FUSELAGE PARAMETERS
+Lt =  5.7 #m - Tail length
+Lf = 9.04#m - fuselage length
 
 
 #WING PARAMETERS
@@ -63,7 +66,6 @@ S1 = 0.5*(hr1+hr2)*wr #surface area at root
 S2 = 0.5*(ht1+ht2)*wt #surface area at tip
 V_fuel = Lf/3. * (S1+S2 + (S1*S2)**0.5) #maximum fuel volume in main wing
 
-CL = 0.5
 
 #TAIL
 S_ht = 21.634 * 0.092903 #ft2 to m2
@@ -71,3 +73,6 @@ cr_ht = 0.7857 #root cord hor tail
 ct_ht = 0.629 #tip cord hor tail
 b_ht = 2.828 #span hor tail
 W_ht = 13.432 #mass hor tail
+
+
+
