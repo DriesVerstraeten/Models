@@ -1,5 +1,3 @@
-<<<<<<< HEAD
 bye dries!
-=======
 hi
->>>>>>> 3269517e2fc8a2119ffdee8e25e430211fd1c412
+
