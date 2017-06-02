@@ -11,7 +11,7 @@ Created on Tue May 30 15:08:10 2017
 import Parameters as p
 import numpy as np
 import matplotlib.pyplot as plt
-
+#lalal
 plt.close()
 fig = plt.figure(figsize = (8.5,6),tight_layout=True)
 
