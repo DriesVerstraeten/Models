@@ -1,7 +1,5 @@
-# Structural-model
-All structural calculations are made here
-
-
+# Models
+All design calculations are made here
 
 The steps to make github work:
 
@@ -14,5 +12,3 @@ git commit -m “MESSAGE”
 
 Then you push it to the server:
 git push
-
-this is a testi simoni
