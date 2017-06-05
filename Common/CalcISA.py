@@ -20,6 +20,9 @@ aMeso1 = -0.0028
 aMeso2 = -0.002
 g0 = 9.80665 #m/s^2
 R = 287.058 #J/(kg*K)
+T0_v = 291.15 #K
+C = 110.56 #K
+mu_0 = 18.27*10**(-6) #Pa*s
 
 #define the temperatures at the kinks in the temperature
 
@@ -62,11 +65,11 @@ rho71 = PR71*rho51*(T51/T71)
 
 #@84852 m
 #T84 = T71 + aMeso2 * 13852
-    
+
 def ISA(h):
     #Define the temperature along the height
     #Troposphere
-    if h<=11000 and h>0:
+    if h<=11000 and h>=0:
         T1 = T0 + aTrop * h
         PR1 = (T1/T0)**(-g0/(aTrop * R))
         P1 = P0* PR1
@@ -123,3 +126,129 @@ def ISA(h):
         
     else:
         raise ValueError('{} does not lie between 0 and 84852 m, I cannot calculate ISA values there'.format(h))
+
+def ISA_temp(h):
+    '''
+    Calculate the temperature at a certain height
+    '''
+    if h<=11000 and h>=0:
+        T1 = T0 + aTrop * h
+        return T1
+    
+    #Tropopause
+    elif h>11000 and h<= 20000:
+        return T11
+    
+    #Part one of the Stratosphere
+    elif h>20000 and h<=32000:
+        T1 = T0 + aStrat1 * h
+        return T1
+    
+    #Part two of the Stratosphere
+    elif h>32000 and h<=47000:
+        T1 = T0 + aStrat2 * h
+        return T1
+    
+    #Stratopause
+    elif h>47000 and h<=51000:
+        return T47
+        
+    #Part one of the Mesosphere
+    elif h>51000 and h<=71000:
+        T1 = T0 + aMeso1 * h
+        return T1
+    
+    #Part two of the Mesosphere
+    elif h>71000 and h<=84852:
+        T1 = T0 + aMeso2 * h
+        return T1
+
+def ISA_press(h):
+    T = ISA_temp(h)
+    
+    #Troposphere
+    if h<=11000 and h>=0:
+        P1 = P0*(T/T0)**(-g0/(aTrop * R))
+        return P1
+    
+    #Tropopause
+    elif h>11000 and h<= 20000:
+        P1 = P11*np.exp(-g0/(R*T)*(h-11000))
+        return P1
+    
+    #Part one of the Stratosphere
+    elif h>20000 and h<=32000:
+        P1 = P20*(T/T20)**(-g0/(aStrat1 * R))
+        return P1
+    
+    #Part two of the Stratosphere
+    elif h>32000 and h<=47000:
+        P1 = P32*(T/T32)**(-g0/(aStrat2 * R))
+        return P1
+    
+    #Stratopause
+    elif h>47000 and h<=51000:
+        P1 = P47*np.exp(-g0/(R*T)*(h-47000))
+        return P1
+        
+    #Part one of the Mesosphere
+    elif h>51000 and h<=71000:
+        P1 = P51*(T/T51)**(-g0/(aMeso1 * R))
+        return P1
+    
+    #Part two of the Mesosphere
+    elif h>71000 and h<=84852:
+        P1 = P71*(T/T71)**(-g0/(aMeso2 * R))
+        return P1
+    
+def ISA_dens(h):
+    T = ISA_temp(h)
+    
+    #Troposphere
+    if h<=11000 and h>=0:
+        rho1 = rho0*(T/T0)**(-g0/(aTrop * R)-1)
+        return rho1
+    
+    #Tropopause
+    elif h>11000 and h<= 20000:
+        rho1 = P11*np.exp(-g0/(R*T)*(h-11000))
+        return rho1
+    
+    #Part one of the Stratosphere
+    elif h>20000 and h<=32000:
+        rho1 = rho20*(T/T20)**(-g0/(aStrat1 * R)-1)
+        return rho1
+    
+    #Part two of the Stratosphere
+    elif h>32000 and h<=47000:
+        rho1 = rho32*(T/T32)**(-g0/(aStrat2 * R)-1)
+        return rho1
+    
+    #Stratopause
+    elif h>47000 and h<=51000:
+        rho1 = rho47*np.exp(-g0/(R*T)*(h-47000))
+        return rho1
+        
+    #Part one of the Mesosphere
+    elif h>51000 and h<=71000:
+        rho1 = rho51*(T/T51)**(-g0/(aMeso1 * R)-1)
+        return rho1
+    
+    #Part two of the Mesosphere
+    elif h>71000 and h<=84852:
+        rho1 = rho71*(T/T71)**(-g0/(aMeso2 * R)-1)
+    
+def dyn_visc(h):
+    '''
+    mu = mu_0*(T0+C)/(T+C)(T/T0)**(3/2)
+    C = 120
+    mu_o = 18.27*10e-6
+    T0 = 291.15
+    '''    
+    T = ISA_temp(h)
+    return mu_0*(T0_v+C)/(T+C)*((T/T0_v)**(3/2))
+
+def speed_sound(h):
+    T = ISA_temp(h)
+    return np.sqrt(1.4*T*R)
+    
