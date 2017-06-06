@@ -14,100 +14,119 @@ import matplotlib.pyplot as plt
 import math
 from scipy import integrate
 
-dy = 1000 #number of "pieces"
-y_tail = np.linspace(0,p.b_ht/2,dy)
-y_tail_inv = np.linspace(p.b_ht/2,0,dy)
-c_tail = np.linspace(p.ct_ht,p.cr_ht,dy)
-mid_rho = p.W_ht*2/((p.cr_ht+p.ct_ht)*p.b_ht)
-root_rho = mid_rho / 0.9
-tip_rho = root_rho * 0.8
-rho_tail = np.linspace(tip_rho, root_rho, dy)
-areas = p.b_ht/(2*dy) * c_tail
-slope_c = (p.ct_ht+p.cr_ht)/dy
-I_xx = np.zeros(dy)
-I_xx = (p.cr_ht - y_tail_inv * slope_c)**4 * (0.1*p.cr_ht)**3 * 0.25*p.cr_ht/12 - (p.cr_ht - y_tail_inv * slope_c)**4 * (0.1*p.cr_ht - 0.0005)**3 * (0.25*p.cr_ht/12 - 0.0005)
-#9G ULTIMATE STATIC LOAD HORIZONTAL TAIL
+def y_tail(dy,i):
+    y_tail = np.linspace(0,p.b_ht/2,dy)
+    return y_tail[i]
+
+def y_tail_inv(dy,i):
+    y_tail_inv = np.linspace(p.b_ht/2,0,dy)
+    return y_tail_inv[i]
+
+def c_tail(dy,i):
+    c_tail = np.linspace(p.ct_ht,p.cr_ht,dy)
+    return c_tail[i]
+    
+def rho_tail(dy,i):
+    mid_rho = p.W_ht*2/((p.cr_ht+p.ct_ht)*p.b_ht)
+    root_rho = mid_rho / 0.9
+    tip_rho = root_rho * 0.8
+    rho = np.linspace(tip_rho, root_rho, dy)
+    return rho[i]
+
+def area(dy,i):
+    areas = p.b_ht/(2*dy) * c_tail(dy,i)
+    return areas
+
+def slope_c(dy):
+    slope = (p.ct_ht+p.cr_ht)/dy
+    return slope
+
+def tail_I_xx(dy,i):
+    I_xx = np.zeros(dy)
+    I_xx = (p.cr_ht - y_tail_inv(dy,i) * slope_c(dy))**4 * (0.1*p.cr_ht)**3 * 0.25*p.cr_ht/12 - (p.cr_ht - y_tail_inv(dy,i) * slope_c(dy))**4 * (0.1*p.cr_ht - 0.0005)**3 * (0.25*p.cr_ht/12 - 0.0005)
+    return I_xx
+    #9G ULTIMATE STATIC LOAD HORIZONTAL TAIL
 
 #Distribution at every point
-forces_9g = np.zeros(1000)
-distr_9g = np.zeros(1000)
-for i in range (0,len(y_tail)):
-   forces_9g[i] = 9*p.g*rho_tail[i]*areas[i]
-for i in range (0,len(y_tail)):
-   distr_9g[i] = 9*p.g*rho_tail[i]*areas[i]/(p.b_ht/2000)
-plt.figure(figsize=(19,5))
-plt.subplot(141)
-plt.plot(y_tail, distr_9g)
-plt.ylabel('Load, N')
-plt.xlabel('Location, m')
+def tail_force(dy,g,i):
+    force = g*p.g*rho_tail(dy,i)*area(dy,i)
+    return force
 
-#Shear distribution
-shear_9g = list(forces_9g)
-for i in range (1,len(y_tail)):
-   shear_9g[i] = shear_9g[i-1] + forces_9g[i]
-plt.subplot(142)
-plt.plot(y_tail, shear_9g)
-plt.ylabel('Shear, N')
-plt.xlabel('Location, m')
+def tail_distr(dy,g,i):
+    distr = g*p.g*rho_tail(dy,i)*area(dy,i)/(p.b_ht/2000)
+    return distr 
 
-#Moment at every point
-moment_9g = forces_9g * y_tail
-for i in range (1,len(y_tail)):
-   moment_9g[i] = moment_9g[i-1]+moment_9g[i]
-plt.subplot(143)
-plt.plot(y_tail, moment_9g)
-plt.ylabel('Moment, Nm')
-plt.xlabel('Location, m')
-plt.show()
+def tail_shear(dy,g,j):
+    shear = np.zeros(j+1)
+    shear[0] = tail_force(dy,g,0)
+    for i in range (1,j+1):
+        shear[i] = shear[i-1] + tail_force(dy,g,i)
+    return shear[j]
 
-#Deflection
-deflec_9g = np.zeros(dy)
-deflec_9g[999] = forces_9g[999] * (p.b_ht/4000)*(p.b_ht/4000) * (3 * p.b_ht/2000-p.b_ht/4000) /(6 * mat.E[0] * I_xx[999])
-for i in range (2,dy+1):
-    deflec_9g[dy-i] = deflec_9g[dy-i+1] + forces_9g[dy-i] * (y_tail[dy-i]-p.b_ht/4000)*(y_tail[dy-i]-p.b_ht/4000) * (3 *y_tail[dy-i] -(y_tail[dy-i]-p.b_ht/4000)) /(6 * mat.E[0] * I_xx[dy-i])
-plt.subplot(144)
-plt.plot(y_tail_inv, deflec_9g)
-plt.show()
-               
-#-4.5G ULTIMATE STATIC LOAD HORIZONTAL TAIL
+def tail_moment(dy,g,j):
+    moment = np.zeros(j+1)
+    moment[0] = tail_force(dy,g,0) * y_tail(dy,0)
+    for i in range (1,j+1):
+        moment[i] = moment[i-1] + tail_force(dy,g,i) * y_tail(dy,i)
+    return moment[j]
+        
+def tail_plots(dy,g):
+    distr = np.zeros(dy)
+    y = np.zeros(dy)
+    shear = np.zeros(dy)
+    moment = np.zeros(dy)
+    for i in range (0,dy):
+        distr[i] = tail_distr(dy,g,i)
+    for i in range (0,dy):
+        y[i] = y_tail(dy,i)
+    for i in range (0,dy):
+        shear[i] = tail_shear(dy,g,i)
+    for i in range (0,dy):
+        moment[i] = tail_moment(dy,g,i)
+    plt.figure(figsize=(19,5))
+    plt.subplot(131)
+    plt.plot(y, distr)
+    plt.ylabel('Load, N')
+    plt.xlabel('Location, m')
+    plt.subplot(132)
+    plt.plot(y, shear)
+    plt.ylabel('Shear, N')
+    plt.xlabel('Location, m')
+    plt.subplot(133)
+    plt.plot(y, moment)
+    plt.ylabel('Moment, Nm')
+    plt.xlabel('Location, m')
+    plt.show()
+    return
 
-#Distribution at every point
-forces_45g = np.zeros(1000)
-distr_45g = np.zeros(1000)
-for i in range (0,len(y_tail)):
-   forces_45g[i] = -4.5*p.g*rho_tail[i]*areas[i]
-for i in range (0,len(y_tail)):
-   distr_45g[i] = -4.5*p.g*rho_tail[i]*areas[i]/(p.b_ht/2000)
-plt.figure(figsize=(19,5))
-plt.subplot(141)
-plt.plot(y_tail, distr_45g)
-plt.ylabel('Load, N/m')
-plt.xlabel('Location, m')
 
-#Shear distribution
-shear_45g = list(forces_45g)
-for i in range (1,len(y_tail)):
-   shear_45g[i] = shear_45g[i-1] + forces_45g[i]
-plt.subplot(142)
-plt.plot(y_tail, shear_45g)
-plt.ylabel('Shear, N')
-plt.xlabel('Location, m')
 
-#Moment at every point
-moment_45g = forces_45g * y_tail
-for i in range (1,len(y_tail)):
-   moment_45g[i] = moment_45g[i-1]+moment_45g[i]
-plt.subplot(143)
-plt.plot(y_tail, moment_45g)
-plt.ylabel('Moment, Nm')
-plt.xlabel('Location, m')
-plt.suptitle('Load-Shear-Moment diagrams for +9g and -4.5g static loads on tail. Location is defined from tip to root.')
-plt.show()
+
+
+
+
+
+
+
+
+
+
+
 
 #Deflection
-deflec_45g = forces_45g * (p.b_ht/4000)**2 * (3 * p.b_ht/2000-p.b_ht/4000) /(6 * mat.E[0] * I_xx)
-for i in range (2,dy+1):
-    deflec_45g[dy-i] = deflec_45g[dy-i] + deflec_45g[dy-i+1]
-plt.subplot(144)
-plt.plot(y_tail, deflec_45g)
-plt.show()
+#a = 0.5 * forces_9g[999]
+#b = 0.25 * (distr_9g[999] - distr_9g[998])/p.b_ht/2000
+#c = p.cr_ht
+#d = slope_c
+#e = mat.E[0] * (0.1*p.cr_ht)**3 * 0.25*p.cr_ht/12 - (0.1*p.cr_ht - 0.0005)**3 * (0.25*p.cr_ht/12 - 0.0005)
+#v_9g = (-(b*d*y_tail+a*d-4*b*c)*np.log(abs(d*y_tail-c)))/(e*d*d*d*d*d) + (c*(3*(2*a*d-3*b*c)*d*y_tail-(5*a*d-8*b*c)*c))/(6*d*d*d*d*d*e*(d*y_tail-c)*(d*y_tail-c)) + (b*y_tail)/(d*d*d*d*e) + y_tail*(b*np.log(abs(-c)))/(e*d*d*d*d) - y_tail*(2*a*d-11*b*c)*c*c/(6*d*d*d*d*c*c*c*e) + (a*d-4*b*c)*np.log(abs(-c))/(d*d*d*d*d*e) + ((5*a*d-8*b*c)*c)/(6*d*d*d*d*d*c*c*e)       
+#plt.subplot(144)
+#plt.plot(y_tail, v_9g)
+#plt.show()       
+#Deflection
+#deflec_45g = forces_45g * (p.b_ht/4000)**2 * (3 * p.b_ht/2000-p.b_ht/4000) /(6 * mat.E[0] * I_xx)
+#for i in range (2,dy+1):
+#    deflec_45g[dy-i] = deflec_45g[dy-i] + deflec_45g[dy-i+1]
+#plt.subplot(144)
+#plt.plot(y_tail, deflec_45g)
+#plt.show()
