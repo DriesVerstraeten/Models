@@ -32,7 +32,7 @@ Cd0 = 0.02 #-
 n_p = 0.82 #propeller efficiency 
 L_m = 0.7 #main gear length, cm
 L_n = 0.7 #nose gear length, cm
-MTOW = 1635. #max TO weight, in kg!!!!!!!!
+MTOW = 1677.1 #max TO weight, in kg!!!!!!!!
 
 
 #FUSELAGE PARAMETERS
