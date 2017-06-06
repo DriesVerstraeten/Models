@@ -11,7 +11,7 @@ import numpy as np
 
 
 #ATMOSPHERIC PARAMETERS
-rho_0 = 1.225 #density at sea level
+rho_0 = 1.226 #density at sea level
 rho_cruise = 0.698145 #density at cruise altitude
 g = 9.80665 #gravitational acceleration
 
