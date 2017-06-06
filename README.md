@@ -12,3 +12,9 @@ git commit -m “MESSAGE”
 
 Then you push it to the server:
 git push
+-------------------------
+1.git init
+2.git config user.name "someone"
+3.git config user.email "someone@someplace.com"
+4.git add *
+5.git commit -m "some init msg"
