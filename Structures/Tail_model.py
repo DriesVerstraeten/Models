@@ -154,6 +154,31 @@ def tail_shear_stress(dy,dx,dz,i,g):
     plt.show()   
     return
 
+#boom design
+b_rr = 0.9 #root radius
+b_rt = 0.4 #tail radius
+b_t = 0.001 #thickness
+b_l = 2 #length
+def y_boom(dx,i):
+    y = np.linspace(0,b_l,dx)
+    return y[i]
+
+def W_boom(rho):
+    w = rho * (math.pi * (b_rr+b_rt)**2/4 * b_l - math.pi * (b_rr+b_rt-2*b_t)**2/4*b_l)
+    return w
+
+def rho_boom(dx,i,rho):
+    root_rho = W_boom(rho)/(b_rr*b_l)
+    tip_rho =  W_boom(rho)/(b_rt*b_l)
+    rho = np.linspace(tip_rho, root_rho, dx)
+    return rho[i]
+
+def area_boom(dx,i):
+    areas = p.b_ht/(2*dy) * c_tail(dy,i)
+    return areas
+
+def force_boom(dx,i,g):
+    
 
 
 
