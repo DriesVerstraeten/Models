@@ -136,7 +136,7 @@ def ISA(h):
     else:
         raise ValueError('{} does not lie between 0 and 84852 m, I cannot calculate ISA values there'.format(h))
 
-def ISA_temp(h):
+def Temp(h):
     '''
     Calculate the temperature at a certain height
     '''
@@ -172,7 +172,7 @@ def ISA_temp(h):
         T1 = T0 + aMeso2 * h
         return T1
 
-def ISA_press(h):
+def Press(h):
     T = ISA_temp(h)
     
     #Troposphere
@@ -210,7 +210,7 @@ def ISA_press(h):
         P1 = P71*(T/T71)**(-g0/(aMeso2 * R))
         return P1
     
-def ISA_dens(h):
+def Dens(h):
     T = ISA_temp(h)
     
     #Troposphere
@@ -254,11 +254,11 @@ def dyn_visc(h):
     mu_o = 18.27*10e-6
     T0 = 291.15
     '''    
-    T = ISA_temp(h)
+    T = Temp(h)
     return mu_0*(T0_v+C)/(T+C)*((T/T0_v)**(3/2))
 
 def speed_sound(h):
-    T = ISA_temp(h)
+    T = Temp(h)
     return np.sqrt(1.4*T*R)
 
 def reynolds(V,h,L):
@@ -267,6 +267,6 @@ def reynolds(V,h,L):
     Velocity is in m/s, height and characteristic length in meter
     '''
     mu = dyn_visc(h)
-    rho = ISA_dens(h)
+    rho = Dens(h)
     return (rho*V*L)/mu
     
