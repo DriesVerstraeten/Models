@@ -3,6 +3,15 @@
 This script calculates the ISA conditions for a certain height,
 currently editing it to take pressure or temperatures to calculate the height
 
+The script has two 'modes': one calculates all properties together, the other 
+                            one houses different functions for each property
+                            
+Current properties calculated:  Temperature
+                                Pressure
+                                Density
+                                Dynamic viscosity
+                                speed of sound
+
 Created on Tue Apr 28 09:09:24 2015
 
 @author: Simon
@@ -20,9 +29,9 @@ aMeso1 = -0.0028
 aMeso2 = -0.002
 g0 = 9.80665 #m/s^2
 R = 287.058 #J/(kg*K)
-T0_v = 291.15 #K
-C = 110.56 #K
-mu_0 = 18.27*10**(-6) #Pa*s
+T0_v = 273.15 #K
+C = 110.4 #K
+mu_0 = 17.16*10**(-6) #Pa*s
 
 #define the temperatures at the kinks in the temperature
 
@@ -251,4 +260,13 @@ def dyn_visc(h):
 def speed_sound(h):
     T = ISA_temp(h)
     return np.sqrt(1.4*T*R)
+
+def reynolds(V,h,L):
+    '''
+    Calculate the reynolds number from velocity, characteristic length and height
+    Velocity is in m/s, height and characteristic length in meter
+    '''
+    mu = dyn_visc(h)
+    rho = ISA_dens(h)
+    return (rho*V*L)/mu
     
