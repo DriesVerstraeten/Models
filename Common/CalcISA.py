@@ -9,7 +9,7 @@ The script has two 'modes': one calculates all properties together, the other
 Current properties calculated:  Temperature
                                 Pressure
                                 Density
-                                Dynamic viscosity
+                                Dynamic viscosity (a bit funky atm I think)
                                 speed of sound
 
 Created on Tue Apr 28 09:09:24 2015
@@ -33,7 +33,7 @@ T0_v = 273.15 #K
 C = 110.4 #K
 mu_0 = 17.16*10**(-6) #Pa*s
 
-#define the temperatures at the kinks in the temperature
+#define the temperatures at the kinks in the temperature profile
 
 
 #@11000 m
@@ -76,6 +76,9 @@ rho71 = PR71*rho51*(T51/T71)
 #T84 = T71 + aMeso2 * 13852
 
 def ISA(h):
+    '''
+    Calculate the atmospheric conditions at the specified height h in meter
+    '''
     #Define the temperature along the height
     #Troposphere
     if h<=11000 and h>=0:
@@ -136,9 +139,9 @@ def ISA(h):
     else:
         raise ValueError('{} does not lie between 0 and 84852 m, I cannot calculate ISA values there'.format(h))
 
-def ISA_temp(h):
+def Temp(h):
     '''
-    Calculate the temperature at a certain height
+    Calculate the atmospheric temperature at the specified height h in meter
     '''
     if h<=11000 and h>=0:
         T1 = T0 + aTrop * h
@@ -172,7 +175,10 @@ def ISA_temp(h):
         T1 = T0 + aMeso2 * h
         return T1
 
-def ISA_press(h):
+def Press(h):
+    '''
+    Calculate the atmospheric pressure at the specified height h in meter
+    '''
     T = ISA_temp(h)
     
     #Troposphere
@@ -210,7 +216,10 @@ def ISA_press(h):
         P1 = P71*(T/T71)**(-g0/(aMeso2 * R))
         return P1
     
-def ISA_dens(h):
+def Dens(h):
+    '''
+    Calculate the atmospheric density at the specified height h in meter
+    '''
     T = ISA_temp(h)
     
     #Troposphere
@@ -249,24 +258,27 @@ def ISA_dens(h):
     
 def dyn_visc(h):
     '''
+    Calculate the dynamic viscosity at a certain height using Sutherland's 
+    formula:
     mu = mu_0*(T0+C)/(T+C)(T/T0)**(3/2)
-    C = 120
-    mu_o = 18.27*10e-6
-    T0 = 291.15
     '''    
-    T = ISA_temp(h)
+    T = Temp(h)
     return mu_0*(T0_v+C)/(T+C)*((T/T0_v)**(3/2))
 
 def speed_sound(h):
-    T = ISA_temp(h)
+    '''
+    Calculate the speed of sound at a certain height in meter
+    '''
+    T = Temp(h)
     return np.sqrt(1.4*T*R)
 
 def reynolds(V,h,L):
     '''
-    Calculate the reynolds number from velocity, characteristic length and height
+    Calculate the reynolds number from velocity, characteristic length and 
+    height
     Velocity is in m/s, height and characteristic length in meter
     '''
     mu = dyn_visc(h)
-    rho = ISA_dens(h)
+    rho = Dens(h)
     return (rho*V*L)/mu
     
