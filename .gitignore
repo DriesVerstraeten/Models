@@ -102,3 +102,8 @@ ENV/
 
 # pyc
 .pyc
+
+# images
+.jpg
+.jpeg
+.png
