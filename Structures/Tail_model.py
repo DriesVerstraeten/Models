@@ -7,7 +7,7 @@ Created on Wed May 31 16:57:36 2017
 
 #Calculations for the HORIZ VERT TAILS MODEL
 
-import Parameters as p
+import Init_Parameters as p
 import Material_properties as mat
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,7 +28,7 @@ def y_tail_inv(dy,i):
     return y_tail_inv[i]
 
 def c_tail(dy,i):
-    c_tail = np.linspace(p.ct_ht,p.cr_ht,dy)
+    c_tail = np.linspace(p.ct_ht,p.cr_ht,dy+1)
     return c_tail[i]
     
 def rho_tail(dy,i):
@@ -58,7 +58,7 @@ def tail_force(dy,g,i):
     return force
 
 def tail_distr(dy,g,i):
-    distr = g*p.g*rho_tail(dy,i)*area(dy,i)/(p.b_ht/2000)
+    distr = g*p.g*rho_tail(dy,i)*area(dy,i)/(p.b_ht/2*dy)
     return distr 
 
 def tail_shear(dy,g,j):
@@ -163,6 +163,11 @@ def y_boom(dx,i):
     y = np.linspace(0,b_l,dx)
     return y[i]
 
+def r_boom(dx,i):
+    slope = (b_rr-b_rt)/dx
+    r = b_rt + slope*i
+    return r
+
 def W_boom(rho):
     w = rho * (math.pi * (b_rr+b_rt)**2/4 * b_l - math.pi * (b_rr+b_rt-2*b_t)**2/4*b_l)
     return w
@@ -170,15 +175,84 @@ def W_boom(rho):
 def rho_boom(dx,i,rho):
     root_rho = W_boom(rho)/(b_rr*b_l)
     tip_rho =  W_boom(rho)/(b_rt*b_l)
-    rho = np.linspace(tip_rho, root_rho, dx)
+    rho = np.linspace(root_rho, tip_rho, dx+1)
     return rho[i]
 
 def area_boom(dx,i):
-    areas = p.b_ht/(2*dy) * c_tail(dy,i)
+    areas = p.b_ht/(2*dx) * c_tail(dx,i)
     return areas
 
-def force_boom(dx,i,g):
+def force_boom(dx,g,i):
+    force = g*p.g*rho_boom(dx,i,mat.rho[0])*area_boom(dx,i)
+    return force
+
+def distr_boom(dx,g,i):
+    distr = (g*p.g*rho_boom(dx,i,mat.rho[0])*area_boom(dx,i) + tail_shear(1000,g,999))/(b_l*dx) 
+    return distr
+
+def shear_boom(dx,g,j):
+    distr = np.zeros(j+1)
+    for i in range (1,j+1):
+        distr[i] = distr_boom(dx,g,i) 
+    shear_j = force_boom(dx,g,0) * (j+1) + tail_shear(1000,g,999) + sum(distr)
+    return shear_j
+
+def moment_boom(dx,g,j):
+    moment = np.zeros(j+1)
+    moment[0] = (force_boom(dx,g,0) + tail_shear(1000,g,999)) * y_tail(dx,0)
+    for i in range (1,j+1):
+        moment[i] = moment[i-1] + tail_force(dx,g,i) * y_tail(dx,i)
+    return moment[j]
+        
+def boom_plots(dx,g):
+    distr = np.zeros(dx)
+    y = np.zeros(dx)
+    shear = np.zeros(dx)
+    moment = np.zeros(dx)
+    for i in range (0,dx):
+        distr[i] = distr_boom(dx,g,i)
+    for i in range (0,dx):
+        y[i] = y_boom(dx,i)
+    shear[0] = shear_boom(dx,g,0)
+    for i in range (1,dx):
+        shear[i] = shear[i-1] + distr_boom(dx,g,i)
+    for i in range (0,dx):
+        moment[i] = moment_boom(dx,g,i)
+    plt.figure(figsize=(19,5))
+    plt.subplot(131)
+    plt.plot(y, distr)
+    plt.ylabel('Load, N')
+    plt.xlabel('Location, m')
+    plt.subplot(132)
+    plt.plot(y, shear)
+    plt.ylabel('Shear, N')
+    plt.xlabel('Location, m')
+    plt.subplot(133)
+    plt.plot(y, moment)
+    plt.ylabel('Moment, Nm')
+    plt.xlabel('Location, m')
+    plt.show()
+    return    
     
+def boom_shear_stress(dtheta,dx,i,g):
+    theta = np.linspace(0, 2*math.pi, dtheta)
+    shear_flow = np.zeros(dtheta)
+    a = np.zeros(dtheta)
+    for j in range (0,dtheta):
+        a[j] = math.cos(theta[j])
+    shear_flow = shear_boom(dx,g,i) * (a-1) / (math.pi * r_boom(dx,i))
+    shear_stress = shear_flow/b_t
+    plt.figure(figsize=(19,5))
+    plt.subplot(121)
+    plt.plot(theta, shear_flow)
+    plt.ylabel('Shear flow, N/m')
+    plt.xlabel('Location, radian')
+    plt.subplot(122)
+    plt.plot(theta, shear_stress)
+    plt.ylabel('Shear stress, N/m^2')
+    plt.xlabel('Location, radian')
+    plt.show()
+    return
 
 
 
