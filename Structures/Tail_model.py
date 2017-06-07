@@ -229,7 +229,34 @@ def boom_plots(dx,g):
     plt.show()
     return    
     
-def boom_shear_stress(dtheta,dx,i,g):
+def boom_shear_stress_h(dtheta,dx,i,g):
+    theta = np.linspace(0, 2*math.pi, dtheta)
+    shear_flow = np.zeros(dtheta)
+    a = np.zeros(dtheta)
+    for j in range (0,dtheta):
+        a[j] = math.cos(theta[j]+math.pi/2)
+    shear_flow = shear_boom(dx,g,i) * (a-1) / (math.pi * r_boom(dx,i))
+    shear_stress = shear_flow/b_t
+    plt.figure(figsize=(19,5))
+    plt.subplot(121)
+    plt.plot(theta, shear_flow)
+    plt.ylabel('Shear flow, N/m')
+    plt.xlabel('Location, radian')
+    plt.subplot(122)
+    plt.plot(theta, shear_stress)
+    plt.ylabel('Shear stress, N/m^2')
+    plt.xlabel('Location, radian')
+    plt.show()
+    return
+
+def force_vert(dz,g):
+    v_c = np.linspace(v_r,v_t,dz)
+    mid_w = v_w / dz
+    w_distr = mid_w * v_c / v_c[dz/2]
+    force = g*p.g*w_distr
+    return sum(force)
+
+def boom_shear_stress_v(dtheta,dx,i,g):
     theta = np.linspace(0, 2*math.pi, dtheta)
     shear_flow = np.zeros(dtheta)
     a = np.zeros(dtheta)
@@ -247,7 +274,6 @@ def boom_shear_stress(dtheta,dx,i,g):
     plt.ylabel('Shear stress, N/m^2')
     plt.xlabel('Location, radian')
     plt.show()
-    return
 
 def torque_vert(dz,g):
     z_v = np.linspace(0,v_b,dz)
@@ -259,7 +285,38 @@ def torque_vert(dz,g):
     torque = sum(moment)
     return torque
 
+def torque_stress(dx, dz, g, i):
+    t_stress = torque_vert(dz,g) / (2 * b_t * math.pi * r_boom(dx,i)**2)
+    return t_stress
 
+def total_shear_stress_boom(dx,dz,dtheta,g1,g2,i):
+    theta = np.linspace(0, 2*math.pi, dtheta)
+    shear_flow = np.zeros(dtheta)
+    a = np.zeros(dtheta)
+    for j in range (0,dtheta):
+        a[j] = math.cos(theta[j])
+    shear_flow = shear_boom(dx,g1,i) * (a-1) / (math.pi * r_boom(dx,i))
+    shear_stress_1 = shear_flow/b_t
+    plt.figure(figsize=(19,5))
+    plt.subplot(131)
+    plt.plot(theta, shear_stress_1)
+    plt.ylabel('Shear stress from vertical tail, N/m^2')
+    plt.xlabel('Location, radian')
+    for j in range (0,dtheta):
+        a[j] = math.cos(theta[j]+math.pi/2)
+    shear_flow = shear_boom(dx,g2,i) * (a-1) / (math.pi * r_boom(dx,i))
+    shear_stress_2 = shear_flow/b_t
+    plt.subplot(132)
+    plt.plot(theta, shear_stress_2)
+    plt.ylabel('Shear stress from horizontal tail, N/m^2')
+    plt.xlabel('Location, radian')
+    print torque_stress(dz,g2)
+    shear_stress_tot = shear_stress_1 + shear_stress_2 + torque_stress(dx,dz,g2,i)
+    plt.subplot(133)
+    plt.plot(theta, shear_stress_tot)
+    plt.ylabel('Shear stress, N/m^2')
+    plt.xlabel('Location, radian')
+    plt.show()
 
 
 
