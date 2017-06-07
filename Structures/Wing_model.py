@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 plt.close()
-fig = plt.figure(figsize = (8.5,6),tight_layout=True)
+#fig = plt.figure(figsize = (8.5,6),tight_layout=True)
 
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #CHORD LENGTH AT DIFFERENT SPANWISE LOCATIONS
@@ -142,5 +142,10 @@ def wing_moment_45g(CL, rho, V):
     
     return dM_45g, dM_45g_total
 
-
+"""
+print "Max shear 9g:", wing_shear_9g(CL_9g, p.rho_0, p.V_cruise)[1][0], "N"
+print "Max moment 9g:", wing_moment_9g(CL_9g, p.rho_0, p.V_cruise)[1][0], "Nm"
+print "Max shear -4.5g:", wing_shear_45g(CL_45g, p.rho_0, p.V_cruise)[1][0], "N"
+print "Max moment -4.5g:", wing_moment_45g(CL_45g, p.rho_0, p.V_cruise)[1][0], "Nm"
+"""
     
