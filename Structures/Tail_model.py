@@ -98,6 +98,7 @@ def tail_plots(dy,g):
     for i in range (0,dy):
         moment[i] = tail_moment(dy,g,i)
     plt.figure(figsize=(19,5))
+    plt.title('Load-shear-moment diagrams for horisontal tail')
     plt.subplot(131)
     plt.plot(y, distr)
     plt.ylabel('Horizontal tail load, N')
@@ -136,6 +137,7 @@ def tail_shear_stress(dy,dx,dz,i,g):
     for j in range (0,dx):
         tau_34[j] = q_34[j] / box_t
     plt.figure(figsize=(19,5))
+    plt.title('Shear distribution in horisontal tail box at', i)
     plt.subplot(231)
     plt.plot(x_12, q_12)
     plt.ylabel('Shear flow, N/m')
@@ -218,6 +220,7 @@ def boom_plots(dx,g):
     for i in range (0,dx):
         moment[i] = moment_boom(dx,g,i)
     plt.figure(figsize=(19,5))
+    plt.title('Load-shear-moment diagram for the mounting boom by horisontal tail')
     plt.subplot(131)
     plt.plot(y, distr)
     plt.ylabel('Load, N')
@@ -233,6 +236,46 @@ def boom_plots(dx,g):
     plt.show()
     return    
     
+def force_vert(dz,g):
+    v_c = np.linspace(v_r,v_t,dz)
+    mid_w = v_w / dz
+    w_distr = mid_w * v_c / v_c[dz/2]
+    force = g*p.g*w_distr
+    return sum(force)
+
+def boom_plots_vertical(dx,g):
+    distr = np.zeros(dx)
+    y = np.zeros(dx)
+    shear = np.zeros(dx)
+    moment = np.zeros(dx)
+    v_c = np.linspace(v_r,v_t,dz)
+    mid_w = v_w / dz
+    w_distr = mid_w * v_c / v_c[dz/2]
+    force = g*p.g*w_distr
+    for i in range (0,dx):
+        y[i] = y_boom(dx,i)
+    distr = np.zeros(j+1)
+    for i in range (1,j+1):
+        distr[i] = distr_boom(dx,g,i) 
+    shear_j = force_boom(dx,g,0) * (j+1) + tail_shear(1000,g,999) + sum(distr)
+
+    plt.figure(figsize=(19,5))
+    plt.title('Load-shear-moment diagram for the mounting boom by vertical tail')
+    plt.subplot(131)
+    plt.plot(y, force)
+    plt.ylabel('Load, N')
+    plt.xlabel('Location, m')
+    plt.subplot(132)
+    plt.plot(y, shear)
+    plt.ylabel('Shear, N')
+    plt.xlabel('Location, m')
+    plt.subplot(133)
+    plt.plot(y, moment)
+    plt.ylabel('Moment, Nm')
+    plt.xlabel('Location, m')
+    plt.show()
+    return    
+
 def boom_shear_stress_h(dtheta,dx,i,g):
     theta = np.linspace(0, 2*math.pi, dtheta)
     shear_flow = np.zeros(dtheta)
@@ -242,6 +285,7 @@ def boom_shear_stress_h(dtheta,dx,i,g):
     shear_flow = shear_boom(dx,g,i) * (a-1) / (math.pi * r_boom(dx,i))
     shear_stress = shear_flow/b_t
     plt.figure(figsize=(19,5))
+    plt.title('Shear flow and stress in the mounting boom by horizontal tail')
     plt.subplot(121)
     plt.plot(theta, shear_flow)
     plt.ylabel('Shear flow, N/m')
@@ -253,13 +297,6 @@ def boom_shear_stress_h(dtheta,dx,i,g):
     plt.show()
     return
 
-def force_vert(dz,g):
-    v_c = np.linspace(v_r,v_t,dz)
-    mid_w = v_w / dz
-    w_distr = mid_w * v_c / v_c[dz/2]
-    force = g*p.g*w_distr
-    return sum(force)
-
 def boom_shear_stress_v(dtheta,dx,i,g):
     theta = np.linspace(0, 2*math.pi, dtheta)
     shear_flow = np.zeros(dtheta)
@@ -269,6 +306,7 @@ def boom_shear_stress_v(dtheta,dx,i,g):
     shear_flow = shear_boom(dx,g,i) * (a-1) / (math.pi * r_boom(dx,i))
     shear_stress = shear_flow/b_t
     plt.figure(figsize=(19,5))
+        plt.title('Shear flow and stress in the mounting boom by vertical tail')
     plt.subplot(121)
     plt.plot(theta, shear_flow)
     plt.ylabel('Shear flow, N/m')
@@ -302,6 +340,7 @@ def total_shear_stress_boom(dx,dz,dtheta,g1,g2,i):
     shear_flow = shear_boom(dx,g1,i) * (a-1) / (math.pi * r_boom(dx,i))
     shear_stress_1 = shear_flow/b_t
     plt.figure(figsize=(19,5))
+    plt.title('Total shear stress on the mounting boom')
     plt.subplot(131)
     plt.plot(theta, shear_stress_1)
     plt.ylabel('Shear stress from vertical tail, N/m^2')
@@ -323,6 +362,7 @@ def total_shear_stress_boom(dx,dz,dtheta,g1,g2,i):
     plt.show()
 
 def big_scary_funtion():
+    
         
     
 
