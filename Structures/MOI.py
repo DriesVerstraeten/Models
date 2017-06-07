@@ -27,8 +27,8 @@ def wingbox_spar():
     hback = []
     hfront_per = 0.15
     hback_per = 0.57
-    y_front_bottom = []
-    y_back_bottom = []
+    y_front_coordinates = []
+    y_back_coordinates = []
     
     airfoil_coordinates = np.round(np.genfromtxt('foil1_modified.dat',skip_header=1),2)
     
@@ -38,20 +38,21 @@ def wingbox_spar():
                 continue
             hfront.append(np.abs(airfoil_coordinates[i][1]))
             h_front = sum(hfront)
-            y_front_bottom.append(airfoil_coordinates[i][1])
+            y_front_coordinates.append(airfoil_coordinates[i][1])
             
         if airfoil_coordinates[i][0] == hback_per:
             if len(hback) == 2:
                 continue
             hback.append(np.abs(airfoil_coordinates[i][1]))
             h_back = sum(hback)
-            y_back_bottom.append(airfoil_coordinates[i][1])
+            y_back_coordinates.append(airfoil_coordinates[i][1])
 
         wingbox_width = hback_per - hfront_per
         #difference_spar = np.abs(h_back-h_front)
-        
-    return h_front, h_back, y_front_bottom, y_back_bottom, wingbox_width,
 
+    return h_front, h_back, y_front_coordinates, y_back_coordinates, wingbox_width, hfront_per, hback_per
+
+wingbox_spar()
 
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #NEUTRAL AXIS LOCATION
@@ -64,22 +65,45 @@ def wingbox_NA():
     else:
         h_longest = wingbox_spar()[1]
         h_shortest = wingbox_spar()[0]
-        
-    y_datum = -0.07
     
+    #DATUMS
+    y_datum = -0.07
+    x_datum = 0.
+    
+    #DIMENSIONS
+    bottom_skin_length = np.sqrt((wingbox_spar()[3][1]-wingbox_spar()[2][1])**2 + wingbox_spar()[4]**2)
+    top_skin_length = np.sqrt((wingbox_spar()[3][0]-wingbox_spar()[2][0])**2 + wingbox_spar()[4]**2)
+    
+    #Y - CG LOCATIONS
+    front_spar_ycg = wingbox_spar()[0]/2 + np.abs(y_datum - wingbox_spar()[2][1])
+    back_spar_ycg = wingbox_spar()[1]/2 + np.abs(y_datum - wingbox_spar()[3][1])
+    top_skin_ycg = (wingbox_spar()[2][0]+wingbox_spar()[3][0])/2+np.abs(y_datum)
+    bottom_skin_ycg = (wingbox_spar()[2][1]+wingbox_spar()[3][1])/2+np.abs(y_datum)
+    
+    #X - CG LOCATIONS
+    front_spar_xcg = wingbox_spar()[5]
+    back_spar_xcg = wingbox_spar()[6]
+    top_skin_xcg = wingbox_spar()[6]-wingbox_spar()[5]
+    bottom_skin_xcg = wingbox_spar()[6]-wingbox_spar()[5]
+
+    print top_skin_xcg
+
+    #AREAS
     front_spar_area = wingbox_spar()[0]*t
     back_spar_area = wingbox_spar()[1]*t
+    top_skin_area = top_skin_length*t  
+    bottom_skin_area = bottom_skin_length*t 
     
-    front_spar_cg = wingbox_spar()[0]/2 + np.abs(y_datum - wingbox_spar()[2][1])
-    back_spar_cg = wingbox_spar()[1]/2 + np.abs(y_datum - wingbox_spar()[3][1])
+    total_area = front_spar_area + back_spar_area + top_skin_area + bottom_skin_area                          
     
-    bottom_skin_width = 0
-    
-    print back_spar_cg
-    
+    #NEUTRAL AXIS
+    y_NA = (front_spar_area*front_spar_ycg + back_spar_area*back_spar_ycg + top_skin_area*top_skin_ycg + bottom_skin_area*bottom_skin_ycg)/total_area + y_datum 
+    x_NA = (front_spar_area*front_spar_xcg + back_spar_area*back_spar_xcg + top_skin_area*top_skin_xcg + bottom_skin_area*bottom_skin_xcg)/total_area
+    print x_NA
+           
     #NA = (wingbox_spar()[0]**2*p.t_skin/2 + wingbox_spar()[1]**2*p.t_skin/2 + wingbox_spar()[2]*p.tskin*(h_shortest+wingbox_spar[3]/2)/(wingbox_spar()[0]*p.t_skin + wingbox_spar()[1]*p.t_skin + wingbox_spar()[2]*p.tskin*(h_shortest+wingbox_spar[3]/2
     
-    return h_longest
+    return 
 
 wingbox_NA()
 
