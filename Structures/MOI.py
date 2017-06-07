@@ -98,11 +98,22 @@ def wingbox_NA():
     
     #NEUTRAL AXIS
     y_NA = (front_spar_area*front_spar_ycg + back_spar_area*back_spar_ycg + top_skin_area*top_skin_ycg + bottom_skin_area*bottom_skin_ycg)/total_area + y_datum 
-    x_NA = (front_spar_area*front_spar_xcg + back_spar_area*back_spar_xcg + top_skin_area*top_skin_xcg + bottom_skin_area*bottom_skin_xcg)/total_area
-    
-    return 
+    x_NA = (front_spar_area*front_spar_xcg + back_spar_area*back_spar_xcg + top_skin_area*top_skin_xcg + bottom_skin_area*bottom_skin_xcg)/total_area       
+           
+    return y_NA, x_NA, front_spar_area, front_spar_ycg, back_spar_area, back_spar_ycg
 
-wingbox_NA()
+
+def wingbox_MOI():
+    
+    #Ixx - MOMENT OF INERTIA CONTRIBUTIONS
+    front_spar_MOI = t*wingbox_spar()[0]**3 / 12 + wingbox_NA()[2]* (wingbox_NA()[0]-wingbox_NA()[3])**2
+    back_spar_MOI = t*wingbox_spar()[1]**3 / 12 + wingbox_NA()[4]* (wingbox_NA()[0]-wingbox_NA()[5])**2
+    top_skin_MOI =   
+                                  
+    print back_spar_MOI
+    return
+
+wingbox_MOI()
 
 
 """
