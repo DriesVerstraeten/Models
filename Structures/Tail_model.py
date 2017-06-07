@@ -12,12 +12,23 @@ import Material_properties as mat
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-from scipy import integrate
 
 #WINGBOX DIMENSIONS
 box_t = 0.0005 #m, thickness. same everywhere for now
 box_b = 0.25*p.cr_ht #m, width at rootapply scaling for other points. scales linearly with taper
 box_h = 0.1*p.cr_ht #m, height at root. apply scaling for other points. scales linearly with taper
+
+#boom design
+b_rr = 0.9 #root radius
+b_rt = 0.4 #tail radius
+b_t = 0.001 #thickness
+b_l = 2 #length
+
+#Vertical tail dimensions
+v_r = p.cr_ht
+v_t = p.ct_ht
+v_b = p.b_ht / 2
+v_w = p.W_ht
 
 def y_tail(dy,i):
     y_tail = np.linspace(0,p.b_ht/2,dy)
@@ -30,17 +41,11 @@ def y_tail_inv(dy,i):
 def c_tail(dy,i):
     c_tail = np.linspace(p.ct_ht,p.cr_ht,dy+1)
     return c_tail[i]
-    
-def rho_tail(dy,i):
-    mid_rho = p.W_ht*2/((p.cr_ht+p.ct_ht)*p.b_ht)
-    root_rho = mid_rho / 0.9
-    tip_rho = root_rho * 0.8
-    rho = np.linspace(tip_rho, root_rho, dy)
-    return rho[i]
 
-def area(dy,i):
-    areas = p.b_ht/(2*dy) * c_tail(dy,i)
-    return areas
+def w_tail(dy,i):
+    mid_w = p.W_ht / dy
+    w_distr = mid_w * c_tail(dy,i) / c_tail(dy,dy/2)
+    return w_distr
 
 def slope_c(dy):
     slope = (p.ct_ht+p.cr_ht)/dy
@@ -54,11 +59,11 @@ def tail_I_xx(dy,i):
 
 #Distribution at every point
 def tail_force(dy,g,i):
-    force = g*p.g*rho_tail(dy,i)*area(dy,i)
+    force = g*p.g*w_tail(dy,i)
     return force
 
 def tail_distr(dy,g,i):
-    distr = g*p.g*rho_tail(dy,i)*area(dy,i)/(p.b_ht/2*dy)
+    distr = g*p.g*w_tail(dy,i)/(p.b_ht/2*dy)
     return distr 
 
 def tail_shear(dy,g,j):
@@ -154,11 +159,6 @@ def tail_shear_stress(dy,dx,dz,i,g):
     plt.show()   
     return
 
-#boom design
-b_rr = 0.9 #root radius
-b_rt = 0.4 #tail radius
-b_t = 0.001 #thickness
-b_l = 2 #length
 def y_boom(dx,i):
     y = np.linspace(0,b_l,dx)
     return y[i]
@@ -172,22 +172,17 @@ def W_boom(rho):
     w = rho * (math.pi * (b_rr+b_rt)**2/4 * b_l - math.pi * (b_rr+b_rt-2*b_t)**2/4*b_l)
     return w
 
-def rho_boom(dx,i,rho):
-    root_rho = W_boom(rho)/(b_rr*b_l)
-    tip_rho =  W_boom(rho)/(b_rt*b_l)
-    rho = np.linspace(root_rho, tip_rho, dx+1)
-    return rho[i]
-
-def area_boom(dx,i):
-    areas = p.b_ht/(2*dx) * c_tail(dx,i)
-    return areas
+def w_boom(dx,i):
+    mid_w = W_boom(mat.rho[0]) / dx
+    w_distr = mid_w * r_boom(dx,i) / r_boom(dx,dx/2)
+    return w_distr
 
 def force_boom(dx,g,i):
-    force = g*p.g*rho_boom(dx,i,mat.rho[0])*area_boom(dx,i)
+    force = g*p.g*w_boom(dx,i)
     return force
 
 def distr_boom(dx,g,i):
-    distr = (g*p.g*rho_boom(dx,i,mat.rho[0])*area_boom(dx,i) + tail_shear(1000,g,999))/(b_l*dx) 
+    distr = (g*p.g*w_boom(dx,i) + tail_shear(1000,g,999))/(b_l*dx) 
     return distr
 
 def shear_boom(dx,g,j):
@@ -254,7 +249,15 @@ def boom_shear_stress(dtheta,dx,i,g):
     plt.show()
     return
 
-
+def torque_vert(dz,g):
+    z_v = np.linspace(0,v_b,dz)
+    v_c = np.linspace(v_r,v_t,dz)
+    mid_w = v_w / dz
+    w_distr = mid_w * v_c / v_c[dz/2]
+    force = g*p.g*w_distr
+    moment = force * z_v
+    torque = sum(moment)
+    return torque
 
 
 
