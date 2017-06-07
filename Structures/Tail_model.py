@@ -1,18 +1,12 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed May 31 16:57:36 2017
-
-@author: 123
-"""
-
-#Calculations for the HORIZ VERT TAILS MODEL
-
 import Init_Parameters as p
 import Material_properties as mat
 import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+"""
+INPUTS OF DIMENSIONS ARE HERE FOR NOW. everything in METERS
+"""
 #WINGBOX DIMENSIONS
 box_t = 0.0005 #m, thickness. same everywhere for now
 box_b = 0.25*p.cr_ht #m, width at rootapply scaling for other points. scales linearly with taper
@@ -25,11 +19,21 @@ b_t = 0.001 #thickness
 b_l = 2 #length
 
 #Vertical tail dimensions
-v_r = p.cr_ht
-v_t = p.ct_ht
-v_b = p.b_ht / 2
-v_w = p.W_ht
+v_r = p.cr_ht#root cord length
+v_t = p.ct_ht#tip cord length
+v_b = p.b_ht / 2#vertical tail span
+v_w = p.W_ht#weight of the vertical tail. gonna be recalculated a bit later
 
+"""
+MAIN FUNCTIONS ARE HERE. inputs are yada yada
+
+"""
+
+
+"""
+Stuff
+
+"""
 def y_tail(dy,i):
     y_tail = np.linspace(0,p.b_ht/2,dy)
     return y_tail[i]
@@ -96,16 +100,16 @@ def tail_plots(dy,g):
     plt.figure(figsize=(19,5))
     plt.subplot(131)
     plt.plot(y, distr)
-    plt.ylabel('Load, N')
-    plt.xlabel('Location, m')
+    plt.ylabel('Horizontal tail load, N')
+    plt.xlabel('Location from tip to root, m')
     plt.subplot(132)
     plt.plot(y, shear)
-    plt.ylabel('Shear, N')
-    plt.xlabel('Location, m')
+    plt.ylabel('Horizontal tail shear, N')
+    plt.xlabel('Location from tip to root, m')
     plt.subplot(133)
     plt.plot(y, moment)
-    plt.ylabel('Moment, Nm')
-    plt.xlabel('Location, m')
+    plt.ylabel('Horizontal tail moment, Nm')
+    plt.xlabel('Location from tip to root, m')
     plt.show()
     return
 
@@ -134,28 +138,28 @@ def tail_shear_stress(dy,dx,dz,i,g):
     plt.figure(figsize=(19,5))
     plt.subplot(231)
     plt.plot(x_12, q_12)
-    plt.ylabel('Shear, N/m')
-    plt.xlabel('Location, m')
+    plt.ylabel('Shear flow, N/m')
+    plt.xlabel('Location (top plate from middle to right edge), m')
     plt.subplot(232)
     plt.plot(q_23, z_23)
-    plt.ylabel('Location, m')
-    plt.xlabel('Shear, N/m')
+    plt.ylabel('Location (right plate from bottom to top), m')
+    plt.xlabel('Shear flow, N/m')
     plt.subplot(233)
     plt.plot(x_34, q_34)
-    plt.ylabel('Shear, N/m')
-    plt.xlabel('Location, m')
+    plt.ylabel('Shear flow, N/m')
+    plt.xlabel('Location (bottom plate from middle to right), m')
     plt.subplot(234)
     plt.plot(x_12, tau_12)
     plt.ylabel('Shear stress, N/m^2')
-    plt.xlabel('Location, m')
+    plt.xlabel('Location (top plate from middle to right edge), m')
     plt.subplot(235)
     plt.plot(z_23, tau_23)
-    plt.ylabel('Location, m')
-    plt.xlabel('Shear, N/m')
+    plt.ylabel('Location (right plate from bottom to top), m')
+    plt.xlabel('Shear stress, N/m^2')
     plt.subplot(236)
     plt.plot(x_34, tau_34)
-    plt.ylabel('Shear, N/m')
-    plt.xlabel('Location, m')
+    plt.ylabel('Shear stress, N/m^2')
+    plt.xlabel('Location (bottom plate from middle to right), m')
     plt.show()   
     return
 
@@ -301,7 +305,7 @@ def total_shear_stress_boom(dx,dz,dtheta,g1,g2,i):
     plt.subplot(131)
     plt.plot(theta, shear_stress_1)
     plt.ylabel('Shear stress from vertical tail, N/m^2')
-    plt.xlabel('Location, radian')
+    plt.xlabel('Location (from top), radian')
     for j in range (0,dtheta):
         a[j] = math.cos(theta[j]+math.pi/2)
     shear_flow = shear_boom(dx,g2,i) * (a-1) / (math.pi * r_boom(dx,i))
@@ -309,16 +313,18 @@ def total_shear_stress_boom(dx,dz,dtheta,g1,g2,i):
     plt.subplot(132)
     plt.plot(theta, shear_stress_2)
     plt.ylabel('Shear stress from horizontal tail, N/m^2')
-    plt.xlabel('Location, radian')
+    plt.xlabel('Location (from top), radian')
     print torque_stress(dz,g2)
     shear_stress_tot = shear_stress_1 + shear_stress_2 + torque_stress(dx,dz,g2,i)
     plt.subplot(133)
     plt.plot(theta, shear_stress_tot)
-    plt.ylabel('Shear stress, N/m^2')
-    plt.xlabel('Location, radian')
+    plt.ylabel('Total shear stress, N/m^2')
+    plt.xlabel('Location (from top), radian')
     plt.show()
 
-
+def big_scary_funtion():
+        
+    
 
 
 
