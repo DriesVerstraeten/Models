@@ -179,7 +179,7 @@ def Press(h):
     '''
     Calculate the atmospheric pressure at the specified height h in meter
     '''
-    T = ISA_temp(h)
+    T = Temp(h)
     
     #Troposphere
     if h<=11000 and h>=0:
@@ -220,7 +220,7 @@ def Dens(h):
     '''
     Calculate the atmospheric density at the specified height h in meter
     '''
-    T = ISA_temp(h)
+    T = Temp(h)
     
     #Troposphere
     if h<=11000 and h>=0:

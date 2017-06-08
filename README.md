@@ -33,3 +33,15 @@ git push
 4.git add *
 
 5.git commit -m "some init msg"
+
+Ttab = []
+Rhotab = []
+htab = []
+ptab = []
+State = 3*[0]
+for h in range(1,84000):
+    State = ISA(h)
+    Ttab.append(State[0])
+    Rhotab.append(State[2])
+    ptab.append(State[1])
+    htab.append(h)
