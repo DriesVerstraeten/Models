@@ -19,7 +19,7 @@ plt.close()
 #CHORD LENGTH AT DIFFERENT SPANWISE LOCATIONS
 
 #def wing_parameters(b, MTOW, rho, V, S):
-dy = 0.001 #small spanwise section
+dy = 0.01 #small spanwise section
 y = np.arange(0,p.b/2.+dy, dy) #spanwise location of section
 y1 = np.arange(0,p.b/2.+2*dy, dy)
 d_cLE = np.tan(p.theta_LE) * y #LE section "to be cut away from chord"
@@ -147,5 +147,4 @@ print "Max shear 9g:", wing_shear_9g(CL_9g, p.rho_0, p.V_cruise)[1][0], "N"
 print "Max moment 9g:", wing_moment_9g(CL_9g, p.rho_0, p.V_cruise)[1][0], "Nm"
 print "Max shear -4.5g:", wing_shear_45g(CL_45g, p.rho_0, p.V_cruise)[1][0], "N"
 print "Max moment -4.5g:", wing_moment_45g(CL_45g, p.rho_0, p.V_cruise)[1][0], "Nm"
-"""
-    
+""" 
