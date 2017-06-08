@@ -340,3 +340,4 @@ def total_shear_stress_boom(dx,dz,dtheta,g1,g2,i):#works
     plt.ylabel('Total shear stress, N/m^2')
     plt.xlabel('Location (from top), radian')
     plt.show()
+
