@@ -46,9 +46,8 @@ def c_tail(dy,i): #from tip to root, works
     c_tail = np.linspace(p.ct_ht,p.cr_ht,dy+1)
     return c_tail[i]
 
-def w_tail(dy,i): #from tip to root, works
-    mid_w = p.W_ht / dy
-    w_distr = mid_w * c_tail(dy,i) / c_tail(dy,dy/2)
+def tail_force(dy,f,i): #from tip to root, works
+    w_distr = f * c_tail(dy,i) / c_tail(dy,dy/2)
     return w_distr
 
 def slope_c(dy): #slope of cord, works
@@ -60,40 +59,36 @@ def tail_I_xx(dy,i): #going to be replaced by code Dries is writing
     I_xx = (1 - y_tail_inv(dy,i) * slope_c(dy))**4 * (box_h)**3 * box_b/12 - (1 - y_tail_inv(dy,i) * slope_c(dy))**4 * (box_h - box_t)**3 * (box_b - 0.0005)/12
     return I_xx
 
-def tail_force(dy,g,i): #force produced by a piece of tail, works
-    force = g*p.g*w_tail(dy,i)
-    return force
-
-def tail_distr(dy,g,i): #loading on a piece of tail (per meter)
-    distr = g*p.g*w_tail(dy,i)*dy/(p.b_ht/2)
+def tail_distr(dy,f,i): #loading on a piece of tail (per meter)
+    distr = f*dy/(p.b_ht/2)
     return distr 
 
-def tail_shear(dy,g,j): #works, shear at each point
+def tail_shear(dy,f,j): #works, shear at each point
     shear = np.zeros(j+1)
-    shear[0] = tail_force(dy,g,0)
+    shear[0] = tail_force(dy,f,0)
     for i in range (1,j+1):
-        shear[i] = shear[i-1] + tail_force(dy,g,i)
+        shear[i] = shear[i-1] + tail_force(dy,f,i)
     return shear[j]
 
-def tail_moment(dy,g,j): #works
+def tail_moment(dy,f,j): #works
     moment = 0
     for i in range (0,j+1):
-        moment = tail_force(dy,g,i) * (y_tail(dy,j)-y_tail(dy,i)) + moment
+        moment = tail_force(dy,f,i) * (y_tail(dy,j)-y_tail(dy,i)) + moment
     return moment
         
-def tail_plots(dy,g): #works
+def tail_plots(dy,f): #works
     distr = np.zeros(dy)
     y = np.zeros(dy)
     shear = np.zeros(dy)
     moment = np.zeros(dy)
     for i in range (0,dy):
-        distr[i] = tail_distr(dy,g,i)
+        distr[i] = tail_distr(dy,f,i)
     for i in range (0,dy):
         y[i] = y_tail(dy,i)
     for i in range (0,dy):
-        shear[i] = tail_shear(dy,g,i)
+        shear[i] = tail_shear(dy,f,i)
     for i in range (0,dy):
-        moment[i] = tail_moment(dy,g,i)
+        moment[i] = tail_moment(dy,f,i)
     plt.figure(figsize=(19,5))
     plt.title('Load-shear-moment diagrams for horisontal tail')
     plt.subplot(131)
@@ -111,7 +106,7 @@ def tail_plots(dy,g): #works
     plt.show()
     return
 
-def tail_shear_stress(dy,dx,dz,i,g):#looks like it works
+def tail_shear_stress(dy,dx,dz,i,f):#looks like it works
     x_12 = np.linspace(0, (1-y_tail_inv(dy,i) * slope_c(dy)) * box_b/2,dx)
     z_23 = np.linspace(((1 - y_tail_inv(dy,i) * slope_c(dy)) * box_h)/2, -1*(1-y_tail_inv(dy,i)*slope_c(dy))*0.1*p.cr_ht/2, dz)
     x_34 = np.linspace((1 - y_tail_inv(dy,i) * slope_c(dy)) * box_b/2,0,dx)
@@ -119,12 +114,12 @@ def tail_shear_stress(dy,dx,dz,i,g):#looks like it works
     q_23 = np.zeros(dy)
     q_34 = np.zeros(dx)
     for j in range (0,dx):
-        q_12[j] = -tail_shear(dy,g,i) * box_t * z_23[0] * x_12[j] / (tail_I_xx(dy,i))
+        q_12[j] = -tail_shear(dy,f,i) * box_t * z_23[0] * x_12[j] / (tail_I_xx(dy,i))
     for j in range (0,dz):
-        q_23[j] = q_12[dx-1] + box_t * tail_shear(dy,g,i) * x_12[dx-1] * ((z_23[0])**2 - z_23[j]**2)/(4*tail_I_xx(dy,i))
+        q_23[j] = q_12[dx-1] + box_t * tail_shear(dy,f,i) * x_12[dx-1] * ((z_23[0])**2 - z_23[j]**2)/(4*tail_I_xx(dy,i))
     print q_12[99], z_23[50]
     for j in range (0,dx):
-        q_34[j] = q_23[dz-1] - tail_shear(dy,g,i) * box_t * z_23[dz-1] * x_12[j] / (tail_I_xx(dy,i))
+        q_34[j] = q_23[dz-1] - tail_shear(dy,f,i) * box_t * z_23[dz-1] * x_12[j] / (tail_I_xx(dy,i))
     tau_12 = np.zeros(dx)
     tau_23 = np.zeros(dx)
     tau_34 = np.zeros(dx)
@@ -196,14 +191,14 @@ def shear_boom(dx,g,j):#works
     shear_j = force_boom(dx,g,0)+ tail_shear(1000,g,999) + np.sum(distr)
     return shear_j
 
-def moment_boom(dx,g,j):#works
+def moment_boom(dx,f,g,j):#works
     moment = 0
     for i in range (0,j+1):
         moment = force_boom(dx,g,i) * (x_boom(dx,j)-x_boom(dx,i)) + moment
-    moment = tail_shear(1000,4,999)*x_boom(dx,j) + moment
+    moment = tail_shear(1000,g,999)*x_boom(dx,j) + moment
     return moment
 
-def boom_plots(dx,g):#works
+def boom_plots(dx,f,g):#works
     distr = np.zeros(dx)
     x = np.zeros(dx)
     shear = np.zeros(dx)
@@ -234,19 +229,18 @@ def boom_plots(dx,g):#works
     plt.show()
     return    
     
-def force_vert(dz,g):#works
+def force_vert(dz,f):#works not anymore ARRRRRRRRRRRRRRRGH
     v_c = np.linspace(v_r,v_t,dz)
-    mid_w = v_w / dz
+    mid_w = (f+0.00) / dz
     w_distr = mid_w * v_c / v_c[dz/2]
-    force = g*p.g*w_distr
-    return np.sum(force)
+    return np.sum(w_distr)
 
-def boom_plots_vertical(dx,g):#works
+def boom_plots_vertical(dx,f):#works
     x = np.zeros(dx)
     for i in range (0,dx):
         x[i] = x_boom(dx,i)
     moment = np.zeros(dx)
-    shear = force_vert(1000,g)
+    shear = force_vert(1000,f)
     moment = shear * x
     plt.figure(figsize=(9,5))
     plt.title('Moment diagram for the mounting boom by vertical tail')
@@ -256,13 +250,13 @@ def boom_plots_vertical(dx,g):#works
     plt.show()
     return    
 
-def boom_shear_stress_h(dtheta,dx,i,g):#works
+def boom_shear_stress_h(dtheta,dx,i,f):#works
     theta = np.linspace(0, 2*math.pi, dtheta)
     shear_flow = np.zeros(dtheta)
     a = np.zeros(dtheta)
     for j in range (0,dtheta):
         a[j] = math.cos(theta[j]+math.pi/2)
-    shear_flow = shear_boom(dx,g,i) * (a-1) / (math.pi * r_boom(dx,i))
+    shear_flow = shear_boom(dx,f,i) * (a-1) / (math.pi * r_boom(dx,i))
     shear_stress = shear_flow/b_t
     plt.figure(figsize=(19,5))
     plt.title('Shear flow and stress in the mounting boom by horizontal tail')
@@ -341,3 +335,26 @@ def total_shear_stress_boom(dx,dz,dtheta,g1,g2,i):#works
     plt.xlabel('Location (from top), radian')
     plt.show()
 
+def total_bending_stress_boom(Ixx,Iyy,dx,dr,i,f,g):
+    x_coord = np.zeros(dr)
+    y_coord = np.zeros(dr)
+    sin = np.zeros(dr)
+    cos = np.zeros(dr)
+    theta = np.linspace(0, 2*math.pi, dr)
+    for j in range (0,dr):
+        sin[j] = math.sin(theta[j]+math.pi/2)
+        cos[j] = math.cos(theta[j]+math.pi/2)
+    x_coord = r_boom(dx,i) * cos
+    y_coord = r_boom(dx,i) * sin
+    x = x_boom(dx,i)
+    shear = force_vert(1000,f)
+    moment_x = shear * x
+    moment_y = moment_boom(dx,f,g,i)
+    stress = np.zeros(dr)
+    stress = moment_x/Ixx * y_coord + moment_y/Iyy * x_coord
+    plt.plot(theta, stress)
+    plt.ylabel('Bending stress, N/m^2')
+    plt.xlabel('Location (from top), radian')
+    
+    
+    return
