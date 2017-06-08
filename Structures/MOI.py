@@ -15,54 +15,57 @@ import matplotlib.pyplot as plt
 
 t = p.t_skin
 
-airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
 
+def wingbox_MOI(airfoil_file_name):
+    airfoil_coordinates = np.genfromtxt(airfoil_file_name,skip_header=1)
+    
+    ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
+    #INTERPOLATION OF AIRFOIL DATAPOINTS
+    
+    xcoordinates = np.zeros(len(airfoil_coordinates))
+    ycoordinates = np.zeros(len(airfoil_coordinates))
+    
+    for i in range(len(airfoil_coordinates)):
+        xcoordinates[i] = airfoil_coordinates[i][0]
+        ycoordinates[i] = airfoil_coordinates[i][1]
+    
+    fit1 = np.polyfit(xcoordinates[0:134],ycoordinates[0:134],25)
+    f1 = np.poly1d(fit1)
+    
+    fit2 = np.polyfit(xcoordinates[133:256],ycoordinates[133:256],25)
+    f2 = np.poly1d(fit2)
+    
+    #arc length calculator: http://www.emathhelp.net/calculators/calculus-2/definite-integral-calculator/?a=3/20&b=23/40&f=sqrt%28%286958%2Ax%20-%203239%29%5E2%20%2B%20100000000%29/10000&steps=on&var=x
+    
+    front_spar = 0.15
+    back_spar = 0.575
+    
+    arc_length_US = 0.427622 #upper skin
+    arc_length_LS = 0.425 #lower skin
+    
+    front_spar_length = np.abs(f1(front_spar)) + np.abs(f2(front_spar))
+    back_spar_length = np.abs(f1(back_spar)) + np.abs(f2(back_spar))
+    
+    front_spar_area = np.abs(f1(front_spar)) + np.abs(f2(front_spar))*t
+    back_spar_area = np.abs(f1(back_spar)) + np.abs(f2(back_spar))*t
+    
+    total_area = (arc_length_US + arc_length_LS)*t + front_spar_area + back_spar_area
+                
+                 
+    sections = 1000.             
+    dx = 1./sections             
+    area_section = dx * t
+    x = np.arange(front_spar,back_spar+dx,dx)
+    
+    y_NA = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
+    x_NA = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area*back_spar) / total_area
+                 
+    Ixx = 2*dx*t**3/12 + area_section * sum(f1(x)**2 + f2(x)**2) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA))**2)
+    Iyy = (front_spar_area * (front_spar-x_NA)**2) + (back_spar_area * (back_spar-x_NA)**2) + area_section*(sum(x**2)-2*x_NA*sum(x)+len(x)*x_NA**2)
+    
+    return Ixx, Iyy
 
-########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
-#INTERPOLATION OF AIRFOIL DATAPOINTS
-
-xcoordinates = np.zeros(len(airfoil_coordinates))
-ycoordinates = np.zeros(len(airfoil_coordinates))
-
-for i in range(len(airfoil_coordinates)):
-    xcoordinates[i] = airfoil_coordinates[i][0]
-    ycoordinates[i] = airfoil_coordinates[i][1]
-
-fit1 = np.polyfit(xcoordinates[0:134],ycoordinates[0:134],25)
-f1 = np.poly1d(fit1)
-
-fit2 = np.polyfit(xcoordinates[133:256],ycoordinates[133:256],25)
-f2 = np.poly1d(fit2)
-
-#arc length calculator: http://www.emathhelp.net/calculators/calculus-2/definite-integral-calculator/?a=3/20&b=23/40&f=sqrt%28%286958%2Ax%20-%203239%29%5E2%20%2B%20100000000%29/10000&steps=on&var=x
-
-front_spar = 0.15
-back_spar = 0.575
-
-arc_length_US = 0.427622 #upper skin
-arc_length_LS = 0.425 #lower skin
-
-front_spar_length = np.abs(f1(front_spar)) + np.abs(f2(front_spar))
-back_spar_length = np.abs(f1(back_spar)) + np.abs(f2(back_spar))
-
-front_spar_area = np.abs(f1(front_spar)) + np.abs(f2(front_spar))*t
-back_spar_area = np.abs(f1(back_spar)) + np.abs(f2(back_spar))*t
-
-total_area = (arc_length_US + arc_length_LS)*t + front_spar_area + back_spar_area
-            
-             
-sections = 1000.             
-dx = 1./sections             
-area_section = dx * t
-x = np.arange(front_spar,back_spar+dx,dx)
-
-y_NA = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
-x_NA = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area*back_spar) / total_area
-             
-Ixx = 2*dx*t**3/12 + area_section * sum(f1(x)**2 + f2(x)**2) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA))**2)
-Iyy = (front_spar_area * (front_spar-x_NA)**2) + (back_spar_area * (back_spar-x_NA)**2) + area_section*(sum(x**2)-2*x_NA*sum(x)+len(x)*x_NA**2)
-
-  
+wingbox_MOI('foil1_modified.dat')
       
 #plt.plot(x,f1(x))
 #plt.plot(x,f2(x))
