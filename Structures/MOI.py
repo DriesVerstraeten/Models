@@ -48,7 +48,7 @@ def wingbox_MOI():
         front_spar = 0.15 * c[i]
         back_spar = 0.575 * c[i]
         
-        sections = 1000.             
+        sections = 100.             
         dx = 1./sections             
         area_section = dx * t
         x = np.arange(front_spar,back_spar+dx,dx)
@@ -76,7 +76,7 @@ def wingbox_MOI():
         Ixy.append(Ixy_section)
 
     
-    return Ixx, Iyy, Ixy, f1, f2, y_NA, x_NA, x 
+    return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x 
 
 
 
