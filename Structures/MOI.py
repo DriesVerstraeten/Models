@@ -24,6 +24,7 @@ def wingbox_MOI():
     Ixx = []
     Iyy = []
     Ixy = []
+    x_span = []
     
     xcoordinates = np.zeros(len(airfoil_coordinates)) 
     ycoordinates = np.zeros(len(airfoil_coordinates)) 
@@ -52,6 +53,8 @@ def wingbox_MOI():
         dx = 1./sections             
         area_section = dx * t
         x = np.arange(front_spar,back_spar+dx,dx)
+        x_span.append(x[0])
+        #print x_span
     
         arc_length_US = sum(np.sqrt(1+f11(x)**2)*dx) #upper skin
         arc_length_LS = sum(np.sqrt(1+f22(x)**2)*dx) #lower skin
@@ -75,10 +78,16 @@ def wingbox_MOI():
         Iyy.append(Iyy_section)
         Ixy.append(Ixy_section)
 
-    
-    return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x 
 
+    return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x, np.array(x_span)
 
+print wingbox_MOI()[8]
+'''
+plt.plot(wm.y,wingbox_MOI()[0], linestyle = '-')
+plt.plot(wm.y,wingbox_MOI()[1], linestyle = '--')
+plt.plot(wm.y,wingbox_MOI()[2], linestyle = '-.')
+plt.show()
+'''
 
 """
 
