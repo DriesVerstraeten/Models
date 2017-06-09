@@ -26,7 +26,7 @@ b1 = 0.3
 M_x = 10000000.
 M_y = 10000000.
 L_1 = 1.2+0.15
-a2 = 3.
+a2 = 
 b2 = 2.
 
 L= 1.20
@@ -39,6 +39,8 @@ angle = np.arange(361)*np.pi/180
 t_material = np.zeros((np.shape(a)[0]-1,np.shape(mat.rho)[0]-1))
 mass = np.zeros(np.shape(mat.rho)[0]-1)
 cost = np.zeros(np.shape(mat.rho)[0]-1)
+
+## Section 1
 for cut in range(np.shape(a)[0]-1):
     x = a[cut]*np.cos(angle)
     y = b[cut]*np.sin(angle)
@@ -63,3 +65,7 @@ for material in range(np.shape(mat.rho)[0]-1):
     mass[material] = sum(dm)
     cost[material] = mass[material]*mat.Cost[material]
 
+## Section 2
+
+
+    
