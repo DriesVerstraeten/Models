@@ -15,11 +15,11 @@ import matplotlib.pyplot as plt
 t = p.t_skin
 c = wm.c
 #c_r = p.c_r
+aifoil_file_name = 'foil1_modified.dat'
 
-
-def wingbox_MOI(airfoil_file_name):
+def wingbox_MOI():
     
-    airfoil_coordinates = np.genfromtxt(airfoil_file_name,skip_header=1)
+    airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
     
     Ixx = []
     Iyy = []
@@ -74,15 +74,10 @@ def wingbox_MOI(airfoil_file_name):
         Ixx.append(Ixx_section)
         Iyy.append(Iyy_section)
         Ixy.append(Ixy_section)
+
     
-    return Ixx, Iyy, Ixy
+    return Ixx, Iyy, Ixy, f1, f2, y_NA, x_NA, x 
 
-print wingbox_MOI('foil1_modified.dat')[0]
-      
-
-plt.plot(x,f1(x))
-plt.plot(x,f2(x))
-plt.show()
 
 
 """
