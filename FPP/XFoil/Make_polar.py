@@ -40,13 +40,19 @@ def convert_float_to_str(RE,M):
     Mach number is converted to a dwo digit string, XX, with the first digit 
     being the number before the point, e.g. 0.4 becomes '04'
     
-    Inputs:
-        RE:     float, Reynolds number
-        M:      float, Mach number
+    Input
+    -----
+    RE:     float
+        Reynolds number
+    M:      float
+        Mach number
     
-    Outputs:
-        RE_f:   str, Reynolds number
-        M_f:    str, Mach number
+    Output
+    ------
+    RE_f:   str
+        Reynolds number
+    M_f:    str
+        Mach number
     '''
     #Convert the Reynolds number to a string and get the tens of millions
     RE_f = str(np.round(RE))[:-7] #getting the parts higher than the thousands
@@ -75,38 +81,13 @@ def generate_polar(foilname, RE, M, appendDAT = True):
        
     RE_s = str(np.round(RE/100000.)*100000)
     M_s = str(np.round(M, decimals=1))
-    
-    """    
-    #Begin the command sequence
-    issueCmd('load '+filename)  #load airfoil coordinates in XFoil
-    issueCmd('GDES')            #enter GDES menu
-    issueCmd('CADD')            #add points at corners
-    issueCmd('')                #accept default input
-    issueCmd('')                #accept default input
-    issueCmd('')                #accept default input
-    issueCmd('')                #return to top menu
-    issueCmd('PPAR')            #enter paneling parameters menu
-    issueCmd('N 299')           #change panel count to 299 (max number)
-    issueCmd('')                #accept
-    issueCmd('')                #accept
-    issueCmd('')                #return to top level
-    issueCmd('OPER')            #enter OPER menu
-    issueCmd('VISC '+RE_s)      #change to viscous mode
-    issueCmd('MACH '+M_s)       #change the mach number
-    issueCmd('ITER 100')        #change iteration limit for polar accumulation
-    issueCmd('PACC')            #change to polar mode
-    issueCmd('../Polars/'+foilname +'_RE' + RE_f + '_M' + M_f +'.txt')   #specify filename
-    issueCmd('')                #no dump needed
-    issueCmd('ASEQ -10 10 0.5') #generate the linear, lower part
-    issueCmd('ASEQ 10.1 25 0.1')#generate the upper part with the non-linear part
-    issueCmd('')                #return to top level
-    issueCmd('QUIT')            #quit XFOIL"""
+    print '../Polars/'+foilname +'_RE' + RE_f + '_M' + M_f +'.txt'
     output = xfoil.communicate(string.join(['load '+filename, 'GDES', '', '', '', '', 
                                 'PPAR', 'N200', '', '', '', 'OPER', 'VISC '+RE_s,
                                 'MACH '+M_s, 'ITER 100', 'PACC', 
-                                '../Polars/'+foilname +'_RE' + RE_f + '_M' + M_f +'.txt'
-                                '', 'ASEQ -10 10 0.5', 'ASEQ 10.1 25 0.1',
-                                'PACC'], '\n'))
+                                '../Polars/'+foilname +'_RE' + RE_f + '_M' + M_f +'.txt',
+                                '', 'ASEQ -5 25 0.1',
+                                'PACC', "", 'QUIT'], '\n'))
     
     return output
 
