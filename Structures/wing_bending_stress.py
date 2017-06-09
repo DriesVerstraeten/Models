@@ -18,8 +18,10 @@ f2 = mi.wingbox_MOI()[4]
 y_NA = mi.wingbox_MOI()[5]
 x_NA = mi.wingbox_MOI()[6]
 x = mi.wingbox_MOI()[7]
-x_span = mi.wingbox_MOI()[8]
+x_span1 = mi.wingbox_MOI()[8]
+x_span = np.ones(len(x_span1))
 
+    
 
 def wingbox_extreme_pos():
     longest_US = np.sqrt((f1(x)-y_NA)**2 + (x-x_NA)**2)
@@ -36,7 +38,10 @@ def wingbox_extreme_pos():
         f = f2
 
     return longest_US, longest_LS, x_location, f
-wingbox_extreme_pos()
+
+
+for i in range(len(x_span)):
+    x_span[i] = x_span1[i][wingbox_extreme_pos()[2]]
 
 
 def wingbox_bending_stress():
@@ -45,18 +50,18 @@ def wingbox_bending_stress():
     Iyy = mi.wingbox_MOI()[1]
     Ixy = mi.wingbox_MOI()[2]
     x_location = wingbox_extreme_pos()[2]
-    print x_location
     f = wingbox_extreme_pos()[3]
     
-    max_bending_stress = - Mx[0:-1] / (Ixx*Iyy - Ixy**2) * (Iyy*(f(x_span[x_location]-y_NA) - Ixy*((x_span[x_location]-x_NA))))
-    print max_bending_stress
+    max_bending_stress = - Mx[0:-1] / (Ixx*Iyy - Ixy**2) * (Iyy*(f(x_span-y_NA) - Ixy*((x_span-x_NA)))) #y_NA changes with the spanwise sections, so change this!!
+    max_bending_stressu = - Mx[0:-1] / (Ixx*Iyy - Ixy**2) * (Iyy*(f1(x_span-y_NA) - Ixy*((x_span-x_NA))))
+    print max_bending_stress, max_bending_stressu
     
     return max_bending_stress, f
 
-a ,f= wingbox_bending_stress()
+#print wingbox_bending_stress()[0]
 
 
-plt.plot(wm.y,wingbox_bending_stress()[0][0])
+plt.plot(wm.y,wingbox_bending_stress()[0])
 plt.show()
 
 

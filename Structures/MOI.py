@@ -25,6 +25,8 @@ def wingbox_MOI():
     Iyy = []
     Ixy = []
     x_span = []
+    x_NA = []
+    y_NA = []
     
     xcoordinates = np.zeros(len(airfoil_coordinates)) 
     ycoordinates = np.zeros(len(airfoil_coordinates)) 
@@ -53,7 +55,7 @@ def wingbox_MOI():
         dx = 1./sections             
         area_section = dx * t
         x = np.arange(front_spar,back_spar+dx,dx)
-        x_span.append(x[0])
+        x_span.append(x)
         #print x_span
     
         arc_length_US = sum(np.sqrt(1+f11(x)**2)*dx) #upper skin
@@ -62,14 +64,17 @@ def wingbox_MOI():
         front_spar_length = np.abs(f1(front_spar)) + np.abs(f2(front_spar))
         back_spar_length = np.abs(f1(back_spar)) + np.abs(f2(back_spar))
         
-        front_spar_area = np.abs(f1(front_spar)) + np.abs(f2(front_spar))*t
-        back_spar_area = np.abs(f1(back_spar)) + np.abs(f2(back_spar))*t
+        front_spar_area = (front_spar_length)*t
+        back_spar_area = (back_spar_length)*t
         
         total_area = (arc_length_US + arc_length_LS)*t + front_spar_area + back_spar_area
         
-        y_NA = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
-        x_NA = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area*back_spar) / total_area
-                     
+        y_NA_sec = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
+        x_NA_sec = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area * back_spar) / total_area
+
+        y_NA.append(y_NA_sec) #trying to find the spanwise y_NA, fix this on monday
+        x_NA.append(x_NA_sec)
+
         Ixx_section = 2*dx*t**3/12 + area_section * sum(f1(x)**2 + f2(x)**2) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA))**2)
         Iyy_section = (front_spar_area * (front_spar-x_NA)**2) + (back_spar_area * (back_spar-x_NA)**2) + area_section*(sum(x**2)-2*x_NA*sum(x)+len(x)*x_NA**2)
         Ixy_section = area_section*(sum((x-x_NA)*(f1(x)-y_NA)) + sum((x-x_NA)*(f2(x)-y_NA))) + front_spar_area * (front_spar - x_NA) * ((f1(front_spar) + f2(front_spar))/2 - y_NA) + back_spar_area * (back_spar - x_NA) * ((f1(back_spar) + f2(back_spar))/2 - y_NA)
@@ -77,11 +82,10 @@ def wingbox_MOI():
         Ixx.append(Ixx_section)
         Iyy.append(Iyy_section)
         Ixy.append(Ixy_section)
+        
+    return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, np.array(y_NA), np.array(x_NA), x, x_span
+wingbox_MOI()
 
-
-    return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x, np.array(x_span)
-
-print wingbox_MOI()[8]
 '''
 plt.plot(wm.y,wingbox_MOI()[0], linestyle = '-')
 plt.plot(wm.y,wingbox_MOI()[1], linestyle = '--')
