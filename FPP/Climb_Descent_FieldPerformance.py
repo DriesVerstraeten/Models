@@ -219,7 +219,7 @@ print "___________________________________________________________________"
 
 #Airspeed for best ROC
 V_Y_list = []
-hmax = 20000 #meter
+hmax = 30000 #meter
 h0 = 0
 hcruise = 6000 #meter
 
@@ -231,35 +231,79 @@ for i in range(0, hmax):
 #Rate of climb
 ROC_list = []
 
+#If power changes according to height try changing the V_Y to a constant value
+
 for i in range(0, len(V_Y_list)):
     ROC = 60*(((etha_p*550*P_TO)/W_TO)-(V_Y_list[i]*(1.1547/LD_max))) #ft/min, CHANGE P_TO to power dependent on altitude
     ROC_si = ROC*0.00508
     ROC_list.append(ROC_si)   
     ROC_SL = ROC_list[0]
     ROC_SL_si = ROC_SL*0.00508
+    if ROC<0.1 and ROC>-0.1:
+        print "Absolute ceiling =", htab[i], "m"
+    if ROC<100.1 and ROC>99.9:
+        print "Service ceiling =", htab[i], "m"
+    
 
 print
 print "Maximum rate of climb reachable at sea level =", ROC_SL,"m/s"
+#It should be noted that the maximum climb rate is calculated at MTOW with full fuel tanks
 
+#Altitude - ROC plot
 plt.plot(ROC_list, htab[0:len(ROC_list)])
 plt.show()
-#plt.axis([14,18,0,7000])
+
+#Polynomial fit for the ROC vs. Altitude plot
+z = np.polyfit(htab[0:len(ROC_list)], ROC_list, 3) #Third order
+polyfit = []
+for i in range(0, len(V_Y_list)):
+    Z = z[0]*(htab[i]**3) + z[1]*htab[i]**2 + z[2]*htab[i] + z[3] #Third order
+    #Z = z[0]*htab[i] + z[1] #First order
+    polyfit.append(Z)
 
 plt.plot(htab[0:len(ROC_list)], ROC_list )
+plt.plot(htab[0:len(ROC_list)], polyfit)
 
-bb = ROC_list[0]
-aa = (ROC_list[-1]-ROC_list[0])/(htab[len(ROC_list)]-htab[0])
+#polynomial fit
+aa = z[0]
+bb = z[1]
+cc = z[2]
+dd = z[3]
 
-       
+
 #Time to altitiude & service ceiling
-ROC_a = (aa*(hcruise-h0))/(np.log(aa*hcruise + bb) - np.log(aa*h0 + bb))
-t = (hmax - h0)/ROC_a
-print
-print "Time to cruise altitude =", t, "s"
+#ROC_a = (aa*(hcruise-h0))/(np.log(aa*hcruise + bb) - np.log(aa*h0 + bb))
+#t = (hcruise - h0)/ROC_a
 
+#Modified formula from book page 837
+ROC_a_3rd = (aa*((hcruise-h0)**3)+(bb*((hcruise-h0)**2)+(cc*(hcruise-h0))))/(np.log((aa*(hcruise**3))+(bb*(hcruise**2))+(cc*hcruise) + dd) - np.log((aa*(h0**3))+(bb*(h0**2))+(cc*h0) + dd))
+t = (hcruise - h0)/ROC_a_3rd
+
+print
+print "Time to reach an altitude of", hcruise,"m is", t, "s"
 
 
 #Descent performance
+
+#Best glide speed
+V_BG_list = []
+
+for i in range(0, hcruise):
+    rho_h = Rhotab[i] * 0.00194032033 #Converted to slugs/ft3       
+    V_BG = sqrt((2/rho_h)*(sqrt((1./(pi*A*e))/CD_0))*(W_TO/S)) #What weight are we going to take?
+    V_BG_list.append(V_BG)
+
+V_BG_list = V_BG_list[::-1] #Reversing the list, we're descending here
+
+#Minimum glide angle
+
+
+
+
+#Glide distance - provided the best glide speed and minimum glide angle
+R_glide = hcruise * LD_max
+
+print "Gliding distance from cruise =", R_glide, "m, or", R_glide*0.000539956803, "nm" 
 
 
 
