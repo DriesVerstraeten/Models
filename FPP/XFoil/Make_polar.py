@@ -16,6 +16,7 @@ import psutil as sp
 import numpy as np
 from subprocess import PIPE
 import string
+import matplotlib.pyplot as plt
 
 
 def start_XFOIL():
@@ -50,9 +51,9 @@ def convert_float_to_str(RE,M):
     Output
     ------
     RE_f:   str
-        Reynolds number
+        Reynolds number in string format
     M_f:    str
-        Mach number
+        Mach number in string format
     '''
     #Convert the Reynolds number to a string and get the tens of millions
     RE_f = str(np.round(RE))[:-7] #getting the parts higher than the thousands
@@ -130,6 +131,16 @@ def save_polar_npz(foilname, RE, M):
     Save an XFoil polar to an NPZ file
     Alpha, CL, CD and CM are saved, their positions are:
     0, 1, 2, 4
+    
+    Input
+    -----
+    fname:  str
+        filename of the foil requested without extension
+    RE:     str
+        Reynolds number at which the polar was constructed
+    M:      float
+        Mach number at which the polar was constructed
+     
     """
     RE_f, M_f = convert_float_to_str(RE,M)
     polar = load_foil_data(foilname, RE, M)
@@ -138,3 +149,61 @@ def save_polar_npz(foilname, RE, M):
     cd = polar[:,2]
     cm = polar[:,4]
     np.savez(r'../Polars/' + foilname +'_RE' + RE_f + '_M' + M_f +'.txt', AoA = alpha, cl = cl, cd = cd, cm = cm)
+    
+def construct_thicknesses(foilname, thicknesses):
+    """
+    Constructs different thicknesses of a given airfoil by scaling the upper 
+    and lower distribution over the camber line
+    
+    Input
+    -----
+    
+    foilname:       str,
+        filename of the aerofoil
+    thicknesses:    ndarray
+        Array of thicknesses to calculate the thickness distribution for
+    """
+    foil = load_foil(foilname)
+    #get the upper and lower surfaces
+    separation = np.where( np.logical_and(foil[:,0] == 0,foil[:,1] ==0))
+    #print separation[0][0]
+    s_upper = foil[:separation[0][0]+1][::-1]
+    s_lower = foil[separation[0][0]:]
+    
+    #Get the camberline
+    camber = (s_upper[:,1]-s_lower[:,1])/2+s_lower[:,1]
+    #get the thickness distribution and scale it to the required relative thicknesses
+    thick_distr = s_upper[:,1]-camber
+    print 'Original thickness: ' ,np.amax(thick_distr)*2
+    print 'New thicknesses: ', thicknesses
+    new_foils_tc = np.zeros((len(thick_distr),len(thicknesses)))
+    for i, thick in enumerate(thicknesses):
+        new_foils_tc[:,i] = thick_distr / np.amax(thick_distr) * thick/2
+    
+    
+    new_upper = new_foils_tc+np.transpose(np.array(camber, ndmin=2))
+    new_lower = np.array(np.transpose(np.array(camber, ndmin=2))-new_foils_tc)[1:]
+    
+    new_foils = np.concatenate((new_upper[::-1,:],new_lower), axis=0)
+    
+    foil_out = np.concatenate((np.transpose(np.array(foil[:,0],ndmin=2)),new_foils,np.transpose(np.array(foil[:,1],ndmin=2))),axis=1)
+    
+    plt.plot(foil[:,0], foil[:,1], '-g')
+    plt.plot(s_upper[:,0], camber, '-r')
+    for i in range(len(foil_out[0,:])-2):
+        plt.plot(foil_out[:,0], foil_out[:,i+1], '-b')
+    
+    plt.axes().set_aspect('equal', 'datalim')
+    plt.show()
+    
+    return foil_out, thicknesses
+
+    
+def load_foil(foilname, appendDAT=True):
+    """
+    Loads a coordinate file in selig format
+    """
+    if appendDAT:
+        foilname = foilname + '.dat'
+    foil = np.genfromtxt(foilname, skip_header=1)
+    return foil
