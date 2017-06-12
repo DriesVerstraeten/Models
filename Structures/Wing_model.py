@@ -76,7 +76,7 @@ def wing_moment_9g(CL, rho, V):
             dM_9g_total[i] = dM_9g_total[i-1] - dM_9g[0]
         else:
             dM_9g_total[i] = dM_9g_total[i-1] - dM_9g[i-1]
-    """
+    '''
     ax2 = fig.add_subplot(222)
     ax2.plot(y1,dM_9g_total)  
     ax2.set_title('Bending moment at 9g')
@@ -84,9 +84,11 @@ def wing_moment_9g(CL, rho, V):
     ax2.set_xlabel('Wing span [m]')
     ax2.set_ylim(dM_9g_total[-1],dM_9g_total[0])
     ax2.set_xlim([y[0],y[-1]])
-    plt.show()"""
-    
+    plt.show()
+    '''
     return dM_9g, dM_9g_total
+
+#wing_moment_9g(CL_9g,p.rho_0,p.V_cruise)
 
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #BENDING AT -4.5g

@@ -36,25 +36,30 @@ def wingbox_MOI():
         ycoordinates[i] = airfoil_coordinates[i][1] 
     
     
+    
     for i in range(len(c)):
         xcoordinates1 = xcoordinates * c[i]
         ycoordinates1 = ycoordinates * c[i]
         
-        fit1 = np.polyfit(xcoordinates1[0:134],ycoordinates1[0:134],5)
-        f1 = np.poly1d(fit1)
+        fit1 = np.polyfit(xcoordinates1[0:133],ycoordinates1[0:133],5)
+        f1 = np.poly1d(fit1) #upper skin
         f11 = f1.deriv(1)
         
         fit2 = np.polyfit(xcoordinates1[133:256],ycoordinates1[133:256],5)
-        f2 = np.poly1d(fit2)
+        f2 = np.poly1d(fit2) #lower skin
         f22 = f2.deriv(1)
-    
+        '''
+        plt.plot(xcoordinates1,ycoordinates1)
+        plt.axes().set_aspect('equal','datalim')
+        plt.show()
+        '''
         front_spar = 0.15 * c[i]
         back_spar = 0.575 * c[i]
-        
+
         sections = 100.             
         dx = 1./sections             
         area_section = dx * t
-        x = np.arange(front_spar,back_spar+dx,dx)
+        x = np.linspace(front_spar,back_spar,len(wm.y))
         x_span.append(x)
         #print x_span
     
@@ -71,25 +76,45 @@ def wingbox_MOI():
         
         y_NA_sec = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
         x_NA_sec = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area * back_spar) / total_area
-
-        y_NA.append(y_NA_sec) #trying to find the spanwise y_NA, fix this on monday
+                   
         x_NA.append(x_NA_sec)
-
-        Ixx_section = 2*dx*t**3/12 + area_section * sum(f1(x)**2 + f2(x)**2) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA))**2)
-        Iyy_section = (front_spar_area * (front_spar-x_NA)**2) + (back_spar_area * (back_spar-x_NA)**2) + area_section*(sum(x**2)-2*x_NA*sum(x)+len(x)*x_NA**2)
-        Ixy_section = area_section*(sum((x-x_NA)*(f1(x)-y_NA)) + sum((x-x_NA)*(f2(x)-y_NA))) + front_spar_area * (front_spar - x_NA) * ((f1(front_spar) + f2(front_spar))/2 - y_NA) + back_spar_area * (back_spar - x_NA) * ((f1(back_spar) + f2(back_spar))/2 - y_NA)
+        y_NA.append(y_NA_sec)
+        
+        Ixx_section = 2*dx*t**3/12 + area_section * sum(f1(x)**2 + f2(x)**2) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA[i]))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA[i]))**2)
+        Iyy_section = (front_spar_area * (front_spar-x_NA[i])**2) + (back_spar_area * (back_spar-x_NA[i])**2) + area_section*(sum(x**2)-2*x_NA[i]*sum(x)+len(x)*x_NA[i]**2)
+        Ixy_section = area_section*(sum((x-x_NA[i])*(f1(x)-y_NA[i])) + sum((x-x_NA[i])*(f2(x)-y_NA[i]))) + front_spar_area * (front_spar - x_NA[i]) * ((f1(front_spar) + f2(front_spar))/2 - y_NA[i]) + back_spar_area * (back_spar - x_NA[i]) * ((f1(back_spar) + f2(back_spar))/2 - y_NA[i])
     
         Ixx.append(Ixx_section)
         Iyy.append(Iyy_section)
         Ixy.append(Ixy_section)
+
         
-    return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, np.array(y_NA), np.array(x_NA), x, x_span
+    return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x, x_span
 wingbox_MOI()
 
+x_span = wingbox_MOI()[8]
+
+
+
+########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
+#PLOTTING THE AIRFOIL
+
+#plt.figure(figsize = (8.5,6),tight_layout=True)
+
 '''
-plt.plot(wm.y,wingbox_MOI()[0], linestyle = '-')
-plt.plot(wm.y,wingbox_MOI()[1], linestyle = '--')
-plt.plot(wm.y,wingbox_MOI()[2], linestyle = '-.')
+xfront = 0.15 * np.ones(2)
+xback = 0.57 * np.ones(2)
+yfront = [-0.04,0.07]
+yback = [-0.04,0.09]
+
+plt.plot(xfront,yfront)
+plt.plot(xback,yback)
+'''
+
+'''
+plt.plot(wm.y,wingbox_MOI()[0], color = 'r')
+plt.plot(wm.y,wingbox_MOI()[1], color = 'b')
+plt.plot(wm.y,wingbox_MOI()[2], color = 'g')
 plt.show()
 '''
 
@@ -212,26 +237,8 @@ wingbox_MOI()
 
 
 
-########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
-#PLOTTING THE AIRFOIL
-
-#plt.figure(figsize = (8.5,6),tight_layout=True)
-
-"""
-xfront = 0.15 * np.ones(2)
-xback = 0.57 * np.ones(2)
-yfront = [-0.04,0.07]
-yback = [-0.04,0.09]
-
-plt.plot(xfront,yfront)
-plt.plot(xback,yback)
 
 
-plt.plot(xcoordinates,ycoordinates)
-
-
-plt.show()
-"""
 
 
 
