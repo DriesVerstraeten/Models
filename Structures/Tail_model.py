@@ -430,15 +430,69 @@ def wingbox_MOI(dy,start,end,t,rho):
    
     return Ixx, Iyy, Ixy, weight, xcoordinates1, ycoordinates1, f1, f2, y_NA, x_NA, x 
 
-def bending_box(dy,start,end,t,rho,f):    #bending stress calc
-    y = wingbox_MOI(dy,start,end,t,rho)[5]
-    Ixx = wingbox_MOI(dy,start,end,t,rho)[0]
-    stress = tail_moment(dy,f,dy-1) * y / Ixx
-    plt.figure(figsize=(5,5))
-    plt.suptitle('Bending stress in the given tailbox location (default - root)')
+def bending_box(dx,dy,start,end,t,rho,f,i):    #bending stress calc
+    airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
+    x_x = np.linspace(start*c_tail(dy,i),end*c_tail(dy,i),dx)
+    print x_x
+    xcoordinates = np.zeros(len(airfoil_coordinates)) 
+    ycoordinates = np.zeros(len(airfoil_coordinates)) 
+    for j in range(len(airfoil_coordinates)):
+        xcoordinates[j] = airfoil_coordinates[j][0]
+        ycoordinates[j] = airfoil_coordinates[j][1] 
+    xcoordinates1 = xcoordinates * c_tail(dy,i)
+    ycoordinates1 = ycoordinates * c_tail(dy,i)
+    fit1 = np.polyfit(xcoordinates1[0:134],ycoordinates1[0:134],5)
+    f1 = np.poly1d(fit1)
+    fit2 = np.polyfit(xcoordinates1[133:256],ycoordinates1[133:256],5)
+    f2 = np.poly1d(fit2)
+    x_y_up = np.zeros(dx)
+    x_y_down = np.zeros(dx)
+    for j in range (0,dx):
+        x_y_up[j] = f1(x_x[j])
+        x_y_down[j] = f2(x_x[j])
+    x_y_right = np.linspace(x_y_up[dx-1],x_y_down[dx-1],dx) 
+    x_y_left = np.linspace(x_y_down[0],x_y_up[0],dx) 
+    Ixx = wingbox_MOI(dx,start,end,t,rho)[0]
+    stress_12 = tail_moment(dx,f,i) * x_y_up / Ixx[i]
+    stress_23 = tail_moment(dx,f,i) * x_y_right / Ixx[i]
+    stress_34 = tail_moment(dx,f,i) * x_y_down / Ixx[i]
+    stress_41 = tail_moment(dx,f,i) * x_y_left / Ixx[i]
+    a = max(stress_12)
+    b = min(stress_12)
+    if abs(a) >= abs(b):
+        c = a
+    else:
+        c = b
+    a = max(stress_23)
+    b = min(stress_23)
+    if abs(a) >= abs(b):
+        c = a
+    else:
+        c = b
+    a = max(stress_34)
+    b = min(stress_34)
+    if abs(a) >= abs(b):
+        c = a
+    else:
+        c = b
+    a = max(stress_41)
+    b = min(stress_41)
+    if abs(a) >= abs(b):
+        c = a
+    else:
+        c = b
+    return c
+
+def highest_bending_box(dx,dy,start,end,t,rho,f):
+    y = np.linspace(0,p.b_ht/2,dy)
+    stress = np.zeros(dy)
+    for i in range (0,dy):
+        stress[i] = bending_box(dx,dy,start,end,t,rho,f,i)
+    plt.figure(figsize=(7,5))
+    plt.suptitle('Highest bending stress in the tailbox')
     plt.plot(y,stress)
-    plt.ylabel('Bending stress stress, N/m^2')
-    plt.xlabel('y - Location, radian')
+    plt.ylabel('Bending stress, N/m^2')
+    plt.xlabel('x - Location')
     plt.show()
     a = max(stress)
     b = min(stress)
@@ -447,8 +501,44 @@ def bending_box(dy,start,end,t,rho,f):    #bending stress calc
     else:
         c = b
     return c
-    
+
 def shear_box(): #shear stress calc
+    airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
+    x_x = np.linspace(start*c_tail(dy,i),end*c_tail(dy,i),dx)
+    print x_x
+    xcoordinates = np.zeros(len(airfoil_coordinates)) 
+    ycoordinates = np.zeros(len(airfoil_coordinates)) 
+    for j in range(len(airfoil_coordinates)):
+        xcoordinates[j] = airfoil_coordinates[j][0]
+        ycoordinates[j] = airfoil_coordinates[j][1] 
+    xcoordinates1 = xcoordinates * c_tail(dy,i)
+    ycoordinates1 = ycoordinates * c_tail(dy,i)
+    fit1 = np.polyfit(xcoordinates1[0:134],ycoordinates1[0:134],5)
+    f1 = np.poly1d(fit1)
+    f11 = f1.deriv(1)
+    fit2 = np.polyfit(xcoordinates1[133:256],ycoordinates1[133:256],5)
+    f2 = np.poly1d(fit2)
+    f22 = f2.deriv(1)
+    x_y_up = np.zeros(dx)
+    x_y_down = np.zeros(dx)
+    for j in range (0,dx):
+        x_y_up[j] = f1(x_x[j])
+        x_y_down[j] = f2(x_x[j])
+    x_y_right = np.linspace(x_y_up[dx-1],x_y_down[dx-1],dx) 
+    x_y_left = np.linspace(x_y_down[0],x_y_up[0],dx) 
+    Ixx = wingbox_MOI(dx,start,end,t,rho)[0]
+    Iyy = wingbox_MOI(dx,start,end,t,rho)[1]
+    Ixy = wingbox_MOI(dx,start,end,t,rho)[2]
+    q = np.zeros(4*dx)
+    q[0] = 0
+    for j in range (1,dx):
+        q[j] = q[j-1] + fh*f11(x_x[j])*t*(x_x[j]*Ixy[i]-x_y_up[j]*Iyy[i])/(Ixx[i]*Iyy[i]-Ixy[i]**2)
+    for j in range (1,dx):
+        q[j+dx] = q[dx+j-1] + fh*((x_y_down[dx-1]-x_y_up[dx-1])/dx)*t*(x_x[dx-1]*Ixy[i]-x_y_right[j]*Iyy[i])/(Ixx[i]*Iyy[i]-Ixy[i]**2)
+    for j in range (1,dx):
+        q[j+2*dx] = q[2*dx+j-1] + fh*f22(x_x[j])*t*(x_x[j]*Ixy[i]-x_y_down[j]*Iyy[i])/(Ixx[i]*Iyy[i]-Ixy[i]**2)
+    for j in range (1,dx):
+        q[j+3*dx] = q[3*dx+j-1] + fh*((x_y_down[0]-x_y_up[0])/dx)*t*(x_x[dx-1]*Ixy[i]-x_y_left[j]*Iyy[i])/(Ixx[i]*Iyy[i]-Ixy[i]**2)
     
     return
     
