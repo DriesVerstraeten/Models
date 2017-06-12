@@ -23,8 +23,6 @@ Ixy = mi.wingbox_MOI()[2]
 y_NA = mi.wingbox_MOI()[5]
 x_NA = mi.wingbox_MOI()[6]
 x_span = mi.wingbox_MOI()[8]
-f1 = mi.wingbox_MOI()[3]
-f2 = mi.wingbox_MOI()[4]
 
 def piecewise_poly():
     
@@ -73,8 +71,17 @@ def wingbox_bending_stress():
     
     return sigma_bending_US, sigma_bending_LS
 
+
+
+
+maxpoints = np.ones(len(wingbox_bending_stress()[0]))
+for i in range(len(wingbox_bending_stress()[0])):
+    
+    maxpoints[i] = np.max(wingbox_bending_stress()[0][i])
+
 plt.plot(x_span[0],wingbox_bending_stress()[0][0], color='r')
 plt.plot(x_span[0],wingbox_bending_stress()[1][0], color='b')
+#plt.plot(wm.y,maxpoints, color='b')
 plt.show()
 
 
