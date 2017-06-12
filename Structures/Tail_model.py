@@ -330,7 +330,13 @@ def total_shear_stress_boom(dx,dz,dtheta,fh,fv,i):#works
     plt.ylabel('Total shear stress, N/m^2')
     plt.xlabel('Location (from top), radian')
     plt.show()
-    return
+    a = max(shear_stress_tot)
+    b = min(shear_stress_tot)
+    if abs(a) >= abs(b):
+        c = a
+    else:
+        c = b
+    return c
 
 def total_bending_stress_boom(Ixx,Iyy,dx,dr,i,fh,fv,g):
     x_coord = np.zeros(dr)
@@ -353,7 +359,13 @@ def total_bending_stress_boom(Ixx,Iyy,dx,dr,i,fh,fv,g):
     plt.plot(theta, stress)
     plt.ylabel('Bending stress, N/m^2')
     plt.xlabel('Location (from top), radian')  
-    return
+    a = max(stress)
+    b = min(stress)
+    if abs(a) >= abs(b):
+        c = a
+    else:
+        c = b
+    return c
 
 def wingbox_MOI(dy,start,end,t,rho):
     
@@ -397,11 +409,12 @@ def wingbox_MOI(dy,start,end,t,rho):
         front_spar_length = np.abs(f1(front_spar)) + np.abs(f2(front_spar))
         back_spar_length = np.abs(f1(back_spar)) + np.abs(f2(back_spar))
         
-        front_spar_area = np.abs(f1(front_spar)) + np.abs(f2(front_spar))*t
-        back_spar_area = np.abs(f1(back_spar)) + np.abs(f2(back_spar))*t
+        front_spar_area = (np.abs(f1(front_spar)) + np.abs(f2(front_spar)))*t
+        back_spar_area = (np.abs(f1(back_spar)) + np.abs(f2(back_spar)))*t
         
         total_area = (arc_length_US + arc_length_LS)*t + front_spar_area + back_spar_area
-        
+        if (i == dy/2):
+            area = total_area
         y_NA = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
         x_NA = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area*back_spar) / total_area
                      
@@ -413,13 +426,12 @@ def wingbox_MOI(dy,start,end,t,rho):
         Iyy.append(Iyy_section)
         Ixy.append(Ixy_section)
         
-    weight = np.sum(total_area*rho*p.b_ht/dy)
-        
+    weight = area*rho*p.b_ht/2
+   
     return Ixx, Iyy, Ixy, weight, f1, f2, y_NA, x_NA, x 
 #                master_function(500,500,100,100,100,100,0.15,0.575,0.002,0,0)
 
 def master_function(fh,fv,dx,dy,dz,dtheta,start,end,t,m1,m2):
-    #inputs: wingbox material, boom material numbers
     Ixx = wingbox_MOI(dy,start,end,t,mat.rho[m1])[0]
     Ixy = wingbox_MOI(dy,start,end,t,mat.rho[m1])[2]
     Iyy = wingbox_MOI(dy,start,end,t,mat.rho[m1])[1]
@@ -427,10 +439,15 @@ def master_function(fh,fv,dx,dy,dz,dtheta,start,end,t,m1,m2):
     tail_shear_stress(dy,dx,dz,dy-1,fh,Ixx,Ixy,Iyy,t)
     boom_plots(dx,fh,1)
     boom_plots_vertical(dx,fv)
-    total_shear_stress_boom(dx,dz,dtheta,fh,fv,dz-1)
-    total_bending_stress_boom(Ixx,Iyy,dx,dtheta,dx-1,fh,fv,1)
+    a = total_shear_stress_boom(dx,dz,dtheta,fh,fv,dz-1)
+    b = total_bending_stress_boom(Ixx,Iyy,dx,dtheta,dx-1,fh,fv,1)
+    print 'highest shear stress in the boom:'
+    print a
+    print 'highest bending stress in the boom:'
+    print b
     print ('Weight of the wingbox:')
     print wingbox_MOI(dy,start,end,t,mat.rho[m1])[3]
     print ('Weight of the boom:')
     print W_boom(mat.rho[m2])
+    if abs(a) >= 
     return
