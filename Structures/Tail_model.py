@@ -224,7 +224,7 @@ def boom_plots(dx,f,g):#works
     plt.xlabel('Location, m')
     plt.show()
     return    
-    
+
 def force_vert(dz,f):#works not anymore ARRRRRRRRRRRRRRRGH
     v_c = np.linspace(v_r,v_t,dz)
     mid_w = (f+0.00) / dz
@@ -428,7 +428,33 @@ def wingbox_MOI(dy,start,end,t,rho):
         
     weight = area*rho*p.b_ht/2
    
-    return Ixx, Iyy, Ixy, weight, f1, f2, y_NA, x_NA, x 
+    return Ixx, Iyy, Ixy, weight, xcoordinates1, ycoordinates1, f1, f2, y_NA, x_NA, x 
+
+def bending_box(dy,start,end,t,rho,f):    #bending stress calc
+    y = wingbox_MOI(dy,start,end,t,rho)[5]
+    Ixx = wingbox_MOI(dy,start,end,t,rho)[0]
+    stress = tail_moment(dy,f,dy-1) * y / Ixx
+    plt.figure(figsize=(5,5))
+    plt.suptitle('Bending stress in the given tailbox location (default - root)')
+    plt.plot(y,stress)
+    plt.ylabel('Bending stress stress, N/m^2')
+    plt.xlabel('y - Location, radian')
+    plt.show()
+    a = max(stress)
+    b = min(stress)
+    if abs(a) >= abs(b):
+        c = a
+    else:
+        c = b
+    return c
+    
+def shear_box(): #shear stress calc
+    
+    return
+    
+
+
+
 #                master_function(500,500,100,100,100,100,0.15,0.575,0.002,0,0)
 
 def master_function(fh,fv,dx,dy,dz,dtheta,start,end,t,m1,m2):
@@ -441,13 +467,32 @@ def master_function(fh,fv,dx,dy,dz,dtheta,start,end,t,m1,m2):
     boom_plots_vertical(dx,fv)
     a = total_shear_stress_boom(dx,dz,dtheta,fh,fv,dz-1)
     b = total_bending_stress_boom(Ixx,Iyy,dx,dtheta,dx-1,fh,fv,1)
+    c = bending_box(dy,start,end,t,mat.rho[m1],fh)
+    d = 123
+    print ('TAILBOX ANALYSIS:')  
+    print ('Weight of the tailbox:')
+    print wingbox_MOI(dy,start,end,t,mat.rho[m1])[3]
+    print 'highest shear stress in the boom:'
+    print d
+    print 'highest bending stress in the tailbox:'
+    print c
+    print ('BOOM ANALYSIS:')
+    print ('Weight of the boom:')
+    print W_boom(mat.rho[m2])
     print 'highest shear stress in the boom:'
     print a
     print 'highest bending stress in the boom:'
     print b
-    print ('Weight of the wingbox:')
-    print wingbox_MOI(dy,start,end,t,mat.rho[m1])[3]
-    print ('Weight of the boom:')
-    print W_boom(mat.rho[m2])
-    if abs(a) >= 
+    if abs(a) >= mat.Fty[m2]:
+        print 'This material is expected to yield in bending'
+    else:
+        print 'This material is not expected to yield in bending'
+    if abs(a) >= mat.Ftu[m2]:
+        print 'This material is expected to fail in bending'
+    else:
+        print 'This material is not expected to fail in bending'
+    if abs(b) >= mat.Fsu[m2]:
+        print 'This material is expected to fail in shear'
+    else:
+        print 'This material is not expected to fail in shear'
     return
