@@ -82,37 +82,39 @@ def moi_I(n_boom,a,b):
 ## Section 2
 a_ellipse_top = 0.6
 b_ellipse_top = 0.15
-L_max         = 1.1
-n_boom_top    = 6
+L_max         = 1.2
+n_boom_top    = 9
 n_boom_bottom = n_boom_top
 
 angleboom_top = np.arange(0,180,180/n_boom_top)*np.pi/180
 angleboom_top = np.append(angleboom_top,np.pi)
 
+def f_x(x,a,b):
+    f = (a**2*(np.sin(x)**2)+b**2*(np.cos(x)**2))**0.5
+    return f
 def arclength(angleboom_top,a,b):
     nodes = np.array([angleboom_top[0],angleboom_top[0]+ \
                  (angleboom_top[1]-angleboom_top[0])/3,\
                   angleboom_top[0]+2./3*(angleboom_top[1]-angleboom_top[0]),\
                   angleboom_top[1]])
-    def f_x(x,a,b):
-        f = (a**2*(np.sin(x)**2)+b**2*(np.cos(x)**2))
-    return f
     boom_spacing = np.around((angleboom_top[1]-angleboom_top[0])/8* \
                          (f_x(nodes[0],a,b)+ \
                         3*f_x(nodes[1],a,b)+ \
                         3*f_x(nodes[2],a,b)+ \
-                        f_x(nodes[3],a,b)),2)
+                        f_x(nodes[3],a,b)),1)
     return boom_spacing
+dl = arclength(angleboom_top,a,b)
+d = np.arange(0,L_max,dl)
+d = L_max/2
 
 x = a_ellipse_top*np.cos(angleboom_top)
-y = b_ellipse_top*np.sin(angleboom_top)+d/2
-
-dl = arclength(angleboom,a,b)
-d = np.arange(0,L_max,dl)
-i = 0 
-for i in range(np.shape(d)[0]):
-    x = np.append(x,-a)
-    y = np.append(y,dl)
+print(x)
+y = b_ellipse_top*np.sin(angleboom_top)+d
+print(y)
+while space < d/dl
+    x  = x.append(x,x(np.shape[0]))
+    print x
+    y  = y.append(y,y([np.shape[0])-dl)
     
 def boom_area(n_boom,a,b,M_x,M_y,x,y,I_xx,I_yy,materials):
     sigma_bending_B = M_x/I_xx*y+M_y/I_yy*x
