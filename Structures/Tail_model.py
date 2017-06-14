@@ -16,7 +16,7 @@ b_rr = 0.9 #root radius
 b_rt = 0.4 #tail radius
 b_t = 0.001 #thickness
 b_l = 2 #length
-
+#ATTENTION boom is just a check for the fuselage part which connects the tail. So input of boom size can be just the dimensions of that part. Loads on the tail will most likely be low anyway.
 #Vertical tail dimensions
 v_r = p.cr_ht#root cord length
 v_t = p.ct_ht#tip cord length
@@ -30,8 +30,10 @@ basically force entered here is a total force, and then code distributes it acco
 so near the root a bit more force is allocated than on tip.
 next 4 are meshes (leave at 500 max, otherwise will take too long). 
 start and end are spar locations (so for 0.0 and 0.6 there is only one spar at 0.6 of the cord). 
-spar should be at where elevator or whtever control surface is!. 0.002 is thickness of the skin in m, 
+spar should be at where elevator or whtever control surface is!. 
+0.002 is thickness of the skin in m, 
 and last 2 numbers are the material reference to a Material_properties.py. 
+
 
 """
 def y_tail(dy,i): #from tip to root, verified
@@ -442,44 +444,86 @@ def bending_box(dx,dy,start,end,t,rho,f,i):    #bending stress calc
     ycoordinates1 = ycoordinates * c_tail(dy,i)
     fit1 = np.polyfit(xcoordinates1[0:66],ycoordinates1[0:66],5)
     f1 = np.poly1d(fit1)
+    f11 = f1.deriv(1)
     fit2 = np.polyfit(xcoordinates1[68:133],ycoordinates1[68:133],5)
     f2 = np.poly1d(fit2)
+    f22 = f2.deriv(1)
     x_y_up = np.zeros(dx)
     x_y_down = np.zeros(dx)
     for j in range (0,dx):
         x_y_up[j] = f1(x_x[j])
-        x_y_down[j] = f2(x_x[j])
+        x_y_down[j] = -x_y_up[j]
     x_y_right = np.linspace(x_y_up[dx-1],x_y_down[dx-1],dx) 
-    x_y_left = np.linspace(x_y_down[0],x_y_up[0],dx) 
     Ixx = wingbox_MOI(dx,start,end,t,rho)[0]
     stress_12 = tail_moment(dx,f,i) * x_y_up / Ixx[i]
     stress_23 = tail_moment(dx,f,i) * x_y_right / Ixx[i]
     stress_34 = tail_moment(dx,f,i) * x_y_down / Ixx[i]
-    stress_41 = tail_moment(dx,f,i) * x_y_left / Ixx[i]
-    a = max(stress_12)
-    b = min(stress_12)
+    slope1 = np.zeros(dx)
+    slope2 = np.zeros(dx)
+    for j in range (0,dx):
+        slope1[j] = abs((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f11(x_x[j]))))
+        slope2[j] = abs((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f22(x_x[j]))))
+    q1 = np.zeros(dx)
+    q2 = np.zeros(dx)
+    q3 = np.zeros(dx)
+    q1[dx/2-1] = 0
+    for j in range (dx/2,dx):
+        q1[j] = q1[j-1] - tail_shear(dy,f,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
+    q2[0] = q1[dx-1]
+    for j in range (1,dx):
+        q2[j] = q2[j-1] - tail_shear(dy,f,i)*(abs(x_y_down[dx-1]-x_y_up[dx-1])/dx)*t*x_y_right[j]/Ixx[i]
+    q3[0] = q2[dx-1]
+    for j in range (1,dx):
+        q3[j] = q3[j-1] - tail_shear(dy,f,i)*slope2[j]*t*x_y_down[j]/Ixx[i]
+    q1[0] = q3[dx-1]
+    for j in range (1,dx/2):
+        q1[j] = q1[j-1] - tail_shear(dy,f,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
+    mises1 = np.zeros(dx)
+    mises2 = np.zeros(dx)
+    mises3 = np.zeros(dx)
+    for j in range (0,dx):
+        mises1[j] = math.sqrt(3*(q1[j]/t)**2+stress_12[j]**2)
+        mises2[j] = math.sqrt(3*(q2[j]/t)**2+stress_23[j]**2)
+        mises3[j] = math.sqrt(3*(q3[j]/t)**2+stress_34[j]**2)
+    plt.figure(figsize=(19,5))
+    plt.suptitle('Von-Mises in the tailbox')
+    plt.subplot(131)
+    plt.plot(x_x,mises1)
+    plt.ylabel('Von-Mises in top skin, N/m^2')
+    plt.xlabel('x - Location')
+    plt.subplot(132)
+    plt.plot(x_y_right,mises2)
+    plt.ylabel('Von-Mises in right spar, N/m^2')
+    plt.xlabel('y - Location')
+    plt.subplot(133)
+    plt.plot(x_x,mises3)
+    plt.ylabel('Von-Mises in bottom skin, N/m^2')
+    plt.xlabel('x - Location')
+    plt.show()
+    a = max(mises1)
+    b = min(mises1)
     if abs(a) >= abs(b):
         c = a
     else:
         c = b
-    a = max(stress_23)
-    b = min(stress_23)
+    a = max(mises2)
+    b = min(mises2)
     if abs(a) >= abs(b):
         c = a
     else:
         c = b
-    a = max(stress_34)
-    b = min(stress_34)
+    a = max(mises3)
+    b = min(mises3)
     if abs(a) >= abs(b):
         c = a
     else:
         c = b
-    a = max(stress_41)
-    b = min(stress_41)
-    if abs(a) >= abs(b):
-        c = a
-    else:
-        c = b
+#    a = max(stress_41)
+#    b = min(stress_41)
+#    if abs(a) >= abs(b):
+#        c = a
+#    else:
+#        c = b
     return c
 
 def highest_bending_box(dx,dy,start,end,t,rho,f):
