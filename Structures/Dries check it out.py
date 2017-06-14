@@ -41,8 +41,9 @@ def shear_box(dx,dy,start,end,i,t,rho,fh): #shear stress calc. dx dy are grid nu
     q1 = np.zeros(dx)
     q2 = np.zeros(dx)
     q3 = np.zeros(dx)
-    q1[0] = 0
-    for j in range (1,dx):
+    q4 = np.zeros(dx)
+    q1[dx/2-1] = 0
+    for j in range (dx/2,dx):
         q1[j] = q1[j-1] - (INSERT FORCE AT THE I LOCATION HERE*slope1[j]*t*((x_y_up[j]-y_NA)*Iyy[i]-(x_x[j]-x_NA)*Ixy[i]))/(Ixx[i]*Iyy[i]-Ixy[i]**2)
     q2[0] = q1[dx-1]
     for j in range (1,dx):
@@ -50,8 +51,12 @@ def shear_box(dx,dy,start,end,i,t,rho,fh): #shear stress calc. dx dy are grid nu
     q3[dx-1] = q2[dx-1]
     for j in range (dx-2,0):
         q3[j] = q3[j+1] - (INSERT FORCE AT THE I LOCATION HERE*slope2[j]*t*((x_y_down[j]-y_NA)*Iyy[i]-(x_x[j]-x_NA)*Ixy[i]))/(Ixx[i]*Iyy[i]-Ixy[i]**2)
-    for j in range (1,dx): in case of additional rip uncoment this
-        q[j+3*dx] = q[3*dx+j-1] + fh*(abs(x_y_down[0]-x_y_up[0])/dx)*t*(x_y_down[0]+j*(abs(x_y_down[0]-x_y_up[0])/dx)/Ixx[i]
+    q4[0] = q3[0]
+    for j in range (1,dx):
+        q4[j] = q1[j-1] - (INSERT FORCE AT THE I LOCATION HERE*(abs(x_y_down[0]-x_y_up[0])/dx)*t*((x_y_left[j]-y_NA)*Iyy[i]-(x_x[0]-x_NA[i])*Ixy[i]))/(Ixx[i]*Iyy[i]-Ixy[i]**2)
+    q1[0] = q4[dx-1]
+    for j in range (0,dx/2):
+        q1[j] = q1[j-1] - (INSERT FORCE AT THE I LOCATION HERE*slope1[j]*t*((x_y_up[j]-y_NA)*Iyy[i]-(x_x[j]-x_NA)*Ixy[i]))/(Ixx[i]*Iyy[i]-Ixy[i]**2)
     plt.figure(figsize=(19,5))
     plt.suptitle('Shear flow in the tailbox')
     plt.subplot(131)
