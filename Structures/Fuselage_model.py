@@ -16,11 +16,6 @@ Created on Wed May 31 16:54:31 2017
 import numpy as np 
 import Material_properties as mat
 
-def moi_ellipse(a,b):
-    I_xx = np.pi / 4 * b**2 *(3*a+b)
-    I_yy = np.pi / 4 * a**2 *(3*b+a)
-    return I_xx,I_yy
-
 a1 = 0.4
 b1 = 0.3
 M_x = 100000.
@@ -32,7 +27,7 @@ b2 = 2.
 L_I  = 1.20
 L_II = 3.0
 D    = 1.20
-dl = 0.01
+dl = 0.1
 
 
 a = np.linspace(a1,a2,L_I/dl)
@@ -73,6 +68,8 @@ d = np.linspace(0,D,L_II/dl)
 ## 4n. 
 a = 0.15
 b = 0.6
+## Section = 1 = Engine
+
 ## Section 1 & 3
 n_boom = 24
 def moi_I(n_boom,a,b):
@@ -84,12 +81,18 @@ def moi_I(n_boom,a,b):
     return x,y,I_xx,I_yy
 
 ## Section 2
-a_ellipse_top = 0.6
-b_ellipse_top = 0.15
-L_max         = 1.2
-n_boom_top    = 10
-n_boom_bottom = n_boom_top
+##a_ellipse_top = 0.6
+##b_ellipse_top = 0.15
+##L_max         = 1.2
+##n_boom_top    = 10
+##n_boom_bottom = n_boom_top
 
+## Composite Analysis
+
+def moi_ellipse(a,b):
+    I_xx = np.pi / 4 * b**2 *(3*a+b)
+    I_yy = np.pi / 4 * a**2 *(3*b+a)
+    return I_xx,I_yy
 
 def f_x(x,a,b):
     f = (a**2*(np.sin(x)**2)+b**2*(np.cos(x)**2))**0.5
@@ -115,6 +118,7 @@ def moi_cockpit(a_ellipse,b_ellipse_top,b_ellipse_bot,d):
     angleboom_bot = np.arange(180,360,1)*np.pi/180
     dL_bot = arclength(angleboom_bot,a_ellipse,b_ellipse_bot)    
 
+    x_panel = a_ellipse
     y_panel = b_ellipse_bot+d/2
     A_panel = b
     
@@ -125,20 +129,21 @@ def moi_cockpit(a_ellipse,b_ellipse_top,b_ellipse_bot,d):
     y_c_top = np.sum(y_top*dL_top)/(np.shape(y_top)[0]*dL_top)
     A_top = (a_ellipse+b_ellipse_top)/2
 
+    x_c = 0 
     y_c = (A_bot*y_c_bot+2*A_panel*y_panel+A_top*y_c_top)/(A_bot+A_top+ \
                                                            2*A_panel)
-
-    I_xx_top = moi_ellipse(a_ellipse,b_ellipse_top)[0]
-    I_yy_top = moi_ellipse(a_ellipse,b_ellipse_top)[1]
-    I_xx_bot = moi_ellipse(a_ellipse,b_ellipse_bot)[0]
-    I_yy_bot = moi_ellipse(a_ellipse,b_ellipse_bot)[1]
+    
+    I_xx_top = moi_ellipse(a_ellipse,b_ellipse_top)[0]/2
+    I_yy_top = moi_ellipse(a_ellipse,b_ellipse_top)[1]/2
+    I_xx_bot = moi_ellipse(a_ellipse,b_ellipse_bot)[0]/2
+    I_yy_bot = moi_ellipse(a_ellipse,b_ellipse_bot)[1]/2
     I_xx_panel      = d^3/12
     I_yy_panel      = 0
 
-    I_xx = I_xx_top+A_top*(y_c-y_c_bot)**2+I_xx_bot+A_bot*(y_c-y_c_bot)**2 + /
-            2*I_xx_panel+2*A_panel*(y_c-y_panel)**2
-    I_yy = I_yy_bot+A_bot*(x_c
-    return A_bot, A_panel, A_top, y_c_bot, y_panel, y_c_top, y_c
+    I_xx = I_xx_top+A_top*(y_c-y_c_bot)**2+I_xx_bot+A_bot*(y_c-y_c_bot)**2 + 2*I_xx_panel+2*A_panel*(y_c-y_panel)**2
+    I_yy = I_yy_bot+I_yy_top+I_yy_panel+2*A_panel*(x_c-x_panel)**2
+    
+    return I_xx,I_yy
 
 
 
@@ -159,7 +164,8 @@ def boom_ellipse(n_boom_top,quadrant):
 ##    x = a_ellipse_top*np.cos(angleboom_top)
 ##    y = b_ellipse_top*np.sin(angleboom_top)+L_max/2
 ##    return
-        
+
+#### CASE II: Stringers
 def boom_area(n_boom,a,b,M_x,M_y,x,y,I_xx,I_yy,materials):
     sigma_bending_B = M_x/I_xx*y+M_y/I_yy*x
     sigma_bending_B_max = np.amax(sigma_bending_B)
@@ -176,7 +182,6 @@ def boom_area(n_boom,a,b,M_x,M_y,x,y,I_xx,I_yy,materials):
     for material in range(np.shape(materials)[0]-1):
         B[material]= sigma_B/materials[material]*10**6
     return B
-
 def skin_tickness(n_boom,a,b,S_x,S_y,T,x,y,I_xx,I_yy,materials):
     q_shear[0] = 0
     panel = 1
@@ -199,13 +204,14 @@ def skin_tickness(n_boom,a,b,S_x,S_y,T,x,y,I_xx,I_yy,materials):
         t[material]=q_max/materials[material]
     return t
 
-n_boom_top = 10
-a_ellipse_top = 0.6
-b_ellipse_top = 0.15
-d = 1.1
-D = 1.2
-b = moi_II(n_boom_top,a_ellipse_top,b_ellipse_top,d,D)
-s = boom_ellipse(n_boom_top,1)
+
+##n_boom_top = 10
+##a_ellipse_top = 0.6
+##b_ellipse_top = 0.15
+##d = 1.1
+##D = 1.2
+##b = moi_II(n_boom_top,a_ellipse_top,b_ellipse_top,d,D)
+##s = boom_ellipse(n_boom_top,1)
    
     
     
