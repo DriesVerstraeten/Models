@@ -29,16 +29,20 @@ L_1 = 1.2+0.15
 a2 = 3.
 b2 = 2.
 
-L= 1.20
+L_I  = 1.20
+L_II = 3.0
+D    = 1.20
 dl = 0.01
 
-a = np.linspace(a1,a2,L/dl)
-b = np.linspace(b1,b2,L/dl)
-dA = a+b
-angle = np.arange(361)*np.pi/180
-t_material = np.zeros((np.shape(a)[0]-1,np.shape(mat.rho)[0]-1))
-mass = np.zeros(np.shape(mat.rho)[0]-1)
-cost = np.zeros(np.shape(mat.rho)[0]-1)
+
+a = np.linspace(a1,a2,L_I/dl)
+b = np.linspace(b1,b2,L_I/dl)
+d = np.linspace(0,D,L_II/dl)
+##dA = a+b
+##angle = np.arange(361)*np.pi/180
+##t_material = np.zeros((np.shape(a)[0]-1,np.shape(mat.rho)[0]-1))
+##mass = np.zeros(np.shape(mat.rho)[0]-1)
+##cost = np.zeros(np.shape(mat.rho)[0]-1)
 
 ## Section 1
 ##for cut in range(np.shape(a)[0]-1):
@@ -83,39 +87,57 @@ def moi_I(n_boom,a,b):
 a_ellipse_top = 0.6
 b_ellipse_top = 0.15
 L_max         = 1.2
-n_boom_top    = 9
+n_boom_top    = 10
 n_boom_bottom = n_boom_top
 
-angleboom_top = np.arange(0,180,180/n_boom_top)*np.pi/180
-angleboom_top = np.append(angleboom_top,np.pi)
 
 def f_x(x,a,b):
     f = (a**2*(np.sin(x)**2)+b**2*(np.cos(x)**2))**0.5
     return f
+
 def arclength(angleboom_top,a,b):
     nodes = np.array([angleboom_top[0],angleboom_top[0]+ \
                  (angleboom_top[1]-angleboom_top[0])/3,\
                   angleboom_top[0]+2./3*(angleboom_top[1]-angleboom_top[0]),\
                   angleboom_top[1]])
-    boom_spacing = np.around((angleboom_top[1]-angleboom_top[0])/8* \
+    boom_spacing = (angleboom_top[1]-angleboom_top[0])/8* \
                          (f_x(nodes[0],a,b)+ \
                         3*f_x(nodes[1],a,b)+ \
                         3*f_x(nodes[2],a,b)+ \
-                        f_x(nodes[3],a,b)),1)
+                        f_x(nodes[3],a,b))
     return boom_spacing
-dl = arclength(angleboom_top,a,b)
-d = np.arange(0,L_max,dl)
-d = L_max/2
 
-x = a_ellipse_top*np.cos(angleboom_top)
-print(x)
-y = b_ellipse_top*np.sin(angleboom_top)+d
-print(y)
-while space < d/dl
-    x  = x.append(x,x(np.shape[0]))
-    print x
-    y  = y.append(y,y([np.shape[0])-dl)
-    
+def ellipse_top(n_boom_top,quadrant):
+    if quadrant == 1:
+        angleboom = np.arange(0,180,180/n_boom_top)*np.pi/180
+        angleboom= np.append(angleboom,np.pi)
+    else:
+        if quadrant == 2:
+            angleboom = np.arange(0,180,180/n_boom_top)*np.pi/180
+            angleboom= np.append(angleboom,np.pi)
+            angleboom+=np.pi
+    return angleboom
+
+##def moi_II(n_boom_top,a_ellipse_top,b_ellipse_top, d)
+##    dl = round(arclength(angleboom_top,a,b),1)
+##    p = np.arange(0,L_max,dl)
+##    x = a_ellipse_top*np.cos(angleboom_top)
+##    y = b_ellipse_top*np.sin(angleboom_top)+L_max/2
+##    n_s = d[n_b]/0.2
+##    if d
+##        x_end = np.shape(x)[0]-1
+##        x  = np.append(x,x[x_end])
+##        y_end = np.shape(y)[0]-1
+##        y = np.append(y,y[y_end]-dl)
+##    return 
+
+##while space < d*2/dl:
+##    x_end = np.shape(x)[0]-1
+##    x  = np.append(x,x[x_end])
+##    print(x)
+##    y_end = np.shape(y)[0]-1
+##    y  = np.append(y,y[y_end]-dl)
+##    print(y)
 def boom_area(n_boom,a,b,M_x,M_y,x,y,I_xx,I_yy,materials):
     sigma_bending_B = M_x/I_xx*y+M_y/I_yy*x
     sigma_bending_B_max = np.amax(sigma_bending_B)
