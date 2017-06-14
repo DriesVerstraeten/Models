@@ -229,7 +229,7 @@ def Dens(h):
     
     #Tropopause
     elif h>11000 and h<= 20000:
-        rho1 = P11*np.exp(-g0/(R*T)*(h-11000))
+        rho1 = rho11*np.exp(-g0/(R*T)*(h-11000))
         return rho1
     
     #Part one of the Stratosphere
