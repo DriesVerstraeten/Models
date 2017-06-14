@@ -11,7 +11,7 @@ box_t = 0.0005 #m, thickness. same everywhere for now
 box_b = 0.25*p.cr_ht #m, width at rootapply scaling for other points. scales linearly with taper
 box_h = 0.1*p.cr_ht #m, height at root. apply scaling for other points. scales linearly with taper
 
-#boom design
+#boom design. In composite iteration it is basically the fuselage part which connects tail to the rest. vertical tail is going to be produced as integrated part of the fuselage, horizontal will be attached.
 b_rr = 0.9 #root radius
 b_rt = 0.4 #tail radius
 b_t = 0.001 #thickness
@@ -24,13 +24,14 @@ v_b = p.b_ht / 2#vertical tail span
 v_w = p.W_ht#weight of the vertical tail. gonna be recalculated a bit later
 
 """
-MAIN FUNCTIONS ARE HERE. inputs are yada yada
-
-"""
-
-
-"""
-Stuff
+USE: master_function(500,500,100,100,100,100,0.0,0.6,0.002,0,0) - 
+input i used to test the code. first 2 are forces (on horizontal tail, then on vertical tail.). 
+basically force entered here is a total force, and then code distributes it according to the mesh areas.
+so near the root a bit more force is allocated than on tip.
+next 4 are meshes (leave at 500 max, otherwise will take too long). 
+start and end are spar locations (so for 0.0 and 0.6 there is only one spar at 0.6 of the cord). 
+spar should be at where elevator or whtever control surface is!. 0.002 is thickness of the skin in m, 
+and last 2 numbers are the material reference to a Material_properties.py. 
 
 """
 def y_tail(dy,i): #from tip to root, verified
@@ -530,38 +531,41 @@ def shear_box(dx,dy,start,end,i,t,rho,fh): #shear stress calc
     slope1 = np.zeros(dx)
     slope2 = np.zeros(dx)
     for j in range (0,dx):
-        slope1[j] = ((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f11(x_x[j]))))
-        slope2[j] = ((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f22(x_x[j]))))
+        slope1[j] = abs((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f11(x_x[j]))))
+        slope2[j] = abs((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f22(x_x[j]))))
     q1 = np.zeros(dx)
     q2 = np.zeros(dx)
     q3 = np.zeros(dx)
-    q1[0] = 0
-    for j in range (1,dx):
-        q1[j] = q1[j-1] - fh*slope1[j]*t*x_y_up[j]/Ixx[i]
+    q1[dx/2-1] = 0
+    for j in range (dx/2,dx):
+        q1[j] = q1[j-1] - tail_shear(dy,fh,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
     q2[0] = q1[dx-1]
     for j in range (1,dx):
-        q2[j] = q2[j-1] - fh*(abs(x_y_down[dx-1]-x_y_up[dx-1])/dx)*t*x_y_right[j]/Ixx[i]
+        q2[j] = q2[j-1] - tail_shear(dy,fh,i)*(abs(x_y_down[dx-1]-x_y_up[dx-1])/dx)*t*x_y_right[j]/Ixx[i]
     q3[0] = q2[dx-1]
     for j in range (1,dx):
-        q3[j] = q3[j-1] - fh*slope2[j]*t*x_y_down[j]/Ixx[i]
-#    for j in range (1,dx): in case of additional rip uncoment this
-#        q[j+3*dx] = q[3*dx+j-1] + fh*(abs(x_y_down[0]-x_y_up[0])/dx)*t*(x_y_down[0]+j*(abs(x_y_down[0]-x_y_up[0])/dx)/Ixx[i]
-#    plt.figure(figsize=(19,5))
-#    plt.suptitle('Shear flow in the tailbox')
-#    plt.subplot(131)
- #   plt.plot(x_x,q1)
- #   plt.ylabel('Shear flow top skin, N/m^2')
- ##   plt.xlabel('x - Location')
-  #  plt.subplot(132)
-  #  plt.plot(x_y_right,q2)
-  #  plt.ylabel('Shear flow right spar, N/m^2')
-  #  plt.xlabel('x - Location')
-  #  plt.subplot(133)
-  #  plt.plot(x_x,q3)
-  #  plt.ylabel('Shear flow bottom skin, N/m^2')
-  #  plt.xlabel('x - Location')
-  #  plt.show()
-    return max(q2)
+        q3[j] = q3[j-1] - tail_shear(dy,fh,i)*slope2[j]*t*x_y_down[j]/Ixx[i]
+    q1[0] = q3[dx-1]
+    for j in range (1,dx/2):
+        q1[j] = q1[j-1] - tail_shear(dy,fh,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
+#    for j in range (1,dx): #in case of additional rib uncoment this
+#        q[j+3*dx] = q[3*dx+j-1] + fh*(abs(x_y_down[0]-x_y_up[0])/dx)*t*(x_y_down[0]+j*(abs(x_y_down[0]-x_y_up[0])/dx))/Ixx[i]
+    plt.figure(figsize=(19,5))
+    plt.suptitle('Shear flow in the tailbox')
+    plt.subplot(131)
+    plt.plot(x_x,q1)
+    plt.ylabel('Shear flow top skin, N/m')
+    plt.xlabel('x - Location')
+    plt.subplot(132)
+    plt.plot(x_y_right,q2)
+    plt.ylabel('Shear flow right spar, N/m')
+    plt.xlabel('y - Location')
+    plt.subplot(133)
+    plt.plot(x_x,q3)
+    plt.ylabel('Shear flow bottom skin, N/m')
+    plt.xlabel('x - Location')
+    plt.show()
+    return max(abs(q2))
 
 def highest_shear_box(dx,dy,start,end,t,rho,fh):
     y = np.linspace(0,p.b_ht/2,dy)
@@ -582,7 +586,7 @@ def highest_shear_box(dx,dy,start,end,t,rho,fh):
         c = b
     return c
 
-#                master_function(500,500,100,100,100,100,0.0,0.6,0.002,0,0)
+#   master_function(500,500,100,100,100,100,0.0,0.6,0.002,0,0) - input i used to test the code. first 2 are forces (on horizontal tail, then on vertical tail.). next 4 are meshes (leave at 500 max, otherwise will take too long). start and end are spar locations (so for 0.0 and 0.6 there is only one spar at 0.6 of the cord). spar should be at where elevator or whtever control surface is!. 0.002 is thickness of the skin in m, and last 2 numbers are the material reference to a Material_properties.py. 
 
 def master_function(fh,fv,dx,dy,dz,dtheta,start,end,t,m1,m2):
 #    Ixx = wingbox_MOI(dy,start,end,t,mat.rho[m1])[0]
