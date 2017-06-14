@@ -5,6 +5,12 @@
 #P_TO = P_BHP at sea level
 #
 #
+################## TBD #####################
+
+#W_landing = ??
+#W_descent = ??
+
+################# TBD #####################
 
 #Importing modules
 import numpy as np
@@ -33,32 +39,72 @@ for h in range(0,84000):
 
 #Initial test input values (IMPERIAL UNITS)
 
-CL_0 = 0.39
-CL_alpha = 0.1
-alpha_TO = 2. #deg
-W_TO = 3400. #lbf
-rho = 0.002378 #slugs/ft3
-S = 144.9 #ft2
-CL_max_TO = 2.2 
-etha_p = 0.85 #propeller efficiency
-P_TO = 450. #BHP
-V_c = 287. #ft/s - Cruising velocity
-V_H = 314. #ft/s - Maximum velocity
-D_prop = 5.577427822 #ft
-D_spinner = 1.312335958 #ft
+#CL_0 = 0.39
+#CL_alpha = 0.1
+#alpha_TO = 2. #deg
+#W_TO = 3400. #lbf
+#rho = 0.002378 #slugs/ft3
+#S = 144.9 #ft2
+#CL_max_TO = 2.2 
+#etha_p = 0.85 #propeller efficiency
+#P_TO = 450. #BHP
+#V_c = 287. #ft/s - Cruising velocity
+#V_H = 314. #ft/s - Maximum velocity
+#D_prop = 5.577427822 #ft
+#D_spinner = 1.312335958 #ft
 
-CD_0 = 0.0250 
-A = 7 #Aspect Ratio
-e = 0.85 #Oswald efficiency factor
-LD_max = 16. #Maximum lift-over-drag
+#CD_0 = 0.0250 
+#A = 7 #Aspect Ratio
+#e = 0.85 #Oswald efficiency factor
+#LD_max = 16. #Maximum lift-over-drag
 
 
 ###############################################################################
 #########################  Take-off performance  ##############################
 ###############################################################################
 
+## Inputs ##
 
-def TO_perf(CL_0, CL_alpha, alpha_TO, CD_0, A, e, W_TO, S, CL_max_TO, D_prop, D_spinner, V_c, V_H, etha_p, P_TO):
+# W_TO [N] Take-off weight, usually MTOW, but can be adapted for aerobatic weight
+# S [m2] Surface area
+# A [-] Aspect ratio
+# e [-] Oswald efficiency factor
+# CD0 [-] Zero lift drag coefficient of the wing
+# etha_p [-] Prop efficiency
+# P_TO [kW] Take-off power
+# alpha_TO [deg] angle of attack during ground run
+# CL_max_TO [-] Maximum lift coefficent in take-off configuration
+# V_c [m/s] Cruise speed
+# V_H [m/s] Maximum speed
+
+
+# CAN BE REPLACED BY CL_TO_rw
+# CL_0 [-] Lift coefficient at zero angle of attack
+# CL_alpha [-] dCL/dalpha
+
+# CAN BE REPLACED BY Tstatic
+# D_prop [-] Propellor diameter
+# D_spinner [-] Spinner diameter
+
+
+## Outputs ##
+
+# CL_TO [-] Lift coefficient during ground run part of take-off
+# CD_TO [-] Drag coefficient during ground run part of take-off
+# V_S1_si [m/s] Stall speed in landing config 
+# V_LOF_si [m/s] Lift off speed 
+# S_TO_si [m] Take-off distance
+
+#Verification test PC-12 
+#Takeoff(46500, 25.81, 10.27, 0.85, 0.04, 0.8, 895, 0.4, 0.1, 2, 2.1, 2.67, 0.3, 146, 155)
+#Take-off distance = 810m (model) vs 793m (reality)
+#It should be noted that the CL, CD, prop efficiency and e are a rough estimation however
+
+#Cirrus Takeoff(15123.95, 13.387, 10, 0.757, 0.0350, 0.85, 231.167, 0.39, 0.1, 2, 1.69, 1.93, 0.4572, 87.46, 95.7)
+#Difference is explained by higher vstall than calculated
+
+def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, D_prop, D_spinner, V_c, V_H):
+
 
     #NOTES:
     #All input values and formulas are performed using imperial units
@@ -66,29 +112,30 @@ def TO_perf(CL_0, CL_alpha, alpha_TO, CD_0, A, e, W_TO, S, CL_max_TO, D_prop, D_
     
     # Not an input for the function, however an input locally
     rho_sealevel = 0.002378 #slugs/ft3
-    mu_g_nobrakes = 0.04 #Ground friction coefficient
+    mu_g_nobrakes = 0.08 #Ground friction coefficient
     g = 32.1740 #ft/s2
+    h_obst = 50. #ft
     
     #Converting the input values from si units to imperial units
-    #W_TO = W_TO*0.224808943871 #Newton to lbf
-    #S = S*10.7639104 #m2 to ft2
-    #D_prop = D_prop*3.2808399 #m to ft
-    #D_spinner = D_spinner*3.2808399 #m to ft
-    #V_c = V_c*3.2808399 #m/s to ft/s
-    #V_H = V_H*3.2808399 #m/s to ft/s
-    #P_TO = P_TO*1.3410220888 #kW to BHP
+    W_TO = W_TO*0.224808943871 #Newton to lbf
+    S = S*10.7639104 #m2 to ft2
+    D_prop = D_prop*3.2808399 #m to ft
+    D_spinner = D_spinner*3.2808399 #m to ft
+    V_c = V_c*1.943844 #m/s to kts
+    V_H = V_H*1.943844 #m/s to kts
+    P_TO = P_TO*1.3410220888 #kW to BHP
     
     #Basic functions taken from Chapter 17 of the General Aviation book
-    CL_TO = CL_0 + CL_alpha * alpha_TO #Can we get this as an output ?
+    CL_TO = CL_0 + CL_alpha * alpha_TO 
     CD_TO = CD_0 + ((CL_TO**2)/(pi*A*e))
-    V_S1 = sqrt((2*W_TO)/(rho_sealevel*S*CL_max_TO)) #ft/s
+    V_S1 = sqrt((2.*W_TO)/(rho_sealevel*S*CL_max_TO)) #ft/s
     V_LOF = 1.1 * V_S1 #ft/s
-    T_c = (etha_p*550*P_TO)/V_c #lbf
-    T_H = (etha_p*550*P_TO)/V_H #lbf  
+    T_c = (etha_p*550.*P_TO)/(V_c*1.68781) #lbf
+    T_H = (etha_p*550.*P_TO)/(V_H*1.68781) #lbf  
     
     A_prop = 0.25*pi*D_prop**2
     A_spinner = 0.25*pi*D_spinner**2
-    T_static = (0.85*((550*P_TO)**(2./3.))*((2.*rho_sealevel*A_prop)**(1./3.))*(1. - (A_spinner/A_prop))) #What power to use
+    T_static = 0.85*((550*P_TO)**(2./3.))*((2.*rho_sealevel*A_prop)**(1./3.))*(1. - (A_spinner/A_prop)) #What power to use
     #T_static apart laten berekenen voor landing?
     #T_static als output van propulsion functie?
     
@@ -108,10 +155,9 @@ def TO_perf(CL_0, CL_alpha, alpha_TO, CD_0, A, e, W_TO, S, CL_max_TO, D_prop, D_
     E = float(x[3])
     
     
-    
     i = 0
     time = 0
-    dt = 0.1
+    dt = 0.01
     t = []
     V = [0.]
     L = []
@@ -122,8 +168,9 @@ def TO_perf(CL_0, CL_alpha, alpha_TO, CD_0, A, e, W_TO, S, CL_max_TO, D_prop, D_
     S2 = []
     S_G = []
     T_V = []
+    # Pas terug aan naar 10000
     
-    for i in range(0, 10000):
+    for i in range(0, 100000):
         if i == 0:
             time = 0
             thrust = E
@@ -147,7 +194,7 @@ def TO_perf(CL_0, CL_alpha, alpha_TO, CD_0, A, e, W_TO, S, CL_max_TO, D_prop, D_
         
         if i==1:
             time = time + dt
-            thrust = (O*V[0]**3.) + (B*V[0]**2.) + (C*V[0]) + E
+            thrust = (O*(V[0]*0.592483801)**3.) + (B*(V[0]*0.592483801)**2.) + (C*(V[0]*0.592483801)) + E
             dynam_pressure = 0.5*rho_sealevel*V[i-1]**2
             lift = dynam_pressure*S*CL_TO
             drag = dynam_pressure*S*CD_TO
@@ -170,7 +217,7 @@ def TO_perf(CL_0, CL_alpha, alpha_TO, CD_0, A, e, W_TO, S, CL_max_TO, D_prop, D_
         
         if i>1:
             time = time + dt
-            thrust = (O*V[i-1]**3.) + (B*V[i-1]**2.) + (C*V[i-1]) + E
+            thrust = (O*(V[i-1]*0.592483801)**3.) + (B*(V[i-1]*0.592483801)**2.) + (C*V[i-1]*0.592483801) + E
             dynam_pressure = 0.5*rho_sealevel*V[i-1]**2
             lift = dynam_pressure*S*CL_TO
             drag = dynam_pressure*S*CD_TO
@@ -193,13 +240,23 @@ def TO_perf(CL_0, CL_alpha, alpha_TO, CD_0, A, e, W_TO, S, CL_max_TO, D_prop, D_
             
             
     VLOF_list = [V_LOF]*len(S_G) #Only useful for plotting
-      
-    loc = np.where(np.array(V) < V_LOF)
+    
+    V_TR = 1.15*V_S1*0.592483801 #kts
+    V_TR_ft = 1.15*V_S1 #ft/s
+    
+    loc = np.where(np.array(V) < V_TR_ft) #V in kts
     loc_list = loc[0][-1]
     
-    S_TR = (0.2156*((V_S1)**2)*((T_V[loc_list]/W_TO)-(1/(L[loc_list]/D[loc_list])))) #ft
+    loc_VLOF = np.where(np.array(V) < V_LOF) #V in ft/s
+    loc_list_VLOF = loc_VLOF[0][-1]
     
-    theta_climb = np.arcsin(((T_V[loc_list]/W_TO)-(1/(L[loc_list]/D[loc_list]))))*(180/pi) #degrees
+    CL_VTR = (2*W_TO)/(rho_sealevel*(V_TR_ft**2)*S) #V in ft/s
+    k = 0.04207#1./(pi*A*e)
+    CD_VTR = CD_0 + k*(CL_VTR**2)
+    
+    S_TR = (0.2156*((V_S1)**2)*((T_V[loc_list]/W_TO)-(1/(CL_VTR/CD_VTR)))) #ft
+    
+    theta_climb = np.arcsin(((T_V[loc_list]/W_TO)-(1/(CL_VTR/CD_VTR))))*(180/pi) #degrees
     R_transition = (0.2156*(V_S1)**2) #ft
     h_transition = R_transition*(1. - np.cos(theta_climb*(pi/180))) #ft
     
@@ -207,7 +264,7 @@ def TO_perf(CL_0, CL_alpha, alpha_TO, CD_0, A, e, W_TO, S, CL_max_TO, D_prop, D_
     S_C = (h_obst-h_transition)/(np.tan(theta_climb*(pi/180))) #ft
     
     #SI units outputs
-    S_TO_si = (S_G[loc_list] + S_TR + S_C)*0.3048
+    S_TO_si = (S_G[loc_list_VLOF] + S_TR + S_C)*0.3048
     V_LOF_si = V_LOF*0.3048
     V_S1_si = V_S1*0.3048
 
@@ -219,126 +276,222 @@ def TO_perf(CL_0, CL_alpha, alpha_TO, CD_0, A, e, W_TO, S, CL_max_TO, D_prop, D_
 ########################  Climb performance  ##################################
 ###############################################################################
 
-#def Climb(hcruise):
+## Inputs ##
 
-#Airspeed for best ROC
-V_Y_list = []
-hmax = 30000 #meter
-h0 = 0
-hcruise = 6000 #meter
+# W_TO [N] Take-off weight, usually MTOW, but can be adapted for aerobatic weight
+# S [m2] Surface area
+# A [-] Aspect ratio
+# e [-] Oswald efficiency factor
+# CD0 [-] Zero lift drag coefficient of the wing
+# etha_p [-] Prop efficiency
+# P [kW] Power during climb --------------------------------> Dependent on altitude
+# LD_max [-] Maximum lift-over-drag ratio
+# hcruise [m] Cruise altitude
 
-for i in range(0, hmax):
-    rho_h = Rhotab[i] * 0.00194032033 #Converted to slugs/ft3       
-    V_Y = sqrt((2/rho_h)*(W_TO/S)*sqrt((1./(pi*A*e))/(3*CD_0)))
-    V_Y_list.append(V_Y)
+## Outputs ##
 
-#Rate of climb
-ROC_list = []
+# t_cruiseh [s] Time it takes to get to cruise altitude
+# ROC_SL_si [m/s] Maximum Rate of Climb at sea level
+# h_absolute_si [m] Absolute service ceiling, meaning the altitude at which the ROC = 0
 
-#If power changes according to height try changing the V_Y to a constant value
+# Verification using PC-12
+# Climb(46500, 25.81, 10.27, 0.85, 0.04, 0.8, 800, 12, 9150)
+# Climb rate = 9.9 m/s (model) vs. 9.75 m/s (flight test)
 
-for i in range(0, len(V_Y_list)):
-    ROC = 60*(((etha_p*550*P_TO)/W_TO)-(V_Y_list[i]*(1.1547/LD_max))) #ft/min, CHANGE P_TO to power dependent on altitude
-    ROC_si = ROC*0.00508
-    ROC_list.append(ROC_si)   
-    ROC_SL = ROC_list[0]
-    ROC_SL_si = ROC_SL*0.00508
-    #if ROC<0.1 and ROC>-0.1:
-        #print "Absolute ceiling =", htab[i], "m"
-    #if ROC<100.1 and ROC>99.9:
-        #print "Service ceiling =", htab[i], "m"
+def Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
     
-#It should be noted that the maximum climb rate is calculated at MTOW with full fuel tanks
+    #Converting the input values from si units to imperial units
+    W_TO = W_TO*0.224808943871 #Newton to lbf    
+    S = S*10.7639104 #m2 to ft2
+    P = P*1.3410220888 #kW to BHP
+    
 
-#Polynomial fit for the ROC vs. Altitude plot
-z = np.polyfit(htab[0:len(ROC_list)], ROC_list, 3) #Third order
-polyfit = []
-for i in range(0, len(V_Y_list)):
-    Z = z[0]*(htab[i]**3) + z[1]*htab[i]**2 + z[2]*htab[i] + z[3] #Third order
-    #Z = z[0]*htab[i] + z[1] #First order
-    polyfit.append(Z)
-
-
-#polynomial fit
-aa = z[0]
-bb = z[1]
-cc = z[2]
-dd = z[3]
-
-
-#Time to altitiude & service ceiling
-#ROC_a = (aa*(hcruise-h0))/(np.log(aa*hcruise + bb) - np.log(aa*h0 + bb))
-#t = (hcruise - h0)/ROC_a
-
-#Modified formula from book page 837
-ROC_a_3rd = (aa*((hcruise-h0)**3)+(bb*((hcruise-h0)**2)+(cc*(hcruise-h0))))/(np.log((aa*(hcruise**3))+(bb*(hcruise**2))+(cc*hcruise) + dd) - np.log((aa*(h0**3))+(bb*(h0**2))+(cc*h0) + dd))
-t_cruiseh = (hcruise - h0)/ROC_a_3rd
-
-#return(t_cruiseh, ROC_SL)
+    #Airspeed for best ROC
+    V_Y_list = []
+    hmax = 28000*0.3048 #meter
+    h0 = 0.
+   
+    
+    for i in range(0, hmax):
+        rho_h = Rhotab[i] * 0.00194032033 #Converted to slugs/ft3       
+        V_Y = sqrt((2./rho_h)*(W_TO/S)*sqrt((1./(pi*A*e))/(3.*CD_0)))
+        V_Y_list.append(V_Y)
+    
+    #Rate of climb
+    ROC_list = []
+    
+    #If power changes according to height try changing the V_Y to a constant value
+    
+    for i in range(0, len(V_Y_list)):
+        ROC = 60.*(((etha_p*550.*P)/W_TO)-(V_Y_list[i]*(1.1547/LD_max))) #ft/min, CHANGE P_TO to power dependent on altitude
+        ROC_si = ROC*0.00508
+        ROC_list.append(ROC_si)   
+        ROC_SL_si = ROC_list[0]
+        #ROC_SL_si = ROC_SL*0.00508
+        if ROC<0.2 and ROC>-0.2:
+            h_absolute_si = htab[i]
+        if ROC<100.1 and ROC>99.9:
+            h_service_si = htab[i]
+        
+    #It should be noted that the maximum climb rate is calculated at MTOW with full fuel tanks
+    
+    #Polynomial fit for the ROC vs. Altitude plot
+    z = np.polyfit(htab[0:len(ROC_list)], ROC_list, 3) #Third order
+    polyfit = []
+    for i in range(0, len(V_Y_list)):
+        Z = z[0]*(htab[i]**3) + z[1]*htab[i]**2 + z[2]*htab[i] + z[3] #Third order
+        #Z = z[0]*htab[i] + z[1] #First order
+        polyfit.append(Z)
+    
+    
+    #polynomial fit
+    aa = z[0]
+    bb = z[1]
+    cc = z[2]
+    dd = z[3]
+    
+    
+    #Time to altitiude & service ceiling
+    #ROC_a = (aa*(hcruise-h0))/(np.log(aa*hcruise + bb) - np.log(aa*h0 + bb))
+    #t = (hcruise - h0)/ROC_a
+    
+    #Modified formula from book page 837
+    ROC_a_3rd = (aa*((hcruise-h0)**3)+(bb*((hcruise-h0)**2)+(cc*(hcruise-h0))))/(np.log((aa*(hcruise**3))+(bb*(hcruise**2))+(cc*hcruise) + dd) - np.log((aa*(h0**3))+(bb*(h0**2))+(cc*h0) + dd))
+    t_cruiseh = (hcruise - h0)/ROC_a_3rd
+    
+    return(t_cruiseh, ROC_SL_si, h_absolute_si)
 
 
 ###############################################################################
 ######################  Descent performance  ##################################
 ###############################################################################
 
+## Inputs ##
 
-#Best glide speed
-V_BG_list = []
-
-for i in range(0, hcruise):
-    rho_h = Rhotab[i] * 0.00194032033 #Converted to slugs/ft3       
-    V_BG = sqrt((2/rho_h)*(sqrt((1./(pi*A*e))/CD_0))*(W_TO/S)) #What weight are we going to take?
-    V_BG_list.append(V_BG)
-
-V_BG_list = V_BG_list[::-1] #Reversing the list, we're descending here
-
-#Minimum glide angle
-theta_min_glide = np.arctan(1./LD_max)
+# W_D [N] The weight of the aircraft right after it reached cruise altitude (not MTOW)
+# S [m2] Surface area
+# A [-] Aspect ratio
+# e [-] Oswald efficiency factor
+# CD_0 [-] Zero lift drag coefficient
+# LD_max [-] Maximum lift-over-drag ratio
+# hcruise [m] Cruise altitude
 
 
-#Glide distance - provided the best glide speed and minimum glide angle
-R_glide = hcruise * LD_max
+## Outputs ##
 
+# R_glide [m] The glide distance starting from cruise altitude and under optimal glide conditions
+
+# Verification using PC-12 flight test data
+# Descent(46500, 25.81, 10.27, 0.85, 0.04, 12, 9150)
+# gives 110 km, flight test gave 140 km
+# https://www.flightglobal.com/news/articles/flight-test-pilatus-pc-12-power-of-one-187732/
+# https://en.wikipedia.org/wiki/Pilatus_PC-12
+
+def Descent(W_descent, S, A, e, CD_0, LD_max, hcruise):
+
+    #Best glide speed
+    V_BG_list = [] #ft/s
+    
+    for i in range(0, hcruise):
+        rho_h = Rhotab[i] * 0.00194032033 #Converted to slugs/ft3       
+        V_BG = sqrt((2/rho_h)*(sqrt((1./(pi*A*e))/CD_0))*(W_descent/S)) #What weight are we going to take?
+        V_BG_list.append(V_BG)
+    
+    V_BG_list = V_BG_list[::-1] #Reversing the list, we're descending here
+    
+    #Minimum glide angle
+    theta_min_glide = np.arctan(1./LD_max)
+    
+    
+    #Glide distance - provided the best glide speed and minimum glide angle
+    R_glide = hcruise * LD_max
+    
+    return(R_glide) 
 
 ###############################################################################
 ######################  Landing performance  ##################################
 ###############################################################################
 
+## inputs ##
 
-#Adapt for landing at different altitudes
-
-CL_landing_max = 2.2 
-mu_g_brakes = 0.2 #Ground friction coefficient for wet grass while braking
-T_landing = 0.07*T_static #lbf
-T_landing_reverse_thrust = -0.6*T_static #lbf
-theta_app = 3 #degrees
-P_BHP_idle = 50 #TBD !!!!
-CL_landing_td = 1.0 #CL after touchdown in landing config
-CD_landing_td = 0.04 #CD after touchdown in landing config
-etha_p_landing = 0.45
-
-V_SO = sqrt((W_TO/S)*(2./rho)*(1./CL_landing_max)) #Landing stall speed in ft/s
-V_REF = 1.3*V_SO #Approach speed
-V_FLR = 1.3*V_SO #Flare speed in ft/s
-V_TD = 1.1 * V_SO #Touchdown speed in ft/s
-V_BR = 1.1 * V_SO #Brake speed in ft/s
-
-L_landing_td = 0.5*rho*((V_BR/sqrt(2))**2)*S*CL_landing_td
-D_landing_td = 0.5*rho*((V_BR/sqrt(2))**2)*S*CD_landing_td
-
-h_f = 0.1512*(V_SO**2.)*(1.-np.cos(theta_app*(pi/180.)))
-S_A = (h_obst - h_f)/(np.tan(theta_app*(pi/180.)))
-S_F = 0.1512*(V_SO**2.)*np.sin(theta_app*(pi/180))
-S_FR = V_TD
-S_BR = abs(((V_BR**2.)*W_TO)/(2.*g*((sqrt(2.)*etha_p_landing*550.*(P_BHP_idle/V_BR))-D_landing_td-(mu_g_brakes*(W_TO-L_landing_td)))))
+# CL_landing_max [-] Maximum lift coefficient in landing configuration
+# T_static [N] Static thrust of the engine --------------------------------> Or just power input
+# theta_app [deg] approach angle --------------------------> CS23??
+# CL_landing_td [-] Lift coefficient after toachdown -------------> Same as during ground run on TO?
+# A [-] Aspect ratio
+# e [-] Oswald efficiency factor
+# etha_p_landing [-] Propellor efficiency during landing
+# W_landing [N] Landing weight ------------------------------> What this is should be specified
+# S [m2] Surface area
 
 
-S_landing  = S_A + S_F + S_FR + S_BR
-S_ground_roll = S_FR + S_BR
+## outputs ##
 
-#Output in si units
-S_landing_si  = S_landing*0.3048
-S_ground_roll_si = S_ground_roll*0.3048
+# S_landing_si [m] Total landing distance
+# S_ground_roll_si [m] Ground roll distance
+# S_landing_reverse_si [m] Total landing distance using reverse thrust
+# S_ground_roll_reverse_si [m] Ground roll distance using reverse thrust
+# V_REF [m/s] Approach landing speed
+
+# Verification using PC-12
+# Landing(44145, 25.81, 10.27, 0.85, 0.04, 0.8, 2.1, 8000, 3, 0.6)
+# Assumed was a Tstatic of 8000 N, CL_max_landing of 2.1 and a CL after touchdown of 0.6
+# Landing distance = 677 m (Model) vs. 661 m (Flight test) on dry ashphalt (mu_g = 0.3)
+
+def Landing(W_landing, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, theta_app, CL_landing_td):
+    
+    # Not an input for the function, however an input locally
+    
+    rho_sealevel = 0.002378 #slugs/ft3
+    mu_g_brakes = 0.2 #Ground friction coefficient
+    g = 32.1740 #ft/s2
+    h_obst = 50 #ft
+    
+    #Converting 
+    
+    S = S*10.7639104 #m2 to ft2
+    T_static = T_static*0.224808943871 #Newton to lbf
+    W_landing = W_landing*0.224808943871 #Newton to lbf
+
+    # Functions
+    
+    CD_landing_td = CD_0 + ((CL_landing_td**2)/(pi*A*e))
+    
+    T_landing = 0.07*T_static #lbf
+    T_landing_reverse_thrust = -0.6*T_static #lbf
+
+    V_SO = sqrt((W_landing/S)*(2./rho_sealevel)*(1./CL_landing_max)) #Landing stall speed in ft/s
+    V_REF = 1.3*V_SO #Approach speed
+    V_FLR = 1.3*V_SO #Flare speed in ft/s
+    V_TD = 1.1 * V_SO #Touchdown speed in ft/s
+    V_BR = 1.1 * V_SO #Brake speed in ft/s
+    
+    P_BHP_idle = T_landing*V_TD * 0.001818181818179 #Converts lbf*ft/s to horsepower
+    P_BHP_reverse = T_landing_reverse_thrust*V_TD * 0.001818181818179 #Converts lbf*ft/s to horsepower
+
+    L_landing_td = 0.5*rho_sealevel*((V_BR/sqrt(2))**2)*S*CL_landing_td
+    D_landing_td = 0.5*rho_sealevel*((V_BR/sqrt(2))**2)*S*CD_landing_td
+
+    h_f = 0.1512*(V_SO**2.)*(1.-np.cos(theta_app*(pi/180.)))
+    S_A = (h_obst - h_f)/(np.tan(theta_app*(pi/180.)))
+    S_F = 0.1512*(V_SO**2.)*np.sin(theta_app*(pi/180))
+    S_FR = V_TD
+    S_BR = abs(((V_BR**2.)*W_landing)/(2.*g*((sqrt(2.)*etha_p_landing*550.*(P_BHP_idle/V_BR))-D_landing_td-(mu_g_brakes*(W_landing-L_landing_td)))))
+    S_BR_reverse = abs(((V_BR**2.)*W_landing)/(2.*g*((sqrt(2.)*etha_p_landing*550.*(P_BHP_reverse/V_BR))-D_landing_td-(mu_g_brakes*(W_landing-L_landing_td)))))
+
+    S_landing  = S_A + S_F + S_FR + S_BR
+    S_ground_roll = S_FR + S_BR
+    S_landing_reverse = S_A + S_F + S_FR + S_BR_reverse
+    S_ground_roll_reverse = S_FR + S_BR_reverse
+
+    #Output in si units
+    S_landing_si  = S_landing*0.3048
+    S_ground_roll_si = S_ground_roll*0.3048
+    S_landing_reverse_si  = S_landing_reverse*0.3048
+    S_ground_roll_reverse_si = S_ground_roll_reverse*0.3048
+    V_REF = V_REF*0.3048
+    
+    return(S_landing_si, S_ground_roll_si, S_landing_reverse_si, S_ground_roll_reverse_si, V_REF, P_BHP_idle, V_SO)
 
 
 ###############################################################################
@@ -346,16 +499,16 @@ S_ground_roll_si = S_ground_roll*0.3048
 ###############################################################################
 
 #PRINTING
-print "S_G =", S_G[loc_list], "ft"
-print "S_TR =", S_TR, "ft"
-print "S_C =", S_C, "ft"
-print "Take-off length =", S_TO_si , "m"
-print "Climb angle =", theta_climb, "degrees"
-print "Maximum rate of climb reachable at sea level =", ROC_SL,"m/s"
-print "Time to reach an altitude of", hcruise,"m is", t, "s"
-print "Gliding distance from cruise =", R_glide, "m, or", R_glide*0.000539956803, "nm"
-print "Ground roll distance =", S_ground_roll_si,"m"
-print "Total landing distance =", S_landing_si,"m"
+#print "S_G =", S_G[loc_list], "ft"
+#print "S_TR =", S_TR, "ft"
+#print "S_C =", S_C, "ft"
+#print "Take-off length =", S_TO_si , "m"
+#print "Climb angle =", theta_climb, "degrees"
+#print "Maximum rate of climb reachable at sea level =", ROC_SL,"m/s"
+#print "Time to reach an altitude of", hcruise,"m is", t, "s"
+#print "Gliding distance from cruise =", R_glide, "m, or", R_glide*0.000539956803, "nm"
+#print "Ground roll distance =", S_ground_roll_si,"m"
+#print "Total landing distance =", S_landing_si,"m"
 
 #It should be noted that the maximum climb rate is calculated at MTOW with full fuel tanks
 
@@ -383,6 +536,7 @@ print "Total landing distance =", S_landing_si,"m"
 #plt.plot(htab[0:len(ROC_list)], ROC_list )
 #plt.plot(htab[0:len(ROC_list)], polyfit)
 #plt.show()
+
 
 
 
