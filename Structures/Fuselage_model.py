@@ -16,7 +16,7 @@ Created on Wed May 31 16:54:31 2017
 import numpy as np 
 import Material_properties as mat
 
-def moi_hellipse(a,b):
+def moi_ellipse(a,b):
     I_xx = np.pi / 4 * b**2 *(3*a+b)
     I_yy = np.pi / 4 * a**2 *(3*b+a)
     return I_xx,I_yy
@@ -107,7 +107,42 @@ def arclength(angleboom_top,a,b):
                         f_x(nodes[3],a,b))
     return boom_spacing
 
-def ellipse_top(n_boom_top,quadrant):
+def moi_cockpit(a_ellipse,b_ellipse_top,b_ellipse_bot,d):
+    y_bot = b_ellipse_bot*np.sin(angleboom_bot)
+    y_c_bot = b_ellipse_bot+np.sum(y_bot*dL_bot)/(np.shape(y_bot)[0]*dL_bot)
+    A_bot = ( a_ellipse + b_ellipse_bot )/2
+    
+    angleboom_bot = np.arange(180,360,1)*np.pi/180
+    dL_bot = arclength(angleboom_bot,a_ellipse,b_ellipse_bot)    
+
+    y_panel = b_ellipse_bot+d/2
+    A_panel = b
+    
+    angleboom_top = np.arange(0,180,1)*np.pi/180
+    dL_top = arclength(angleboom_top,a_ellipse,b_ellipse_top)
+
+    y_top = b_ellipse_top*np.sin(angleboom_top)+d+b_ellipse_bot
+    y_c_top = np.sum(y_top*dL_top)/(np.shape(y_top)[0]*dL_top)
+    A_top = (a_ellipse+b_ellipse_top)/2
+
+    y_c = (A_bot*y_c_bot+2*A_panel*y_panel+A_top*y_c_top)/(A_bot+A_top+ \
+                                                           2*A_panel)
+
+    I_xx_top = moi_ellipse(a_ellipse,b_ellipse_top)[0]
+    I_yy_top = moi_ellipse(a_ellipse,b_ellipse_top)[1]
+    I_xx_bot = moi_ellipse(a_ellipse,b_ellipse_bot)[0]
+    I_yy_bot = moi_ellipse(a_ellipse,b_ellipse_bot)[1]
+    I_xx_panel      = d^3/12
+    I_yy_panel      = 0
+
+    I_xx = I_xx_top+A_top*(y_c-y_c_bot)**2+I_xx_bot+A_bot*(y_c-y_c_bot)**2 + /
+            2*I_xx_panel+2*A_panel*(y_c-y_panel)**2
+    I_yy = I_yy_bot+A_bot*(x_c
+    return A_bot, A_panel, A_top, y_c_bot, y_panel, y_c_top, y_c
+
+
+
+def boom_ellipse(n_boom_top,quadrant):
     if quadrant == 1:
         angleboom = np.arange(0,180,180/n_boom_top)*np.pi/180
         angleboom= np.append(angleboom,np.pi)
@@ -118,31 +153,18 @@ def ellipse_top(n_boom_top,quadrant):
             angleboom+=np.pi
     return angleboom
 
-##def moi_II(n_boom_top,a_ellipse_top,b_ellipse_top, d)
+##def moi_II(n_boom_top,a_ellipse_top,b_ellipse_top,d,D):
+##    angleboom_top = boom_ellipse(n_boom_top,1)
 ##    dl = round(arclength(angleboom_top,a,b),1)
-##    p = np.arange(0,L_max,dl)
 ##    x = a_ellipse_top*np.cos(angleboom_top)
 ##    y = b_ellipse_top*np.sin(angleboom_top)+L_max/2
-##    n_s = d[n_b]/0.2
-##    if d
-##        x_end = np.shape(x)[0]-1
-##        x  = np.append(x,x[x_end])
-##        y_end = np.shape(y)[0]-1
-##        y = np.append(y,y[y_end]-dl)
-##    return 
-
-##while space < d*2/dl:
-##    x_end = np.shape(x)[0]-1
-##    x  = np.append(x,x[x_end])
-##    print(x)
-##    y_end = np.shape(y)[0]-1
-##    y  = np.append(y,y[y_end]-dl)
-##    print(y)
+##    return
+        
 def boom_area(n_boom,a,b,M_x,M_y,x,y,I_xx,I_yy,materials):
     sigma_bending_B = M_x/I_xx*y+M_y/I_yy*x
     sigma_bending_B_max = np.amax(sigma_bending_B)
     sigma_bending_B_ind = np.argmax(sigma_bending_B)
-    sigma_bending_B_min = -np.amas(sigma_bending_B)
+    sigma_bending_B_min = -np.amin(sigma_bending_B)
     sigma_bending_B_ind = np.argamin(sigma_bending_B)
     
     if sigma_bending_B_max > sigma_bending_B_min:
@@ -177,7 +199,13 @@ def skin_tickness(n_boom,a,b,S_x,S_y,T,x,y,I_xx,I_yy,materials):
         t[material]=q_max/materials[material]
     return t
 
-
+n_boom_top = 10
+a_ellipse_top = 0.6
+b_ellipse_top = 0.15
+d = 1.1
+D = 1.2
+b = moi_II(n_boom_top,a_ellipse_top,b_ellipse_top,d,D)
+s = boom_ellipse(n_boom_top,1)
    
     
     
