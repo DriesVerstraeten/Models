@@ -34,7 +34,7 @@ import Common.CalcISA as ISA
 # V_array = array with analysed speeds
 
 ###################################################################################################
-def calcPowerReq(W,V,S,h): # Calc Power Required [W] in steady cruise conditions for one or multiple TAS
+def calcPowerReq(W,V,S,h): # Calc Power Required [W] in steady cruise conditions for one or multiple TAS. Weight in Newton.
     rho = ISA.Dens(h)
     CL = W / (0.5*rho*V**2*S)
     CD = 0.020 + 0.05236 * (CL - 0.2)**2 #calcCD(CL,V) #########!!!!!!!! drag polar from aero
@@ -145,7 +145,7 @@ def calcCruise(MTOW,OEW,Mfuelmax,PL,S,V_acc): # Payload [kg], speed analysis acc
     prop_eff = 0.9
     cp = 0.408 / 3.6E6 # [kg/J] UPDATE for different speeds and altitudes
     E = 45*60 # Required endurance / Loiter duration [s]
-    h_cruise = 25000 * 0.3048 # Cruise altitude [m]
+    h_cruise = 18000 * 0.3048 # Cruise altitude [m]
     h_loiter = 3000 * 0.3048 # Loiter altitude [m]
     g = 9.81
     Mff_start = 0.965 # 0.990*0.995*0.995*0.985 # Fuel fraction from start to cruise altitude
@@ -248,9 +248,9 @@ def CruisePlots(MTOW,OEW,Mfuelmax,S,V_acc):
     
    
 
-Range, Speed = CruisePlots(1700,950,450,20,0.01)
+#Range, Speed = CruisePlots(1700,950,450,20,0.01)
 #
-R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array = calcCruise(1700,950,450,444,20,0.01)
+#R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array = calcCruise(1700,950,450,444,20,0.01)
 
 
 #h_cruise = 18000 * 0.3048 # Cruise altitude [m]

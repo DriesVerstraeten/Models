@@ -20,10 +20,10 @@ import matplotlib.pyplot as plt
 #    x_ac = 0.3
 #    downwash = 0.427
 #    Cmac = -0.121
-#    CL_Ah = 2.3
-#    CL_alpha_Ah = 5.11
-#    CL_h = -0.55
-#    CL_alpha_h = 3.852
+#    CL_Ah_land = 2.3
+#    CL_alpha_Ah_land = 5.11
+#    CL_h_land = -0.55
+#    CL_alpha_h_land = 3.852
 #    VhV2 = 0.85**2 # (Vh/V)^2
 
 ##### OUTPUTS StabTailSizing() ####
@@ -47,7 +47,7 @@ import matplotlib.pyplot as plt
 
 
 
-def StabTailSizing(OEW,c,x_ac,downwash,Cmac,CL_Ah,CL_alpha_Ah,CL_h,CL_alpha_h,VhV2, x_lemac_acc, ShS_acc): # Calc optimal Sh/S and x_lemac. Input accuracy of analysis.
+def StabTailSizing(OEW,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_land,CL_h_land,CL_alpha_h_land,VhV2, x_lemac_acc, ShS_acc): # Calc optimal Sh/S and x_lemac. Input accuracy of analysis.
     ##### Calc xcg_OEW for different x_lemacs ###
     xcg_OEW = 2.9 # [m] # Starting value. Must be updated with xcg_OEW_opt
     xcg_wing = 2.9 # [m] # Starting value 
@@ -109,18 +109,18 @@ def StabTailSizing(OEW,c,x_ac,downwash,Cmac,CL_Ah,CL_alpha_Ah,CL_h,CL_alpha_h,Vh
 #    x_ac = 0.3
 #    downwash = 0.427
 #    Cmac = -0.121
-#    CL_Ah = 2.3
-#    CL_alpha_Ah = 5.11
-#    CL_h = -0.55
-#    CL_alpha_h = 3.852
+#    CL_Ah_land = 2.3
+#    CL_alpha_Ah_land = 5.11
+#    CL_h_land = -0.55
+#    CL_alpha_h_land = 3.852
     lh = 5.425 # Tail arm
 #    VhV2 = 0.85**2 # (Vh/V)^2
     SM = 0.05 # Stability Margin
  
     ShS_array = np.arange(0,0.4,ShS_acc) # Sh/S. Set range and accuracy of analysis !!!
     
-    xcg_control = x_ac - Cmac/CL_Ah + CL_h/CL_Ah * ShS_array * lh / c * VhV2
-    xcg_stab = x_ac + CL_alpha_h / CL_alpha_Ah * (1-downwash) * ShS_array * lh / c * VhV2 - SM
+    xcg_control = x_ac - Cmac/CL_Ah_land + CL_h_land/CL_Ah_land * ShS_array * lh / c * VhV2
+    xcg_stab = x_ac + CL_alpha_h_land / CL_alpha_Ah_land * (1-downwash) * ShS_array * lh / c * VhV2 - SM
     #############################
     ##### Determine minimum Sh/S for optimal x_lemac ###    
     ShS_min_array = []
@@ -144,14 +144,14 @@ def StabTailSizing(OEW,c,x_ac,downwash,Cmac,CL_Ah,CL_alpha_Ah,CL_h,CL_alpha_h,Vh
 
 
 
-def StabTailSizingPlots(OEW,c,x_ac,downwash,Cmac,CL_Ah,CL_alpha_Ah,CL_h,CL_alpha_h,VhV2, x_lemac_acc, ShS_acc):
+def StabTailSizingPlots(OEW,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_land,CL_h_land,CL_alpha_h_land,VhV2, x_lemac_acc, ShS_acc):
     # Create folder to store plots in       
     import os
     directory = os.getcwd() + '\Plots'
     if not os.path.exists(directory):
         os.makedirs(directory)
         
-    x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(OEW,c,x_ac,downwash,Cmac,CL_Ah,CL_alpha_Ah,CL_h,CL_alpha_h,VhV2, x_lemac_acc, ShS_acc)
+    x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(OEW,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_land,CL_h_land,CL_alpha_h_land,VhV2, x_lemac_acc, ShS_acc)
     
     ##### Plot Loading diagram with all x_lemac options ###
 #    plt.plot(xcg_for_load,mass_tot, xcg_aft_load,mass_tot, xcg_pil_load,mass_tot_pil)
