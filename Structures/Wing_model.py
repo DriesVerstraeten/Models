@@ -19,7 +19,7 @@ fig = plt.figure(figsize = (8.5,6),tight_layout=True)
 #CHORD LENGTH AT DIFFERENT SPANWISE LOCATIONS
 
 #def wing_parameters(b, MTOW, rho, V, S):
-dy = 0.001 #small spanwise section
+dy = 0.1 #small spanwise section
 
 r2 = .95
 r3 = .8
