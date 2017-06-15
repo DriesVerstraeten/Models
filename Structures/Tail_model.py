@@ -358,6 +358,7 @@ def total_bending_stress_boom(dx,dr,i,fh,fv,g):
     stress = np.zeros(dr)
     stress = moment_x/I * y_coord + moment_y/I * x_coord
     plt.figure(figsize=(5,5))
+    plt.suptitle('Bending stress in the boom cross-section')
     plt.plot(theta, stress)
     plt.ylabel('Bending stress, N/m^2')
     plt.xlabel('Location (from top), radian')  
@@ -369,7 +370,7 @@ def total_bending_stress_boom(dx,dr,i,fh,fv,g):
         c = b
     return c
 
-def wingbox_MOI(dy,start,end,t,rho):
+def wingbox_MOI(dy,start,end,t1,rho): #t1 is thickness of 2 fiber sheets together, t2 is half-thickness of the whole sandwich
     
     airfoil_coordinates = np.genfromtxt('NACA0012.txt',skip_header=0)
     
@@ -402,7 +403,7 @@ def wingbox_MOI(dy,start,end,t,rho):
         
         sections = dy            
         dx = 1./sections             
-        area_section = dx * t
+        area_section = dx * t1
         x = np.arange(front_spar,back_spar+dx,dx)
     
         arc_length_US = sum(np.sqrt(1+f11(x)**2)*dx) #upper skin
@@ -411,16 +412,16 @@ def wingbox_MOI(dy,start,end,t,rho):
         front_spar_length = np.abs(f1(front_spar)) + np.abs(f2(front_spar))
         back_spar_length = np.abs(f1(back_spar)) + np.abs(f2(back_spar))
         
-        front_spar_area = (np.abs(f1(front_spar)) + np.abs(f2(front_spar)))*t
-        back_spar_area = (np.abs(f1(back_spar)) + np.abs(f2(back_spar)))*t
+        front_spar_area = (np.abs(f1(front_spar)) + np.abs(f2(front_spar)))*t1
+        back_spar_area = (np.abs(f1(back_spar)) + np.abs(f2(back_spar)))*t1
         
-        total_area = (arc_length_US + arc_length_LS)*t + front_spar_area + back_spar_area
+        total_area = (arc_length_US + arc_length_LS)*t1 + front_spar_area + back_spar_area
         if (i == dy/2):
             area = total_area
         y_NA = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
         x_NA = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area*back_spar) / total_area
                      
-        Ixx_section = 2*dx*t**3/12 + area_section * sum(f1(x)**2 + f2(x)**2) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA))**2)
+        Ixx_section = 2*dx*t1**3/12 + area_section * sum(f1(x)**2 + f2(x)**2) + t1/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA))**2)
         Iyy_section = (front_spar_area * (front_spar-x_NA)**2) + (back_spar_area * (back_spar-x_NA)**2) + area_section*(sum(x**2)-2*x_NA*sum(x)+len(x)*x_NA**2)
         Ixy_section = area_section*(sum((x-x_NA)*(f1(x)-y_NA)) + sum((x-x_NA)*(f2(x)-y_NA))) + front_spar_area * (front_spar - x_NA) * ((f1(front_spar) + f2(front_spar))/2 - y_NA) + back_spar_area * (back_spar - x_NA) * ((f1(back_spar) + f2(back_spar))/2 - y_NA)
     
@@ -485,35 +486,35 @@ def bending_box(dx,dy,start,end,t,rho,f,i):    #bending stress calc
         mises1[j] = math.sqrt(3*(q1[j]/t)**2+stress_12[j]**2)
         mises2[j] = math.sqrt(3*(q2[j]/t)**2+stress_23[j]**2)
         mises3[j] = math.sqrt(3*(q3[j]/t)**2+stress_34[j]**2)
-    plt.figure(figsize=(19,5))
-    plt.suptitle('Von-Mises in the tailbox')
-    plt.subplot(131)
-    plt.plot(x_x,mises1)
-    plt.ylabel('Von-Mises in top skin, N/m^2')
-    plt.xlabel('x - Location')
-    plt.subplot(132)
-    plt.plot(x_y_right,mises2)
-    plt.ylabel('Von-Mises in right spar, N/m^2')
-    plt.xlabel('y - Location')
-    plt.subplot(133)
-    plt.plot(x_x,mises3)
-    plt.ylabel('Von-Mises in bottom skin, N/m^2')
-    plt.xlabel('x - Location')
-    plt.show()
-    a = max(mises1)
-    b = min(mises1)
+#    plt.figure(figsize=(19,5))
+#    plt.suptitle('Von-Mises in the tailbox')
+#    plt.subplot(131)
+#    plt.plot(x_x,mises1)
+#    plt.ylabel('Von-Mises in top skin, N/m^2')
+#    plt.xlabel('x - Location')
+#    plt.subplot(132)
+#    plt.plot(x_y_right,mises2)
+#    plt.ylabel('Von-Mises in right spar, N/m^2')
+#    plt.xlabel('y - Location')
+#    plt.subplot(133)
+#    plt.plot(x_x,mises3)
+#    plt.ylabel('Von-Mises in bottom skin, N/m^2')
+#    plt.xlabel('x - Location')
+#    plt.show()
+    a = max(stress_12)
+    b = min(stress_12)
     if abs(a) >= abs(b):
         c = a
     else:
         c = b
-    a = max(mises2)
-    b = min(mises2)
+    a = max(stress_23)
+    b = min(stress_23)
     if abs(a) >= abs(b):
         c = a
     else:
         c = b
-    a = max(mises3)
-    b = min(mises3)
+    a = max(stress_34)
+    b = min(stress_34)
     if abs(a) >= abs(b):
         c = a
     else:
@@ -526,11 +527,11 @@ def bending_box(dx,dy,start,end,t,rho,f,i):    #bending stress calc
 #        c = b
     return c
 
-def highest_bending_box(dx,dy,start,end,t,rho,f):
+def highest_bending_box(dx,dy,start,end,t1,rho,f):
     y = np.linspace(0,p.b_ht/2,dy)
     stress = np.zeros(dy)
     for i in range (0,dy):
-        stress[i] = bending_box(dx,dy,start,end,t,rho,f,i)
+        stress[i] = bending_box(dx,dy,start,end,t1,rho,f,i)
     plt.figure(figsize=(7,5))
     plt.suptitle('Highest bending stress in the tailbox')
     plt.plot(y,stress)
@@ -545,7 +546,7 @@ def highest_bending_box(dx,dy,start,end,t,rho,f):
         c = b
     return c
 
-def shear_box(dx,dy,start,end,i,t,rho,fh): #shear stress calc
+def shear_box(dx,dy,start,end,i,t,rho,fh,T): #shear stress calc
     airfoil_coordinates = np.genfromtxt('NACA0012.txt',skip_header=0)
     x_x = np.linspace(start*c_tail(dy,i),end*c_tail(dy,i),dx)
     xcoordinates = np.zeros(len(airfoil_coordinates)) 
@@ -580,6 +581,10 @@ def shear_box(dx,dy,start,end,i,t,rho,fh): #shear stress calc
     q1 = np.zeros(dx)
     q2 = np.zeros(dx)
     q3 = np.zeros(dx)
+    encl_area = 0
+    for j in range (0,dx):
+        encl_area = encl_area + (x_y_up[j]-x_y_down[j])/dx
+    qt = 2 * encl_area * T
     q1[dx/2-1] = 0
     for j in range (dx/2,dx):
         q1[j] = q1[j-1] - tail_shear(dy,fh,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
@@ -592,23 +597,26 @@ def shear_box(dx,dy,start,end,i,t,rho,fh): #shear stress calc
     q1[0] = q3[dx-1]
     for j in range (1,dx/2):
         q1[j] = q1[j-1] - tail_shear(dy,fh,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
+    q1 = q1 + qt
+    q2 = q2 + qt
+    q3 = q3 + qt
 #    for j in range (1,dx): #in case of additional rib uncoment this
 #        q[j+3*dx] = q[3*dx+j-1] + fh*(abs(x_y_down[0]-x_y_up[0])/dx)*t*(x_y_down[0]+j*(abs(x_y_down[0]-x_y_up[0])/dx))/Ixx[i]
-    plt.figure(figsize=(19,5))
-    plt.suptitle('Shear flow in the tailbox')
-    plt.subplot(131)
-    plt.plot(x_x,q1)
-    plt.ylabel('Shear flow top skin, N/m')
-    plt.xlabel('x - Location')
-    plt.subplot(132)
-    plt.plot(x_y_right,q2)
-    plt.ylabel('Shear flow right spar, N/m')
-    plt.xlabel('y - Location')
-    plt.subplot(133)
-    plt.plot(x_x,q3)
-    plt.ylabel('Shear flow bottom skin, N/m')
-    plt.xlabel('x - Location')
-    plt.show()
+#    plt.figure(figsize=(19,5))
+#    plt.suptitle('Shear flow in the tailbox')
+#    plt.subplot(131)
+#    plt.plot(x_x,q1)
+#    plt.ylabel('Shear flow top skin, N/m')
+#    plt.xlabel('x - Location')
+#    plt.subplot(132)
+#    plt.plot(x_y_right,q2)
+#    plt.ylabel('Shear flow right spar, N/m')
+#    plt.xlabel('y - Location')
+#    plt.subplot(133)
+#    plt.plot(x_x,q3)
+#    plt.ylabel('Shear flow bottom skin, N/m')
+#    plt.xlabel('x - Location')
+#    plt.show()
     return max(abs(q2))
 
 def highest_shear_box(dx,dy,start,end,t,rho,fh):
@@ -657,16 +665,16 @@ def master_function(fh,fv,dx,dy,dz,dtheta,start,end,t,m1,m2):
     print a
     print 'highest bending stress in the boom:'
     print b
-    if abs(a) >= mat.Fty[m2]:
-        print 'This material is expected to yield in bending'
-    else:
-        print 'This material is not expected to yield in bending'
-    if abs(a) >= mat.Ftu[m2]:
-        print 'This material is expected to fail in bending'
-    else:
-        print 'This material is not expected to fail in bending'
-    if abs(b) >= mat.Fsu[m2]:
-        print 'This material is expected to fail in shear'
-    else:
-        print 'This material is not expected to fail in shear'
+#    if abs(a) >= mat.Fty[m2]:
+#        print 'This material is expected to yield in bending'
+#    else:
+#        print 'This material is not expected to yield in bending'
+#    if abs(a) >= mat.Ftu[m2]:
+#        print 'This material is expected to fail in bending'
+#    else:
+#        print 'This material is not expected to fail in bending'
+#    if abs(b) >= mat.Fsu[m2]:
+#        print 'This material is expected to fail in shear'
+#    else:
+#        print 'This material is not expected to fail in shear'
     return
