@@ -14,3 +14,5 @@ and field performance.
 
 import propulsion as prop
 import Climb_Descent_FieldPerformance as CDFP
+import CruiseRange as CR
+
