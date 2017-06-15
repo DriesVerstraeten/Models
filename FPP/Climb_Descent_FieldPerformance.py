@@ -63,6 +63,7 @@ for h in range(0,84000):
 #########################  Take-off performance  ##############################
 ###############################################################################
 
+"""
 ## Inputs ##
 
 # W_TO [N] Take-off weight, usually MTOW, but can be adapted for aerobatic weight
@@ -101,7 +102,9 @@ for h in range(0,84000):
 #It should be noted that the CL, CD, prop efficiency and e are a rough estimation however
 
 #Cirrus Takeoff(15123.95, 13.387, 10, 0.757, 0.0350, 0.85, 231.167, 0.39, 0.1, 2, 1.69, 1.93, 0.4572, 87.46, 95.7)
+#Gives 488 m (model) vs. 468 m (book)
 #Difference is explained by higher vstall than calculated
+"""
 
 def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, D_prop, D_spinner, V_c, V_H):
 
@@ -170,7 +173,7 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
     T_V = []
     # Pas terug aan naar 10000
     
-    for i in range(0, 100000):
+    for i in range(0, 10000):
         if i == 0:
             time = 0
             thrust = E
@@ -239,6 +242,7 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
             S_G.append(distance_total)
             
             
+    S_ROT = V_LOF
     VLOF_list = [V_LOF]*len(S_G) #Only useful for plotting
     
     V_TR = 1.15*V_S1*0.592483801 #kts
@@ -264,7 +268,7 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
     S_C = (h_obst-h_transition)/(np.tan(theta_climb*(pi/180))) #ft
     
     #SI units outputs
-    S_TO_si = (S_G[loc_list_VLOF] + S_TR + S_C)*0.3048
+    S_TO_si = (S_G[loc_list_VLOF] + S_ROT + S_TR + S_C)*0.3048
     V_LOF_si = V_LOF*0.3048
     V_S1_si = V_S1*0.3048
 
@@ -276,6 +280,7 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
 ########################  Climb performance  ##################################
 ###############################################################################
 
+"""
 ## Inputs ##
 
 # W_TO [N] Take-off weight, usually MTOW, but can be adapted for aerobatic weight
@@ -297,6 +302,7 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
 # Verification using PC-12
 # Climb(46500, 25.81, 10.27, 0.85, 0.04, 0.8, 800, 12, 9150)
 # Climb rate = 9.9 m/s (model) vs. 9.75 m/s (flight test)
+"""
 
 def Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
     
@@ -366,6 +372,7 @@ def Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
 ######################  Descent performance  ##################################
 ###############################################################################
 
+"""
 ## Inputs ##
 
 # W_D [N] The weight of the aircraft right after it reached cruise altitude (not MTOW)
@@ -386,9 +393,12 @@ def Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
 # gives 110 km, flight test gave 140 km
 # https://www.flightglobal.com/news/articles/flight-test-pilatus-pc-12-power-of-one-187732/
 # https://en.wikipedia.org/wiki/Pilatus_PC-12
+"""
 
-def Descent(W_descent, S, A, e, CD_0, LD_max, hcruise):
-
+def Descent(W_TO, S, A, e, CD_0, LD_max, hcruise):
+    
+    W_descent = 0.965*W_TO
+    
     #Best glide speed
     V_BG_list = [] #ft/s
     
@@ -411,7 +421,7 @@ def Descent(W_descent, S, A, e, CD_0, LD_max, hcruise):
 ###############################################################################
 ######################  Landing performance  ##################################
 ###############################################################################
-
+"""
 ## inputs ##
 
 # CL_landing_max [-] Maximum lift coefficient in landing configuration
@@ -437,8 +447,12 @@ def Descent(W_descent, S, A, e, CD_0, LD_max, hcruise):
 # Landing(44145, 25.81, 10.27, 0.85, 0.04, 0.8, 2.1, 8000, 3, 0.6)
 # Assumed was a Tstatic of 8000 N, CL_max_landing of 2.1 and a CL after touchdown of 0.6
 # Landing distance = 677 m (Model) vs. 661 m (Flight test) on dry ashphalt (mu_g = 0.3)
+"""
 
-def Landing(W_landing, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, theta_app, CL_landing_td):
+def Landing(W_TO, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, CL_landing_td):
+    
+    #Defined the weight
+    W_landing = W_TO
     
     # Not an input for the function, however an input locally
     
@@ -471,6 +485,8 @@ def Landing(W_landing, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, 
 
     L_landing_td = 0.5*rho_sealevel*((V_BR/sqrt(2))**2)*S*CL_landing_td
     D_landing_td = 0.5*rho_sealevel*((V_BR/sqrt(2))**2)*S*CD_landing_td
+    
+    theta_app = np.arcsin((1./(CL_landing_td/CD_landing_td))-(T_landing/W_landing))*(180./pi)
 
     h_f = 0.1512*(V_SO**2.)*(1.-np.cos(theta_app*(pi/180.)))
     S_A = (h_obst - h_f)/(np.tan(theta_app*(pi/180.)))
@@ -483,6 +499,9 @@ def Landing(W_landing, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, 
     S_ground_roll = S_FR + S_BR
     S_landing_reverse = S_A + S_F + S_FR + S_BR_reverse
     S_ground_roll_reverse = S_FR + S_BR_reverse
+    
+    # approach angle
+    
 
     #Output in si units
     S_landing_si  = S_landing*0.3048
@@ -491,9 +510,25 @@ def Landing(W_landing, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, 
     S_ground_roll_reverse_si = S_ground_roll_reverse*0.3048
     V_REF = V_REF*0.3048
     
-    return(S_landing_si, S_ground_roll_si, S_landing_reverse_si, S_ground_roll_reverse_si, V_REF, P_BHP_idle, V_SO)
+    return(S_landing_si, S_ground_roll_si, S_landing_reverse_si, S_ground_roll_reverse_si, V_REF, V_SO, theta_app)
 
 
+#Power should be imported, remove as input
+#Cruise altitude can be set as a constant and removed as input
+"landing weight and descent weight should be predefined"
+"aproach angle should be predefined"
+#T_static does not have to be calculated using Dprop etc...
+#T_static might not have to be calculated at all
+
+def main_updown(W_TO, S, A, e, CD_0, etha_p, etha_p_landing, P_TO, P, T_static, LD_max, hcruise, CL_0, CL_alpha, alpha_TO, CL_max_TO, CL_landing_max, CL_landing_td, D_prop, D_spinner, V_c, V_H):
+    CL_TO, CD_TO, V_S1_si, V_LOF_si, S_TO_si = Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, D_prop, D_spinner, V_c, V_H)
+    t_cruiseh, ROC_SL_si, h_absolute_si = Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise)
+    R_glide = Descent(W_TO, S, A, e, CD_0, LD_max, hcruise)
+    S_landing_si, S_ground_roll_si, S_landing_reverse_si, S_ground_roll_reverse_si, V_REF, V_SO = Landing(W_TO, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, theta_app, CL_landing_td) 
+    return(CL_TO, CD_TO, V_S1_si, V_LOF_si, S_TO_si, t_cruiseh, ROC_SL_si, h_absolute_si, R_glide, S_landing_si, S_ground_roll_si, S_landing_reverse_si, S_ground_roll_reverse_si, V_REF, V_SO)
+
+#0.965
+"""
 ###############################################################################
 ############################  Printing  #######################################
 ###############################################################################
@@ -536,7 +571,7 @@ def Landing(W_landing, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, 
 #plt.plot(htab[0:len(ROC_list)], ROC_list )
 #plt.plot(htab[0:len(ROC_list)], polyfit)
 #plt.show()
-
+"""
 
 
 
