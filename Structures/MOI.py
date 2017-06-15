@@ -16,7 +16,7 @@ t = p.t_skin
 c_1 = wm.c_1
 c_2 = wm.c_2
 c_3 = wm.c_3
-#c_r = p.c_r
+c = wm.c
 aifoil_file_name = 'foil1_modified.dat'
 
 def MOI_section_1():
@@ -93,8 +93,6 @@ def MOI_section_1():
         
     return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x, x_span
 
-x_NA = MOI_section_1()[0]
-
 
 def MOI_section_2():
     
@@ -170,8 +168,6 @@ def MOI_section_2():
         
     return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x, x_span
 
-x_NA_2 = MOI_section_2()[0]
-
 
 def MOI_section_3():
     
@@ -193,7 +189,7 @@ def MOI_section_3():
     
     
     
-    for i in range(len(c_2)):
+    for i in range(len(c_3)):
         xcoordinates1 = xcoordinates * c_3[i]
         ycoordinates1 = ycoordinates * c_3[i]
         
@@ -217,7 +213,6 @@ def MOI_section_3():
         area_section = dx * t
         x = np.linspace(front_spar,back_spar,len(wm.y))
         x_span.append(x)
-        #print x_span
     
         arc_length_US = sum(np.sqrt(1+f11(x)**2)*dx) #upper skin
         arc_length_LS = sum(np.sqrt(1+f22(x)**2)*dx) #lower skin
@@ -247,17 +242,20 @@ def MOI_section_3():
         
     return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x, x_span
 
+
 def wingbox_MOI_total():
     Ixx = np.hstack((MOI_section_1()[0], MOI_section_2()[0], MOI_section_3()[0]))
     Iyy = np.hstack((MOI_section_1()[1], MOI_section_2()[1], MOI_section_3()[1]))
     Ixy = np.hstack((MOI_section_1()[2], MOI_section_2()[2], MOI_section_3()[2]))
     x_NA = np.hstack((MOI_section_1()[6], MOI_section_2()[6], MOI_section_3()[6]))
     y_NA = np.hstack((MOI_section_1()[5], MOI_section_2()[5], MOI_section_3()[5]))
-    x_span = np.hstack((MOI_section_1()[8], MOI_section_2()[8], MOI_section_3()[8]))
+    x_span = np.vstack((MOI_section_1()[8], MOI_section_2()[8], MOI_section_3()[8]))
     
     return Ixx, Iyy, Ixy, x_NA, y_NA, x_span
 
-Ixx = wingbox_MOI_total()
+
+Ixx, Iyy, Ixy, x_NA, y_NA, x_span = wingbox_MOI_total()
+
 
 '''
 

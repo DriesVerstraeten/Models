@@ -19,12 +19,7 @@ c_1 = wm.c_1
 c_2 = wm.c_2
 c_3 = wm.c_3
 Mx = wm.wing_moment_9g(wm.CL_9g,p.rho_0,p.V_cruise)[1]
-Ixx = mi.wingbox_MOI_total()[0]
-Iyy = mi.wingbox_MOI_total()[1]
-Ixy = mi.wingbox_MOI_total()[2]
-x_NA = mi.wingbox_MOI_total()[3]
-y_NA = mi.wingbox_MOI_total()[4]
-x_span = mi.wingbox_MOI_total()[5]
+Ixx, Iyy, Ixy, x_NA, y_NA, x_span = mi.wingbox_MOI_total()
 
 def piecewise_poly_1():
     
@@ -119,8 +114,11 @@ def piecewise_poly_3():
     
     return np.array(y_position_US), np.array(y_position_LS)
 
-y_position_US = piecewise_poly_1()[0] + piecewise_poly_2()[0] + piecewise_poly_3()[0]
-y_position_LS = piecewise_poly_1()[1] + piecewise_poly_2()[1] + piecewise_poly_3()[1]
+poly1_out = piecewise_poly_1()
+poly2_out = piecewise_poly_2()
+poly3_out = piecewise_poly_3()
+y_position_US = np.vstack((poly1_out[0], poly2_out[0], poly3_out[0]))
+y_position_LS = np.vstack((poly1_out[1], poly2_out[1], poly3_out[1]))
 
 
 
@@ -139,21 +137,19 @@ def wingbox_bending_stress():
     
     return sigma_bending_US, sigma_bending_LS
 
-
+'''
 maxpoints = np.ones(len(wingbox_bending_stress()[0]))
 for i in range(len(wingbox_bending_stress()[0])):
     
     maxpoints[i] = np.max(wingbox_bending_stress()[0][i])
+'''
+bending_stress = wingbox_bending_stress()
 
-
-
-plt.plot(x_span[0],wingbox_bending_stress()[0][0], color='r')
-plt.plot(x_span[0],wingbox_bending_stress()[1][0], color='b')
+plt.plot(x_span[0],bending_stress[0][0], color='r')
+plt.plot(x_span[0],bending_stress[1][0], color='b')
 #plt.plot(wm.y,maxpoints, color='b')
 plt.show()
 
-
-wingbox_bending_stress()
 
 
 
