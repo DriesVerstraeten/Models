@@ -145,7 +145,7 @@ def calcCruise(MTOW,OEW,Mfuelmax,PL,S,V_acc): # Payload [kg], speed analysis acc
     prop_eff = 0.9
     cp = 0.408 / 3.6E6 # [kg/J] UPDATE for different speeds and altitudes
     E = 45*60 # Required endurance / Loiter duration [s]
-    h_cruise = 18000 * 0.3048 # Cruise altitude [m]
+    h_cruise = 25000 * 0.3048 # Cruise altitude [m]
     h_loiter = 3000 * 0.3048 # Loiter altitude [m]
     g = 9.81
     Mff_start = 0.965 # 0.990*0.995*0.995*0.985 # Fuel fraction from start to cruise altitude

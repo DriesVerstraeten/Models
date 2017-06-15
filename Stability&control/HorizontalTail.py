@@ -14,6 +14,18 @@ import matplotlib.pyplot as plt
 #if not os.path.exists(directory):
 #    os.makedirs(directory)
 
+#### INPUTS ##########
+#    OEW = 997. # [kg]
+#    c = 1.568 # MAC
+#    x_ac = 0.3
+#    downwash = 0.427
+#    Cmac = -0.121
+#    CL_Ah = 2.3
+#    CL_alpha_Ah = 5.11
+#    CL_h = -0.55
+#    CL_alpha_h = 3.852
+#    VhV2 = 0.85**2 # (Vh/V)^2
+
 ##### OUTPUTS StabTailSizing() ####
 #    x_lemac_array = array with possible x_lemac locations [m]
 #    xcg_for_load = xcg_locations during loading wrt to MAC for different x_LEMAC
@@ -33,15 +45,17 @@ import matplotlib.pyplot as plt
 #    where_opt = index of optimal configuration
 #################
 
-def StabTailSizing(x_lemac_acc, ShS_acc): # Calc optimal Sh/S and x_lemac. Input accuracy of analysis.
+
+
+def StabTailSizing(OEW,c,x_ac,downwash,Cmac,CL_Ah,CL_alpha_Ah,CL_h,CL_alpha_h,VhV2, x_lemac_acc, ShS_acc): # Calc optimal Sh/S and x_lemac. Input accuracy of analysis.
     ##### Calc xcg_OEW for different x_lemacs ###
     xcg_OEW = 2.9 # [m] # Starting value. Must be updated with xcg_OEW_opt
     xcg_wing = 2.9 # [m] # Starting value 
     xcg_wingMAC = 0.3 # cg of wing wrt MAC
-    OEW = 997. # [kg]
+#    OEW = 997. # [kg]
     wing = 209. # [kg]
     xcg_fuelMAC = 0.35 # xcg of fuel wrt MAC
-    c = 1.568 # MAC
+#    c = 1.568 # MAC
     
     moment_Aw = xcg_OEW * OEW - xcg_wing * wing    
     x_lemac_array = np.arange(1.5,3.0,x_lemac_acc) # Set range and accuracy of analysis !!!
@@ -92,15 +106,15 @@ def StabTailSizing(x_lemac_acc, ShS_acc): # Calc optimal Sh/S and x_lemac. Input
     xcg_aft = np.amax(xcg_for_load + xcg_aft_load + xcg_pil_load, axis=0) + 0.02
     #############################
     ##### Calc control and stability curves ###
-    x_ac = 0.3
-    downwash = 0.427
-    Cmac = -0.121
-    CL_Ah = 2.3
-    CL_alpha_Ah = 5.11
-    CL_h = -0.55
-    CL_alpha_h = 3.852
+#    x_ac = 0.3
+#    downwash = 0.427
+#    Cmac = -0.121
+#    CL_Ah = 2.3
+#    CL_alpha_Ah = 5.11
+#    CL_h = -0.55
+#    CL_alpha_h = 3.852
     lh = 5.425 # Tail arm
-    VhV2 = 0.85**2 # (Vh/V)^2
+#    VhV2 = 0.85**2 # (Vh/V)^2
     SM = 0.05 # Stability Margin
  
     ShS_array = np.arange(0,0.4,ShS_acc) # Sh/S. Set range and accuracy of analysis !!!
@@ -130,14 +144,14 @@ def StabTailSizing(x_lemac_acc, ShS_acc): # Calc optimal Sh/S and x_lemac. Input
 
 
 
-def StabTailSizingPlots(x_lemac_acc, ShS_acc):
+def StabTailSizingPlots(OEW,c,x_ac,downwash,Cmac,CL_Ah,CL_alpha_Ah,CL_h,CL_alpha_h,VhV2, x_lemac_acc, ShS_acc):
     # Create folder to store plots in       
     import os
     directory = os.getcwd() + '\Plots'
     if not os.path.exists(directory):
         os.makedirs(directory)
         
-    x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(x_lemac_acc, ShS_acc)
+    x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(OEW,c,x_ac,downwash,Cmac,CL_Ah,CL_alpha_Ah,CL_h,CL_alpha_h,VhV2, x_lemac_acc, ShS_acc)
     
     ##### Plot Loading diagram with all x_lemac options ###
 #    plt.plot(xcg_for_load,mass_tot, xcg_aft_load,mass_tot, xcg_pil_load,mass_tot_pil)
@@ -187,6 +201,6 @@ def StabTailSizingPlots(x_lemac_acc, ShS_acc):
 
 
 
-StabTailSizingPlots(0.001,0.001)
+StabTailSizingPlots(997,1.568,0.3,0.427,-0.121,2.3,5.11,-0.55,3.852,0.85**2,0.001,0.001)
 
-x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(0.01,0.01)
+x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(997,1.568,0.3,0.427,-0.121,2.3,5.11,-0.55,3.852,0.85**2,0.01,0.01)
