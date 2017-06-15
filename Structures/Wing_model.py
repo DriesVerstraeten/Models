@@ -25,7 +25,7 @@ y1 = np.arange(0,p.b/2.+2*dy, dy)
 d_cLE = np.tan(p.theta_LE) * y #LE section "to be cut away from chord"
 d_cTE = np.tan(p.theta_TE) * y #TE section "to be cut away from chord"
     
-c = p.c_r - d_cLE - d_cTE #chord at each spanwise section
+#c = p.c_r - d_cLE - d_cTE #chord at each spanwise section
     
 CL_9g = 9. * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #lift coefficient at 9g
 CL_45g = -4.5 * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coefficient at -4.5g
@@ -35,6 +35,11 @@ CL_45g = -4.5 * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coef
                                
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #SHEAR AT 9G
+def cord(rib1, rib2, c0, c1, c2, c3, dx):
+    c_1 = np.linspace(c0,c1,rib1*dx)
+    c_2 = np.linspace(c1,c2,(rib2-rib1)*dx)
+    c_3 = np.linspace(c2,c3,(1-rib2)*dx)
+    return
 
 def wing_shear_9g(CL, rho, V):
     dL_9g = CL * 1./2. * rho * V**2. * dy * c #the small lift contribution from every section                      
