@@ -27,6 +27,12 @@ d_cTE = np.tan(p.theta_TE) * y #TE section "to be cut away from chord"
     
 #c = p.c_r - d_cLE - d_cTE #chord at each spanwise section
     
+c_1 = np.linspace(p.c_r, 0.95*p.c_r, 1/dy)
+c_2 = np.linspace(0.95*p.c_r, 0.8*p.c_r, 1/dy)
+c_3 = np.linspace(0.8*p.c_r, 0.4*p.c_r, 1/dy)
+c = np.hstack((c_1,c_2,c_3))
+
+
 CL_9g = 9. * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #lift coefficient at 9g
 CL_45g = -4.5 * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coefficient at -4.5g
     
@@ -35,17 +41,19 @@ CL_45g = -4.5 * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coef
                                
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #SHEAR AT 9G
-def cord(rib1, rib2, c0, c1, c2, c3, dx):
+'''def cord(rib1, rib2, c0, c1, c2, c3, dx):
     c_1 = np.linspace(c0,c1,rib1*dx)
     c_2 = np.linspace(c1,c2,(rib2-rib1)*dx)
     c_3 = np.linspace(c2,c3,(1-rib2)*dx)
-    return
+    return'''
+
+
 
 def wing_shear_9g(CL, rho, V):
     dL_9g = CL * 1./2. * rho * V**2. * dy * c #the small lift contribution from every section                      
     dL_9g_total = np.zeros(len(y)+1) #make a list of zeroes to later overwrite these in the next loop
     
-    for i in range(0,len(y)+1):
+    for i in range(0,len(c)+1):
         if i == 0:
             dL_9g_total[i] = sum(CL * 1./2. * rho * V**2. * dy * c) #overwrite the zeroes
         elif i == 1:
@@ -74,7 +82,7 @@ def wing_moment_9g(CL, rho, V):
     dM_9g = wing_shear_9g(CL, rho, V)[0] * y
     dM_9g_total = np.zeros(len(y)+1)
     
-    for i in range(0,len(y)+1):
+    for i in range(0,len(c)+1):
         if i == 0:
             dM_9g_total[i] = sum(dM_9g)
         elif i == 1:

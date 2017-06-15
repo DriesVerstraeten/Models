@@ -15,16 +15,18 @@ start_time = time.time()
 
 plt.close()
 
-c = wm.c
+c_1 = wm.c_1
+c_2 = wm.c_2
+c_3 = wm.c_3
 Mx = wm.wing_moment_9g(wm.CL_9g,p.rho_0,p.V_cruise)[1]
-Ixx = mi.wingbox_MOI()[0]
-Iyy = mi.wingbox_MOI()[1]
-Ixy = mi.wingbox_MOI()[2]
-y_NA = mi.wingbox_MOI()[5]
-x_NA = mi.wingbox_MOI()[6]
-x_span = mi.wingbox_MOI()[8]
+Ixx = mi.wingbox_MOI_total()[0]
+Iyy = mi.wingbox_MOI_total()[1]
+Ixy = mi.wingbox_MOI_total()[2]
+x_NA = mi.wingbox_MOI_total()[3]
+y_NA = mi.wingbox_MOI_total()[4]
+x_span = mi.wingbox_MOI_total()[5]
 
-def piecewise_poly():
+def piecewise_poly_1():
     
     airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
     
@@ -39,9 +41,9 @@ def piecewise_poly():
         ycoordinates[i] = airfoil_coordinates[i][1] 
     
     
-    for i in range(len(c)):
-        xcoordinates1 = xcoordinates * c[i]
-        ycoordinates1 = ycoordinates * c[i]
+    for i in range(len(c_1)):
+        xcoordinates1 = xcoordinates * c_1[i]
+        ycoordinates1 = ycoordinates * c_1[i]
         
         fit1 = np.polyfit(xcoordinates1[0:133],ycoordinates1[0:133],5)
         f1 = np.poly1d(fit1)
@@ -53,8 +55,74 @@ def piecewise_poly():
     
     return np.array(y_position_US), np.array(y_position_LS)
 
-y_position_US = piecewise_poly()[0]
-y_position_LS = piecewise_poly()[1]
+
+
+
+def piecewise_poly_2():
+    
+    airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
+    
+    xcoordinates = np.zeros(len(airfoil_coordinates)) 
+    ycoordinates = np.zeros(len(airfoil_coordinates)) 
+        
+    y_position_US = []
+    y_position_LS = []
+    
+    for i in range(len(airfoil_coordinates)):
+        xcoordinates[i] = airfoil_coordinates[i][0]
+        ycoordinates[i] = airfoil_coordinates[i][1] 
+    
+    
+    for i in range(len(c_2)):
+        xcoordinates1 = xcoordinates * c_2[i]
+        ycoordinates1 = ycoordinates * c_2[i]
+        
+        fit1 = np.polyfit(xcoordinates1[0:133],ycoordinates1[0:133],5)
+        f1 = np.poly1d(fit1)
+        y_position_US.append(f1(x_span[i]))
+        
+        fit2 = np.polyfit(xcoordinates1[133:256],ycoordinates1[133:256],5)
+        f2 = np.poly1d(fit2)
+        y_position_LS.append(f2(x_span[i]))
+    
+    return np.array(y_position_US), np.array(y_position_LS)
+
+
+
+
+def piecewise_poly_3():
+    
+    airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
+    
+    xcoordinates = np.zeros(len(airfoil_coordinates)) 
+    ycoordinates = np.zeros(len(airfoil_coordinates)) 
+        
+    y_position_US = []
+    y_position_LS = []
+    
+    for i in range(len(airfoil_coordinates)):
+        xcoordinates[i] = airfoil_coordinates[i][0]
+        ycoordinates[i] = airfoil_coordinates[i][1] 
+    
+    
+    for i in range(len(c_3)):
+        xcoordinates1 = xcoordinates * c_3[i]
+        ycoordinates1 = ycoordinates * c_3[i]
+        
+        fit1 = np.polyfit(xcoordinates1[0:133],ycoordinates1[0:133],5)
+        f1 = np.poly1d(fit1)
+        y_position_US.append(f1(x_span[i]))
+        
+        fit2 = np.polyfit(xcoordinates1[133:256],ycoordinates1[133:256],5)
+        f2 = np.poly1d(fit2)
+        y_position_LS.append(f2(x_span[i]))
+    
+    return np.array(y_position_US), np.array(y_position_LS)
+
+y_position_US = piecewise_poly_1()[0] + piecewise_poly_2()[0] + piecewise_poly_3()[0]
+y_position_LS = piecewise_poly_1()[1] + piecewise_poly_2()[1] + piecewise_poly_3()[1]
+
+
 
 
 def wingbox_bending_stress():
@@ -72,12 +140,12 @@ def wingbox_bending_stress():
     return sigma_bending_US, sigma_bending_LS
 
 
-
-
 maxpoints = np.ones(len(wingbox_bending_stress()[0]))
 for i in range(len(wingbox_bending_stress()[0])):
     
     maxpoints[i] = np.max(wingbox_bending_stress()[0][i])
+
+
 
 plt.plot(x_span[0],wingbox_bending_stress()[0][0], color='r')
 plt.plot(x_span[0],wingbox_bending_stress()[1][0], color='b')
