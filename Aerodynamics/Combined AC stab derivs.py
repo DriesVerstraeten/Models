@@ -222,6 +222,8 @@ def calcstabderivs():#does not use specific inputs
         return [Czad,Cmad]
         
     def calcstabderrr():
+        dVinfyrr = np.c_[np.zeros((totalpanels, 1)), (-spanlocy+(spanlocy*math.cos(rr))),np.zeros((totalpanels, 1))]
+        dVinfzrr =np.c_[np.zeros((totalpanels, 2)), (-spanlocy*math.sin(rr))]
     
         # Run VLM for rr+1 here, outputs should be called Forcerr, Vinfxrr
         Mzxrr = -sum(Forcerr[:,0]*cy)
@@ -246,6 +248,9 @@ def calcstabderivs():#does not use specific inputs
         return [Cyp,Clp,Cnp]
     
     def calcstabderpr():
+        dVinfxpr = np.c_[(coordlocx-(coordlocx*math.cos(pr))), np.zeros((totalpanels, 2))]        
+        dVinfzpr = np.c_[np.zeros((totalpanels, 2)), (coordlocx*math.sin(pr))]
+        
     
         # Run VLM for pr+1 here, outputs should be called Forcepr, Vinfxpr
     
@@ -265,7 +270,9 @@ def calcstabderivs():#does not use specific inputs
         return [Czq,Cmq]
         
     def calcstabderyr():
-        
+        dVinfxyr = np.c_[(spanlocy*math.sin(yr)), np.zeros((totalpanels, 2))]        
+        dVinfyyr = np.c_[np.zeros((totalpanels, 1)), (spanlocy-(spanlocy*math.cos(yr))), np.zeros((totalpanels, 1))]
+                
         # Run VLM for yr+1 here, outputs should be called Forceyr, Vinfxyr
         
         dFxyr = Forceyr[:,0]-Force[:,0]
