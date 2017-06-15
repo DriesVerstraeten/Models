@@ -1,4 +1,6 @@
-## Composite Analysis
+## Composite Analysis:
+import numpy as np
+
 def moi_ellipse(a,b):
     I_xx = np.pi / 4 * b**2 *(3*a+b)
     I_yy = np.pi / 4 * a**2 *(3*b+a)
@@ -21,16 +23,17 @@ def arclength(angleboom_top,a,b):
     return boom_spacing
 
 def moi_cockpit(a_ellipse,b_ellipse_top,b_ellipse_bot,d):
+    
+    angleboom_bot = np.arange(180,360,1)*np.pi/180
+    dL_bot = arclength(angleboom_bot,a_ellipse,b_ellipse_bot)    
+    
     y_bot = b_ellipse_bot*np.sin(angleboom_bot)
     y_c_bot = b_ellipse_bot+np.sum(y_bot*dL_bot)/(np.shape(y_bot)[0]*dL_bot)
     A_bot = ( a_ellipse + b_ellipse_bot )/2
     
-    angleboom_bot = np.arange(180,360,1)*np.pi/180
-    dL_bot = arclength(angleboom_bot,a_ellipse,b_ellipse_bot)    
-
     x_panel = a_ellipse
     y_panel = b_ellipse_bot+d/2
-    A_panel = b
+    A_panel = d
     
     angleboom_top = np.arange(0,180,1)*np.pi/180
     dL_top = arclength(angleboom_top,a_ellipse,b_ellipse_top)
@@ -50,21 +53,52 @@ def moi_cockpit(a_ellipse,b_ellipse_top,b_ellipse_bot,d):
     I_xx_panel      = d^3/12
     I_yy_panel      = 0
 
-    I_xx = I_xx_top+A_top*(y_c-y_c_bot)**2+I_xx_bot+A_bot*(y_c-y_c_bot)**2 + /
+    I_xx = I_xx_top+A_top*(y_c-y_c_bot)**2+I_xx_bot+A_bot*(y_c-y_c_bot)**2 + \
             2*I_xx_panel+2*A_panel*(y_c-y_panel)**2
     I_yy = I_yy_bot+I_yy_top+I_yy_panel+2*A_panel*(x_c-x_panel)**2
     
-    return I_xx,I_yy
+    return y_c,I_xx,I_yy
 
-def section_I(a_I,b_I):
+def section_i(a_I,b_I):
     angle = np.arange(361)*np.pi/180
-    x = a*np.cos(angle)
-    y = b*np.sin(angle)
+    x = a_I*np.cos(angle)
+    y = b_I*np.sin(angle)
     return x,y
 
-def section_II(a,b_top,b_bot):
-    angle 
+def section_ii(a,b_top,b_bot,d,y_c):
+    angle_top = np.arange(181)*np.pi/180
+    angle_bot = np.arange(180,361)*np.pi/180
+    dl  = np.round(arclength(angle_top,a,b_top),1)
+    
+    x_t = a*np.cos(angle_top)
+    y_t = b_top*np.sin(angle_top)+b_bot+d-y_c 
+    
+    y_d_l   = np.arange(d,0,dl)+b_bot-y_c
+    x_d_l   = -a*np.ones(np.shape(y_d)[0])
+    
+    x = np.concatenate(x_t,x_d)
+    y = np.concatenate(y_t,y_d)
+    
+    x_b = a*np.cos(angle_bot)
+    y_b = b_bot*np.sin(angle_bot)
+    
+    x = np.append(x,x_b)
+    y = np.append(y,y_b)
+    
+    y_d_r = np.arange(0,d,dl)+b_bot-y_c
+    x_d_r = -x_d_l
+    
+    x = np.append(x,x_d_r)
+    y = np.append(y,y_d_r)
+    return x,y
 
-def bending(a,b,M_x,M_y,x,y,I_xx,I_yy,materials)
+def bending_i(M_x,M_y,a_i,b_i,material):
+    for i in range(np.shape(a_i)[0])
+        x = section_i(a_i[i],b_i[i])[0]
+        y = section_i(a_i[i],b_i[i])[1]
+        I_xx = moi_ellipse(a_i[i],b_i[i])[0]
+        I_yy = moi_ellipse(a_i[i],b_i[i])[0]
+        sigma_t = M_x/I_xx*y+M_y/I_yy*x 
+        
     
     return 
