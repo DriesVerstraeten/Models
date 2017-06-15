@@ -16,9 +16,10 @@ import propulsion as prop
 import Climb_Descent_FieldPerformance as CDFP
 import CruiseRange as CR
 
-def Performance(Mfuelmax, PL, V_acc, MTOW, S, A, e, CD_0, etha_p, etha_p_landing, P_TO, P, T_static, LD_max, hcruise, CL_0, CL_alpha, alpha_TO, CL_max_TO, CL_landing_max, CL_landing_td, D_prop, D_spinner, V_c, V_H):
-    R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array = calcCruise(MTOW,OEW,Mfuelmax,PL,S,V_acc)
-    CL_TO, CD_TO, V_S1_si, V_LOF_si, S_TO_si, t_cruiseh, ROC_SL_si, h_absolute_si, R_glide, S_landing_si, S_ground_roll_si, S_landing_reverse_si, S_ground_roll_reverse_si, V_REF, V_SO = main_updown(MTOW, S, A, e, CD_0, etha_p, etha_p_landing, P_TO, P, T_static, LD_max, hcruise, CL_0, CL_alpha, alpha_TO, CL_max_TO, CL_landing_max, CL_landing_td, D_prop, D_spinner, V_c, V_H)
+def Performance(Mfuelmax, PL, V_acc, MTOW, OEW, S, A, e, CD_0, etha_p, etha_p_landing, P_TO, P, T_static, LD_max, hcruise, CL_0, CL_alpha, alpha_TO, CL_max_TO, CL_landing_max, CL_landing_td, D_prop, D_spinner, V_c, V_H):
+    
+    R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array = CR.calcCruise(MTOW,OEW,Mfuelmax,PL,S,V_acc)
+    CL_TO, CD_TO, V_S1_si, V_LOF_si, S_TO_si, t_cruiseh, ROC_SL_si, h_absolute_si, R_glide, S_landing_si, S_ground_roll_si, S_landing_reverse_si, S_ground_roll_reverse_si, V_REF, V_SO = CDFP.main_updown(MTOW, S, A, e, CD_0, etha_p, etha_p_landing, P_TO, P, T_static, LD_max, hcruise, CL_0, CL_alpha, alpha_TO, CL_max_TO, CL_landing_max, CL_landing_td, D_prop, D_spinner, V_c, V_H)
     
     return 
 
@@ -37,4 +38,4 @@ MTOW,OEW,Mfuelmax,PL,S,V_acc
 
 R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array
 
-""""
+"""

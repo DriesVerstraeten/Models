@@ -42,7 +42,7 @@ for h in range(0,84000):
 #CL_0 = 0.39
 #CL_alpha = 0.1
 #alpha_TO = 2. #deg
-#W_TO = 3400. #lbf
+#MTOW = 3400. #lbf
 #rho = 0.002378 #slugs/ft3
 #S = 144.9 #ft2
 #CL_max_TO = 2.2 
@@ -66,13 +66,13 @@ for h in range(0,84000):
 """
 ## Inputs ##
 
-# W_TO [N] Take-off weight, usually MTOW, but can be adapted for aerobatic weight
+# MTOW [N] Take-off weight, usually MTOW, but can be adapted for aerobatic weight
 # S [m2] Surface area
 # A [-] Aspect ratio
 # e [-] Oswald efficiency factor
 # CD0 [-] Zero lift drag coefficient of the wing
 # etha_p [-] Prop efficiency
-# P_TO [kW] Take-off power
+# P_TO [W] Take-off power
 # alpha_TO [deg] angle of attack during ground run
 # CL_max_TO [-] Maximum lift coefficent in take-off configuration
 # V_c [m/s] Cruise speed
@@ -106,7 +106,7 @@ for h in range(0,84000):
 #Difference is explained by higher vstall than calculated
 """
 
-def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, D_prop, D_spinner, V_c, V_H):
+def Takeoff(MTOW, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, D_prop, D_spinner, V_c, V_H):
 
 
     #NOTES:
@@ -114,7 +114,7 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
     #The method used is described in chapter 17 method #3
     
     #Weight from kg to N
-    W_TO = W_TO*9.80665
+    MTOW = MTOW*9.80665
     
     # Not an input for the function, however an input locally
     rho_sealevel = 0.002378 #slugs/ft3
@@ -123,18 +123,18 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
     h_obst = 50. #ft
     
     #Converting the input values from si units to imperial units
-    W_TO = W_TO*0.224808943871 #Newton to lbf
+    MTOW = MTOW*0.224808943871 #Newton to lbf
     S = S*10.7639104 #m2 to ft2
     D_prop = D_prop*3.2808399 #m to ft
     D_spinner = D_spinner*3.2808399 #m to ft
     V_c = V_c*1.943844 #m/s to kts
     V_H = V_H*1.943844 #m/s to kts
-    P_TO = P_TO*1.3410220888 #kW to BHP
+    P_TO = P_TO*1.3410220888*1000 #W to BHP
     
     #Basic functions taken from Chapter 17 of the General Aviation book
     CL_TO = CL_0 + CL_alpha * alpha_TO 
     CD_TO = CD_0 + ((CL_TO**2)/(pi*A*e))
-    V_S1 = sqrt((2.*W_TO)/(rho_sealevel*S*CL_max_TO)) #ft/s
+    V_S1 = sqrt((2.*MTOW)/(rho_sealevel*S*CL_max_TO)) #ft/s
     V_LOF = 1.1 * V_S1 #ft/s
     T_c = (etha_p*550.*P_TO)/(V_c*1.68781) #lbf
     T_H = (etha_p*550.*P_TO)/(V_H*1.68781) #lbf  
@@ -183,7 +183,7 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
             dynam_pressure = 0.5*rho_sealevel*V[i]**2
             lift = dynam_pressure*S*CL_TO
             drag = dynam_pressure*S*CD_TO
-            acceleration = (thrust-drag-(mu_g_nobrakes*(W_TO - lift)))/(W_TO/g)
+            acceleration = (thrust-drag-(mu_g_nobrakes*(MTOW - lift)))/(MTOW/g)
             distance_1 = V[i] * dt
             distance_2 = 0.
             distance_total = distance_1 + distance_2
@@ -204,7 +204,7 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
             dynam_pressure = 0.5*rho_sealevel*V[i-1]**2
             lift = dynam_pressure*S*CL_TO
             drag = dynam_pressure*S*CD_TO
-            acceleration = (thrust-drag-(mu_g_nobrakes*(W_TO - lift)))/(W_TO/g)
+            acceleration = (thrust-drag-(mu_g_nobrakes*(MTOW - lift)))/(MTOW/g)
             airspeed = V[i-1] + acceleration*dt
             distance_1 = V[0] * dt
             distance_2 = 0.5 * a[0] * (dt**2)
@@ -227,7 +227,7 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
             dynam_pressure = 0.5*rho_sealevel*V[i-1]**2
             lift = dynam_pressure*S*CL_TO
             drag = dynam_pressure*S*CD_TO
-            acceleration = (thrust-drag-(mu_g_nobrakes*(W_TO - lift)))/(W_TO/g)
+            acceleration = (thrust-drag-(mu_g_nobrakes*(MTOW - lift)))/(MTOW/g)
             airspeed = V[i-1] + acceleration*dt
             distance_1 = V[i-1] * dt
             distance_2 = 0.5 * a[i-1] * (dt**2)
@@ -257,13 +257,13 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
     loc_VLOF = np.where(np.array(V) < V_LOF) #V in ft/s
     loc_list_VLOF = loc_VLOF[0][-1]
     
-    CL_VTR = (2*W_TO)/(rho_sealevel*(V_TR_ft**2)*S) #V in ft/s
+    CL_VTR = (2*MTOW)/(rho_sealevel*(V_TR_ft**2)*S) #V in ft/s
     k = 0.04207#1./(pi*A*e)
     CD_VTR = CD_0 + k*(CL_VTR**2)
     
-    S_TR = (0.2156*((V_S1)**2)*((T_V[loc_list]/W_TO)-(1/(CL_VTR/CD_VTR)))) #ft
+    S_TR = (0.2156*((V_S1)**2)*((T_V[loc_list]/MTOW)-(1/(CL_VTR/CD_VTR)))) #ft
     
-    theta_climb = np.arcsin(((T_V[loc_list]/W_TO)-(1/(CL_VTR/CD_VTR))))*(180/pi) #degrees
+    theta_climb = np.arcsin(((T_V[loc_list]/MTOW)-(1/(CL_VTR/CD_VTR))))*(180/pi) #degrees
     R_transition = (0.2156*(V_S1)**2) #ft
     h_transition = R_transition*(1. - np.cos(theta_climb*(pi/180))) #ft
     
@@ -286,13 +286,13 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
 """
 ## Inputs ##
 
-# W_TO [N] Take-off weight, usually MTOW, but can be adapted for aerobatic weight
+# MTOW [N] Take-off weight, usually MTOW, but can be adapted for aerobatic weight
 # S [m2] Surface area
 # A [-] Aspect ratio
 # e [-] Oswald efficiency factor
 # CD0 [-] Zero lift drag coefficient of the wing
 # etha_p [-] Prop efficiency
-# P [kW] Power during climb --------------------------------> Dependent on altitude
+# P [W] Power during climb --------------------------------> Dependent on altitude
 # LD_max [-] Maximum lift-over-drag ratio
 # hcruise [m] Cruise altitude
 
@@ -307,15 +307,15 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
 # Climb rate = 9.9 m/s (model) vs. 9.75 m/s (flight test)
 """
 
-def Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
+def Climb(MTOW, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
     
     #Weight from kg to N
-    W_TO = W_TO*9.80665
+    MTOW = MTOW*9.80665
     
     #Converting the input values from si units to imperial units
-    W_TO = W_TO*0.224808943871 #Newton to lbf    
+    MTOW = MTOW*0.224808943871 #Newton to lbf    
     S = S*10.7639104 #m2 to ft2
-    P = P*1.3410220888 #kW to BHP
+    P = P*1.3410220888*1000 #kW to BHP
     
 
     #Airspeed for best ROC
@@ -326,7 +326,7 @@ def Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
     
     for i in range(0, hmax):
         rho_h = Rhotab[i] * 0.00194032033 #Converted to slugs/ft3       
-        V_Y = sqrt((2./rho_h)*(W_TO/S)*sqrt((1./(pi*A*e))/(3.*CD_0)))
+        V_Y = sqrt((2./rho_h)*(MTOW/S)*sqrt((1./(pi*A*e))/(3.*CD_0)))
         V_Y_list.append(V_Y)
     
     #Rate of climb
@@ -335,7 +335,7 @@ def Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
     #If power changes according to height try changing the V_Y to a constant value
     
     for i in range(0, len(V_Y_list)):
-        ROC = 60.*(((etha_p*550.*P)/W_TO)-(V_Y_list[i]*(1.1547/LD_max))) #ft/min, CHANGE P_TO to power dependent on altitude
+        ROC = 60.*(((etha_p*550.*P)/MTOW)-(V_Y_list[i]*(1.1547/LD_max))) #ft/min, CHANGE P_TO to power dependent on altitude
         ROC_si = ROC*0.00508
         ROC_list.append(ROC_si)   
         ROC_SL_si = ROC_list[0]
@@ -401,12 +401,12 @@ def Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
 # https://en.wikipedia.org/wiki/Pilatus_PC-12
 """
 
-def Descent(W_TO, S, A, e, CD_0, LD_max, hcruise):
+def Descent(MTOW, S, A, e, CD_0, LD_max, hcruise):
     
     #Weight from kg to N
-    W_TO = W_TO*9.80665
+    MTOW = MTOW*9.80665
     
-    W_descent = 0.965*W_TO
+    W_descent = 0.965*MTOW
     
     #Best glide speed
     V_BG_list = [] #ft/s
@@ -458,13 +458,13 @@ def Descent(W_TO, S, A, e, CD_0, LD_max, hcruise):
 # Landing distance = 677 m (Model) vs. 661 m (Flight test) on dry ashphalt (mu_g = 0.3)
 """
 
-def Landing(W_TO, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, CL_landing_td):
+def Landing(MTOW, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, CL_landing_td):
     
     #Weight from kg to N
-    W_TO = W_TO*9.80665
+    MTOW = MTOW*9.80665
     
     #Defined the weight
-    W_landing = W_TO
+    W_landing = MTOW
     
     # Not an input for the function, however an input locally
     
@@ -532,11 +532,11 @@ def Landing(W_TO, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, CL_la
 #T_static does not have to be calculated using Dprop etc...
 #T_static might not have to be calculated at all
 
-def main_updown(W_TO, S, A, e, CD_0, etha_p, etha_p_landing, P_TO, P, T_static, LD_max, hcruise, CL_0, CL_alpha, alpha_TO, CL_max_TO, CL_landing_max, CL_landing_td, D_prop, D_spinner, V_c, V_H):
-    CL_TO, CD_TO, V_S1_si, V_LOF_si, S_TO_si = Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, D_prop, D_spinner, V_c, V_H)
-    t_cruiseh, ROC_SL_si, h_absolute_si = Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise)
-    R_glide = Descent(W_TO, S, A, e, CD_0, LD_max, hcruise)
-    S_landing_si, S_ground_roll_si, S_landing_reverse_si, S_ground_roll_reverse_si, V_REF, V_SO = Landing(W_TO, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, theta_app, CL_landing_td) 
+def main_updown(MTOW, S, A, e, CD_0, etha_p, etha_p_landing, P_TO, P, T_static, LD_max, hcruise, CL_0, CL_alpha, alpha_TO, CL_max_TO, CL_landing_max, CL_landing_td, D_prop, D_spinner, V_c, V_H):
+    CL_TO, CD_TO, V_S1_si, V_LOF_si, S_TO_si = Takeoff(MTOW, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, D_prop, D_spinner, V_c, V_H)
+    t_cruiseh, ROC_SL_si, h_absolute_si = Climb(MTOW, S, A, e, CD_0, etha_p, P, LD_max, hcruise)
+    R_glide = Descent(MTOW, S, A, e, CD_0, LD_max, hcruise)
+    S_landing_si, S_ground_roll_si, S_landing_reverse_si, S_ground_roll_reverse_si, V_REF, V_SO = Landing(MTOW, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, theta_app, CL_landing_td) 
     return(CL_TO, CD_TO, V_S1_si, V_LOF_si, S_TO_si, t_cruiseh, ROC_SL_si, h_absolute_si, R_glide, S_landing_si, S_ground_roll_si, S_landing_reverse_si, S_ground_roll_reverse_si, V_REF, V_SO)
 
 #0.965
