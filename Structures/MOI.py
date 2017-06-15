@@ -13,13 +13,16 @@ import matplotlib.pyplot as plt
 
 
 t = p.t_skin
-c = wm.c
+c = wm.cord
 #c_r = p.c_r
 aifoil_file_name = 'foil1_modified.dat'
 
 def wingbox_MOI():
     
-    airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
+    airfoil_coordinates_1 = np.genfromtxt('foil1_modified.dat',skip_header=1)
+    airfoil_coordinates_2 = np.genfromtxt('foil2_modified.dat',skip_header=1)
+    airfoil_coordinates_3 = np.genfromtxt('foil3_modified.dat',skip_header=1)
+            
     
     Ixx = []
     Iyy = []
