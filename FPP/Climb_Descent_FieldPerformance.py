@@ -113,6 +113,9 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
     #All input values and formulas are performed using imperial units
     #The method used is described in chapter 17 method #3
     
+    #Weight from kg to N
+    W_TO = W_TO*9.80665
+    
     # Not an input for the function, however an input locally
     rho_sealevel = 0.002378 #slugs/ft3
     mu_g_nobrakes = 0.08 #Ground friction coefficient
@@ -306,6 +309,9 @@ def Takeoff(W_TO, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
 
 def Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
     
+    #Weight from kg to N
+    W_TO = W_TO*9.80665
+    
     #Converting the input values from si units to imperial units
     W_TO = W_TO*0.224808943871 #Newton to lbf    
     S = S*10.7639104 #m2 to ft2
@@ -397,6 +403,9 @@ def Climb(W_TO, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
 
 def Descent(W_TO, S, A, e, CD_0, LD_max, hcruise):
     
+    #Weight from kg to N
+    W_TO = W_TO*9.80665
+    
     W_descent = 0.965*W_TO
     
     #Best glide speed
@@ -450,6 +459,9 @@ def Descent(W_TO, S, A, e, CD_0, LD_max, hcruise):
 """
 
 def Landing(W_TO, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, CL_landing_td):
+    
+    #Weight from kg to N
+    W_TO = W_TO*9.80665
     
     #Defined the weight
     W_landing = W_TO
