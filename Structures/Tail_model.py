@@ -445,10 +445,10 @@ def bending_box(dx,dy,start,end,t,rho,f,i):    #bending stress calc
     ycoordinates1 = ycoordinates * c_tail(dy,i)
     fit1 = np.polyfit(xcoordinates1[0:66],ycoordinates1[0:66],5)
     f1 = np.poly1d(fit1)
-    f11 = f1.deriv(1)
-    fit2 = np.polyfit(xcoordinates1[68:133],ycoordinates1[68:133],5)
-    f2 = np.poly1d(fit2)
-    f22 = f2.deriv(1)
+#    f11 = f1.deriv(1)
+#    fit2 = np.polyfit(xcoordinates1[68:133],ycoordinates1[68:133],5)
+#    f2 = np.poly1d(fit2)
+#    f22 = f2.deriv(1)
     x_y_up = np.zeros(dx)
     x_y_down = np.zeros(dx)
     for j in range (0,dx):
@@ -459,33 +459,33 @@ def bending_box(dx,dy,start,end,t,rho,f,i):    #bending stress calc
     stress_12 = tail_moment(dx,f,i) * x_y_up / Ixx[i]
     stress_23 = tail_moment(dx,f,i) * x_y_right / Ixx[i]
     stress_34 = tail_moment(dx,f,i) * x_y_down / Ixx[i]
-    slope1 = np.zeros(dx)
-    slope2 = np.zeros(dx)
-    for j in range (0,dx):
-        slope1[j] = abs((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f11(x_x[j]))))
-        slope2[j] = abs((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f22(x_x[j]))))
-    q1 = np.zeros(dx)
-    q2 = np.zeros(dx)
-    q3 = np.zeros(dx)
-    q1[dx/2-1] = 0
-    for j in range (dx/2,dx):
-        q1[j] = q1[j-1] - tail_shear(dy,f,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
-    q2[0] = q1[dx-1]
-    for j in range (1,dx):
-        q2[j] = q2[j-1] - tail_shear(dy,f,i)*(abs(x_y_down[dx-1]-x_y_up[dx-1])/dx)*t*x_y_right[j]/Ixx[i]
-    q3[0] = q2[dx-1]
-    for j in range (1,dx):
-        q3[j] = q3[j-1] - tail_shear(dy,f,i)*slope2[j]*t*x_y_down[j]/Ixx[i]
-    q1[0] = q3[dx-1]
-    for j in range (1,dx/2):
-        q1[j] = q1[j-1] - tail_shear(dy,f,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
-    mises1 = np.zeros(dx)
-    mises2 = np.zeros(dx)
-    mises3 = np.zeros(dx)
-    for j in range (0,dx):
-        mises1[j] = math.sqrt(3*(q1[j]/t)**2+stress_12[j]**2)
-        mises2[j] = math.sqrt(3*(q2[j]/t)**2+stress_23[j]**2)
-        mises3[j] = math.sqrt(3*(q3[j]/t)**2+stress_34[j]**2)
+#    slope1 = np.zeros(dx)
+#    slope2 = np.zeros(dx)
+#    for j in range (0,dx):
+#        slope1[j] = abs((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f11(x_x[j]))))
+#        slope2[j] = abs((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f22(x_x[j]))))
+#    q1 = np.zeros(dx)
+#    q2 = np.zeros(dx)
+#    q3 = np.zeros(dx)
+#    q1[dx/2-1] = 0
+#    for j in range (dx/2,dx):
+#        q1[j] = q1[j-1] - tail_shear(dy,f,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
+#    q2[0] = q1[dx-1]
+#    for j in range (1,dx):
+#        q2[j] = q2[j-1] - tail_shear(dy,f,i)*(abs(x_y_down[dx-1]-x_y_up[dx-1])/dx)*t*x_y_right[j]/Ixx[i]
+#    q3[0] = q2[dx-1]
+#    for j in range (1,dx):
+#        q3[j] = q3[j-1] - tail_shear(dy,f,i)*slope2[j]*t*x_y_down[j]/Ixx[i]
+#    q1[0] = q3[dx-1]
+#    for j in range (1,dx/2):
+#        q1[j] = q1[j-1] - tail_shear(dy,f,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
+#    mises1 = np.zeros(dx)
+#    mises2 = np.zeros(dx)
+#    mises3 = np.zeros(dx)
+#    for j in range (0,dx):
+#        mises1[j] = math.sqrt(3*(q1[j]/t)**2+stress_12[j]**2)
+#        mises2[j] = math.sqrt(3*(q2[j]/t)**2+stress_23[j]**2)
+#        mises3[j] = math.sqrt(3*(q3[j]/t)**2+stress_34[j]**2)
 #    plt.figure(figsize=(19,5))
 #    plt.suptitle('Von-Mises in the tailbox')
 #    plt.subplot(131)
@@ -501,24 +501,7 @@ def bending_box(dx,dy,start,end,t,rho,f,i):    #bending stress calc
 #    plt.ylabel('Von-Mises in bottom skin, N/m^2')
 #    plt.xlabel('x - Location')
 #    plt.show()
-    a = max(stress_12)
-    b = min(stress_12)
-    if abs(a) >= abs(b):
-        c = a
-    else:
-        c = b
-    a = max(stress_23)
-    b = min(stress_23)
-    if abs(a) >= abs(b):
-        c = a
-    else:
-        c = b
-    a = max(stress_34)
-    b = min(stress_34)
-    if abs(a) >= abs(b):
-        c = a
-    else:
-        c = b
+    c = max(abs(max(stress_12)),abs(min(stress_12)),abs(max(stress_23)),abs(min(stress_23)),abs(max(stress_34)),abs(min(stress_34)))
 #    a = max(stress_41)
 #    b = min(stress_41)
 #    if abs(a) >= abs(b):
@@ -640,7 +623,7 @@ def highest_shear_box(dx,dy,start,end,t,rho,fh):
 
 #   master_function(500,500,100,100,100,100,0.0,0.6,0.002,0,0) - input i used to test the code. first 2 are forces (on horizontal tail, then on vertical tail.). next 4 are meshes (leave at 500 max, otherwise will take too long). start and end are spar locations (so for 0.0 and 0.6 there is only one spar at 0.6 of the cord). spar should be at where elevator or whtever control surface is!. 0.002 is thickness of the skin in m, and last 2 numbers are the material reference to a Material_properties.py. 
 
-def master_function(fh,fv,dx,dy,dz,dtheta,start,end,t,m1,m2):
+def master_function(fh,fv,T,dx,dy,dz,dtheta,start,end,t,m1,m2):
 #    Ixx = wingbox_MOI(dy,start,end,t,mat.rho[m1])[0]
 #    Ixy = wingbox_MOI(dy,start,end,t,mat.rho[m1])[2]
 #    Iyy = wingbox_MOI(dy,start,end,t,mat.rho[m1])[1]
