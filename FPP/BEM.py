@@ -57,7 +57,7 @@ class airfoil(object):
     
     It loads data from a '.npz' file with four arrays:
         
-    airfoils: array of airfoil data arrays (AoA, cl, cd, cm)
+    airfoils: dict of airfoil data arrays (AoA, cl, cd, cm)
     thickness: array of corresponding thickness values
     RE: Reynolds numbers for the corresponding airfoils
     M:  Mach number for the coresponding airfoils
@@ -261,8 +261,15 @@ class BET(object):
         forces = self.forces(velocity, rho, rps, pitch = pitch)
         thrust = self.num_blades * np.trapz(forces[0], x=r)
         torque = self.num_blades * np.trapz(-np.array(forces[1]) * r, x=r)
-        power = np.abs(torque * rps * np.pi*2)
+        power = np.abs(torque * rps * np.pi*2) #radial power = moment*rot vel
         
         return thrust, torque, power
+    
+    def take_off(self, rps, pitch, rho):
+        """
+        Calculate the power available during take-off by using kinetic energy.
+        Basically you put power in the system, whick gets converted using the 
+        propellor
+        """
         
     
