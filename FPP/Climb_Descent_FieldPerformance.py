@@ -5,20 +5,17 @@
 #P_TO = P_BHP at sea level
 #
 #
-################## TBD #####################
 
-#W_landing = ??
-#W_descent = ??
-
-################# TBD #####################
 
 #Importing modules
 import numpy as np
 from math import *
 import matplotlib.pyplot as plt
+import os
 
 #Importing functions
 import Common.CalcISA as ISA
+from FPP.propulsion import Analyse_prop
 
 #ISA lists
 Ttab = []
@@ -32,6 +29,10 @@ for h in range(0,84000):
     Rhotab.append(State[2])
     ptab.append(State[1])
     htab.append(h)
+
+
+airfoil_path = os.getcwd() + '\Polars\Eppler_prop.npz'
+
 
 ###############################################################################
 ##############################  INPUTS  #######################################
@@ -106,12 +107,15 @@ for h in range(0,84000):
 #Difference is explained by higher vstall than calculated
 """
 
-def Takeoff(MTOW, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, D_prop, D_spinner, V_c, V_H):
+def Takeoff(MTOW, S, A, e, CD_0, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, V_c, V_H):
 
 
     #NOTES:
     #All input values and formulas are performed using imperial units
     #The method used is described in chapter 17 method #3
+    
+    #Importing power parameters
+    #thrust, torque, power_available = Analyse_prop()
     
     #Weight from kg to N
     MTOW = MTOW*9.80665
