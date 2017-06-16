@@ -77,7 +77,7 @@ class airfoil(object):
             [np.interp(alpha, data['alpha'], data['CD']) for data in airfoils]
         ])
         self.lift_drag_by_thickness = interp1d(
-            self.aerofoils['thicknesses'], lift_drag, axis=0, copy=False)
+            self.airfoils['thicknesses'], lift_drag, axis=0, copy=False)
     
     def for_thickness(self, thickness):
         """
@@ -175,7 +175,6 @@ class BET(object):
             for th in self.blade.thickness])
         self._lift_drag_interp = fast_interpolation(
             airfoil.alpha, self.lift_drag, axis=1)
-        self._last_factors = np.zeros((len(self.radii), 2)) #stores last coefficients
         
     def lift_drag(self, alpha):
         """
