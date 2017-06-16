@@ -11,14 +11,14 @@ import Wing_model as wm
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.integrate as integrate
-
+import time 
+start_time = time.time()
 
 t = p.t_skin
 c_1 = wm.c_1
 c_2 = wm.c_2
 c_3 = wm.c_3
 c = wm.c
-aifoil_file_name = 'foil1_modified.dat'
 
 def MOI_section_1():
     
@@ -63,7 +63,7 @@ def MOI_section_1():
         #dx = 1./sections             
         x = np.linspace(front_spar,back_spar,len(wm.y))
         dx = (back_spar - front_spar)/len(wm.y)
-        area_section = dx * t
+        area_section = dx * t * 2 #multiplied by two because it is a honeycomb structure
         x_span.append(x)
 
         arc_length_US = integrate.quad(lambda x: np.sqrt(1+f11(x)**2), front_spar, back_spar) #upper skin
@@ -75,7 +75,7 @@ def MOI_section_1():
         front_spar_area = (front_spar_length)*t
         back_spar_area = (back_spar_length)*t
 
-        total_area = (arc_length_US[0] + arc_length_LS[0])*t + front_spar_area + back_spar_area
+        total_area = (arc_length_US[0] + arc_length_LS[0])*2*t + front_spar_area + back_spar_area
 
         y_NA_sec = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
         x_NA_sec = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area * back_spar) / total_area
@@ -123,7 +123,7 @@ def MOI_section_2():
         f1 = np.poly1d(fit1) #upper skin
         f11 = f1.deriv(1)
         
-        fit2 = np.polyfit(xcoordinates1[133:256],ycoordinates1[133:256],5)
+        fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
         f2 = np.poly1d(fit2) #lower skin
         f22 = f2.deriv(1)
         '''
@@ -138,7 +138,7 @@ def MOI_section_2():
         #dx = 1./sections             
         x = np.linspace(front_spar,back_spar,len(wm.y))
         dx = (back_spar - front_spar)/len(wm.y)
-        area_section = dx * t
+        area_section = dx * t * 2
         x_span.append(x)
 
         arc_length_US = integrate.quad(lambda x: np.sqrt(1+f11(x)**2), front_spar, back_spar) #upper skin
@@ -150,7 +150,7 @@ def MOI_section_2():
         front_spar_area = (front_spar_length)*t
         back_spar_area = (back_spar_length)*t
 
-        total_area = (arc_length_US[0] + arc_length_LS[0])*t + front_spar_area + back_spar_area
+        total_area = (arc_length_US[0] + arc_length_LS[0])*2*t + front_spar_area + back_spar_area
 
         y_NA_sec = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
         x_NA_sec = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area * back_spar) / total_area
@@ -213,7 +213,7 @@ def MOI_section_3():
         #dx = 1./sections             
         x = np.linspace(front_spar,back_spar,len(wm.y))
         dx = (back_spar - front_spar)/len(wm.y)
-        area_section = dx * t
+        area_section = dx * t * 2
         x_span.append(x)
 
         arc_length_US = integrate.quad(lambda x: np.sqrt(1+f11(x)**2), front_spar, back_spar) #upper skin
@@ -225,7 +225,7 @@ def MOI_section_3():
         front_spar_area = (front_spar_length)*t
         back_spar_area = (back_spar_length)*t
 
-        total_area = (arc_length_US[0] + arc_length_LS[0])*t + front_spar_area + back_spar_area
+        total_area = (arc_length_US[0] + arc_length_LS[0])*2*t + front_spar_area + back_spar_area
 
         y_NA_sec = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
         x_NA_sec = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area * back_spar) / total_area
@@ -258,8 +258,16 @@ def wingbox_MOI_total():
 
 Ixx, Iyy, Ixy, x_NA, y_NA, x_span = wingbox_MOI_total()
 
+print("--- %s seconds ---" % (time.time() - start_time))
 
 '''
+plt.plot(wm.y,Ixx, color = 'r')
+plt.plot(wm.y,Iyy, color = 'b')
+plt.plot(wm.y,Ixy, color = 'g')
+plt.show()
+
+
+
 
 
 
@@ -279,10 +287,7 @@ plt.plot(xback,yback)
 
 
 
-plt.plot(wm.y,wingbox_MOI()[0], color = 'r')
-plt.plot(wm.y,wingbox_MOI()[1], color = 'b')
-plt.plot(wm.y,wingbox_MOI()[2], color = 'g')
-plt.show()
+
 '''
 
 """
