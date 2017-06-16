@@ -47,8 +47,8 @@ def plot3dlift(dFz):
                           alpha = 0.33, linewidth=0, antialiased=True)
     # Customize the axes.
     ax.set_zlim(-roundup10(np.amax(abs(Z))), roundup10(np.amax(abs(Z))))
-    ax.zaxis.set_major_locator(LinearLocator(10))
-    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+    #ax.zaxis.set_major_locator(LinearLocator(10))
+    #ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
     ax.set_xlim(-6, 6)
     ax.set_ylim(-6, 6)
     ax.set_xlabel('coordloc [m]')
@@ -89,8 +89,8 @@ def plot3ddrag(dFz):
                            alpha = 0.33, linewidth=0, antialiased=True)
     # Customize the axes.
     ax.set_zlim(-2,2)
-    ax.zaxis.set_major_locator(LinearLocator(10))
-    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+    #ax.zaxis.set_major_locator(LinearLocator(10))
+    #ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
     ax.set_xlim(-6, 6)
     ax.set_ylim(-6, 6)
     ax.set_xlabel('delta Drag [m]')
