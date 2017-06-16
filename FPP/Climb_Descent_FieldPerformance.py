@@ -306,7 +306,7 @@ def Takeoff(MTOW, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
 # Climb(46500, 25.81, 10.27, 0.85, 0.04, 0.8, 800, 12, 9150)
 # Climb rate = 9.9 m/s (model) vs. 9.75 m/s (flight test)
 """
-
+#Minimum drag coefficient instead of Cd0
 def Climb(MTOW, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
     
     #Weight from kg to N
