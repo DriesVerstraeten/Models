@@ -32,7 +32,7 @@ for h in range(0,84000):
 
 
 airfoil_path = os.getcwd() + '\Polars\Eppler_prop.npz'
-
+rpm = 2800
 
 ###############################################################################
 ##############################  INPUTS  #######################################
@@ -107,7 +107,7 @@ airfoil_path = os.getcwd() + '\Polars\Eppler_prop.npz'
 #Difference is explained by higher vstall than calculated
 """
 
-def Takeoff(MTOW, S, A, e, CD_0, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, V_c, V_H):
+def Takeoff(MTOW, S, A, e, CD_0, CL_0, CL_alpha, alpha_TO, CL_max_TO, V_c, V_H):
 
 
     #NOTES:
@@ -115,7 +115,7 @@ def Takeoff(MTOW, S, A, e, CD_0, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, V_c,
     #The method used is described in chapter 17 method #3
     
     #Importing power parameters
-    #thrust, torque, power_available = Analyse_prop()
+    T_static, NA1, NA2, P_TO, NA3 = Analyse_prop(airfoil_path, 0, 0, rpm)
     
     #Weight from kg to N
     MTOW = MTOW*9.80665
@@ -129,26 +129,25 @@ def Takeoff(MTOW, S, A, e, CD_0, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, V_c,
     #Converting the input values from si units to imperial units
     MTOW = MTOW*0.224808943871 #Newton to lbf
     S = S*10.7639104 #m2 to ft2
-    D_prop = D_prop*3.2808399 #m to ft
-    D_spinner = D_spinner*3.2808399 #m to ft
+    #D_prop = D_prop*3.2808399 #m to ft
+    #D_spinner = D_spinner*3.2808399 #m to ft
     V_c = V_c*1.943844 #m/s to kts
     V_H = V_H*1.943844 #m/s to kts
-    P_TO = P_TO*1.3410220888*1000 #W to BHP
+    P_TO = P_TO*1.3410220888/1000 #W to BHP
     
     #Basic functions taken from Chapter 17 of the General Aviation book
     CL_TO = CL_0 + CL_alpha * alpha_TO 
     CD_TO = CD_0 + ((CL_TO**2)/(pi*A*e))
     V_S1 = sqrt((2.*MTOW)/(rho_sealevel*S*CL_max_TO)) #ft/s
     V_LOF = 1.1 * V_S1 #ft/s
+    
+    V_LOF_ms = 0.3048*V_LOF
+    BLA1, BLA2, BLA3, BLA4, etha_p = Analyse_prop(airfoil_path, 0, V_LOF_ms, rpm)
+    
     T_c = (etha_p*550.*P_TO)/(V_c*1.68781) #lbf
     T_H = (etha_p*550.*P_TO)/(V_H*1.68781) #lbf  
     
-    A_prop = 0.25*pi*D_prop**2
-    A_spinner = 0.25*pi*D_spinner**2
-    T_static = 0.85*((550*P_TO)**(2./3.))*((2.*rho_sealevel*A_prop)**(1./3.))*(1. - (A_spinner/A_prop)) #What power to use
-    #T_static apart laten berekenen voor landing?
-    #T_static als output van propulsion functie?
-    
+  
     #Setting up the factors of a cubic spline as is explained on page 810 from the book
     Q = np.matrix([[0., 0., 0., 1.],
                    [(V_c**3.), (V_c**2.), V_c, 1.],
@@ -167,7 +166,7 @@ def Takeoff(MTOW, S, A, e, CD_0, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, V_c,
     
     i = 0
     time = 0
-    dt = 0.01
+    dt = 1
     t = []
     V = [0.]
     L = []
@@ -180,7 +179,7 @@ def Takeoff(MTOW, S, A, e, CD_0, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, V_c,
     T_V = []
     # Pas terug aan naar 10000
     
-    for i in range(0, 10000):
+    for i in range(0, 1):
         if i == 0:
             time = 0
             thrust = E
@@ -280,7 +279,7 @@ def Takeoff(MTOW, S, A, e, CD_0, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, V_c,
     V_S1_si = V_S1*0.3048
 
       
-    return(CL_TO, CD_TO, V_S1_si, V_LOF_si, S_TO_si)
+    return(CL_TO, CD_TO, V_S1_si, V_LOF_si, S_TO_si, T_static, P_TO, etha_p)
 
 
 ###############################################################################
