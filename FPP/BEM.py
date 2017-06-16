@@ -235,7 +235,7 @@ class BET(object):
         
         alpha = twist-advance_angle
         cl_cd = self.lift_drag(alpha)
-        #construct array  for the conversion from lift to thrust
+        #construct array  for the conversion factors from lift to thrust
         cphi, sphi = np.cos(advance_angle), np.sin(advance_angle)
         A = np.array([[cphi, -sphi], [sphi, cphi]])
         return np.einsum("ijk,kj->ik", A, cl_cd)
@@ -247,7 +247,7 @@ class BET(object):
         r = self.radii
         chord = self.blade.chord
         lts = LTS(velocity, rps,r)
-#        print lts
+        #print lts
         phi = advance_angle(velocity, rps,r)
         force_coeffs = self.force_coeffs(phi,pitch)
         forces = 0.5*rho*lts**2*force_coeffs * chord

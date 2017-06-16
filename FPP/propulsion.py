@@ -62,26 +62,26 @@ def thick_distr(x):
     return thick
 
 
-def Analyse_prop(airfoil_path, h, V, rps, pitch = 0.0):
+def Analyse_prop(airfoil_path, h, V, rpm, pitch = 0.0):
     """
     Analyse a propellor
     
     Input
     -----
     airfoil_path:   str
-        Path to airfoil used in the analysis
+        Path to airfoil used in the analysis (and filename)
     h:              float
         Height at which the analysis
     V:              float
         Velocity at which to calculate the analysis
-    rps:            float
-        Revolutions per second of the prop
+    rpm:            float
+        Revolutions per minute of the prop
     pitch:          float
         Additional pitch
     """
     x = np.arange(0,(D-d_spin)/2+dx,dx) #blade length
     chord_ref = interp1d(x,chord_distr(x, x[-1]))
-    
+    rps = rpm/60.
     chord = chord_ref(x)
     beta = np.linspace(1.2,0.4,len(x))
     thickness = thick_distr(x)
@@ -98,6 +98,7 @@ def Analyse_prop(airfoil_path, h, V, rps, pitch = 0.0):
     power_available = thrust*V
     eta_prop = power_available/power
     
-#    print eta_p
-#    print eta_prop
+    #print eta_p
+    #print eta_prop
     return thrust, torque, power_available
+
