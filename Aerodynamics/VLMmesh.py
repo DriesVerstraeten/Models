@@ -357,8 +357,9 @@ def createVtailpoints(taper,bv,S,xpanels,SpanPanelsPerSection,xwing,fuseelipsewi
     StartingPoints.append(np.array([xwing-0.25*C[1],0,bv]))
 
     Trapezoidpoint = np.array([xwing-0.25*C[0],0,0])
-
+    
     c = 1-(fuseelipsewidth/2)/(bv)
+
     FuseStartPoint = Interpolate3D(StartingPoints[0],Trapezoidpoint,c)
     StartingPoints.append(FuseStartPoint)
 

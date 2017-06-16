@@ -131,8 +131,122 @@ def CalcTailPars(plane,tail,data):
 
     return deda,CLalphaminH,CLalphaH
 
-timeit.time.clock()
+def CalcCLCD(plane,V,alpha,rho,data,DynViscosity):
 
+    totalpanels = len(plane[5])
+
+    alpharad = np.radians(alpha)
+    
+    Vinfz = V*math.sin(math.pi/180.*alpha)
+    Vinfy = 0
+    Vinfx = V*math.cos(math.pi/180.*alpha)
+
+    Vvec = np.full((totalpanels,3),np.array([Vinfx,Vinfy,Vinfz]))
+
+    Force = VLM.Calcpoint(plane,Vvec,rho)
+
+    Force2 = np.empty((totalpanels,3))
+
+    rotmaty = np.matrix([[math.cos(alpharad),0,math.sin(alpharad)],
+                         [0,1,0],
+                         [-math.sin(alpharad),0,math.cos(alpharad)]])
+
+    for i in range(totalpanels):
+        Force2[i] = np.dot(rotmaty,Force[i])
+
+    FL = sum(Force2[:,2])
+    FD = sum(Force2[:,0])
+
+    wingarray = plane[10][0]
+    Hwingarray = plane[10][1]
+    Vwingarray = plane[10][2]
+    foilarray = plane[10][6]
+    tfoil = plane[10][5]
+    fuselagelength = plane[10][10]
+
+    VDrag = VLMV.ViscousDrag(plane,Force,wingarray,Hwingarray,Vwingarray,data,V,rho,foilarray,tfoil,DynViscosity,plane[9],alpha,fuselagelength)
+
+    return FL,FD,VDrag
+
+def CreateCLCDpolar(plane,data,V,rho,DynViscosity,alphastart,alphaend,alphapoints):
+
+    points = []
+    
+    for alpha in np.linspace(alphastart,alphaend,alphapoints):
+        
+        FL,FD,FDv = CalcCLCD(plane,V,alpha,rho,data,DynViscosity)
+
+        points.append([alpha,FL,FD,FDv,FD+FDv])
+
+    points = np.array(points)
+
+    return points
+
+def CalcFL(plane,alpha,V,rho):
+
+    Vinfz = V*math.sin(math.pi/180.*alpha)
+    Vinfy = 0
+    Vinfx = V*math.cos(math.pi/180.*alpha)
+
+    Vvec = np.full((totalpanels,3),np.array([Vinfx,Vinfy,Vinfz]))
+
+    Force = VLM.Calcpoint(plane,Vvec,rho)
+
+    Force2 = np.empty((totalpanels,3))
+        
+    alpharad = math.pi/180.*alpha
+
+    rotmaty = np.matrix([[math.cos(alpharad),0,math.sin(alpharad)],
+                         [0,1,0],
+                         [-math.sin(alpharad),0,math.cos(alpharad)]])
+    
+    for i in range(totalpanels):
+        Force2[i] = np.dot(rotmaty,Force[i])
+
+    return Force2
+    
+
+def CalcDragForConddition(plane,W,V,rho,DynViscosity,data):
+
+    alphanew = 0.5
+    i = 0
+    FLnew = sum(CalcFL(plane,alphanew,V,rho)[:,2])
+
+    while abs(FLnew-W) > .01:
+        
+        alpha0 = alphanew-0.001
+        alpha1 = alphanew+0.001
+
+        FL0 = sum(CalcFL(plane,alpha0,V,rho)[:,2])
+        FL1 = sum(CalcFL(plane,alpha1,V,rho)[:,2])
+
+        der = (alpha1-alpha0)/(FL1-FL0)
+
+        alphanew = der*(W-FL0)+alpha0
+
+        FLnew = sum(CalcFL(plane,alphanew,V,rho)[:,2])
+        i += 1
+
+
+    Force = CalcFL(plane,alphanew,V,rho)
+
+    wingarray = plane[10][0]
+    Hwingarray = plane[10][1]
+    Vwingarray = plane[10][2]
+    foilarray = plane[10][6]
+    tfoil = plane[10][5]
+    fuselagelength = plane[10][10]
+
+    VDrag = VLMV.ViscousDrag(plane,Force,wingarray,Hwingarray,Vwingarray,data,V,rho,foilarray,tfoil,DynViscosity,plane[9],alpha,fuselagelength)
+
+    FD = sum(Force[:,0])
+
+    totalDrag = VDrag + FD
+
+    print totalDrag
+
+    return totalDrag
+    
 currpath = os.path.dirname(os.path.abspath(__file__))
 
 foilarray = [0,0,0,0,0,0,0,0]
@@ -228,9 +342,15 @@ refz = 0.0
 
 stabinputs = [refx,refy,refz]
 
-alpha = 5.
+DynViscosity = 1.725*10**-5
+
+alpha = 4.
 V = 92.6
 rho = .7
+
+alphastart = 0.0
+alphaend = 5.0
+alphapoints = 10
 
 totalpanels = len(plane[5])
 
@@ -240,8 +360,7 @@ Vinfx = V*math.cos(math.pi/180.*alpha)
 
 Vvec = np.full((totalpanels,3),np.array([Vinfx,Vinfy,Vinfz]))
 
-stabderives = VLMstab.stabderives(plane,Vvec,stabinputs,rho,deda,CNah,VhV)
-time2 = timeit.time.clock()
+CalcDragForConddition(plane,17200.0,V,rho,DynViscosity,viscdata)
 
-print time2
-#VDrag = VLMV.ViscousDrag(plane,Forces,wingarray,Hwingarray,Vwingarray,data,V,rho,foilarray,tfoil,DynViscosity,plane[9],alpha,fuselagelength)
+stabderives = VLMstab.stabderives(plane,Vvec,stabinputs,rho,deda,CNah,VhV)
+
