@@ -37,7 +37,7 @@ import os
 airfoil_path = os.getcwd() + '\Polars\Eppler_prop.npz'
 h=1200
 V=100
-rps = 2800./60
+rpm = 2800
 #V_array = np.arange(5,150,1)
 #
 #thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
@@ -80,14 +80,14 @@ def calcVminmax(W,V_array,S,h):
     PowerAva_simple = []
     V_array_simple = [10,40,80,120,150]
     for V in V_array_simple:
-        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+        thrust, torque, power_available, power, eta_p = Analyse_prop(airfoil_path, h, V, rpm)
         PowerAva_simple.append(power_available)
     fit = np.polyfit(V_array_simple, PowerAva_simple, 1)
     PowerAva = V_array * fit[0] + fit[1]
 
 #    PowerAva = []
 #    for V in V_array:
-#        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+#        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rpm)
 #        PowerAva.append(power_available)
 #    PowerAva = np.array(PowerAva)
     
@@ -112,32 +112,47 @@ def calcPowerAva_alt(h_max,h_acc,h_acc_fit):
     h_simple = np.arange(0,h_max,h_acc_fit)
     for h in h_simple:
         
-        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rpm)
         PowerAva_simple.append(power_available)
     fit = np.polyfit(h_simple, PowerAva_simple, 3)
     PowerAva_alt = fit[0]*h**3 + fit[1]*h**2 + fit[2]*h + fit[3]
     return PowerAva_alt
 
+W_cruise =1500
+V_array =np.arange(10,150,5)
+S=20
+
+
+
+
+
+
 def calcAltMax(W_cruise,V_array,S):
+    from scipy.interpolate import interp1d
+    h_max_an = 12000
     PowerCruise_alt = []
     V_Cruise_alt = []
     PowerAva_alt = []
-    h_cruise = np.arange(0,18000,50)
+    h_acc = 50
+    h_cruise = np.arange(0,h_max_an+h_acc,h_acc)
     for h in h_cruise:
         PowerCruise_eff, V_Cruise_eff, LD_Cruise_eff = calcPowerCruise(W_cruise,V_array,S,h)
         PowerCruise_alt.append(PowerCruise_eff)
         V_Cruise_alt.append(V_Cruise_eff)
-        PowerAva_alt.append(450/0.00135 - h*30) # UPDATE !!!!!!
+    #        PowerAva_alt.append(450/0.00135 - h*30) # UPDATE !!!!!!
     PowerCruise_alt = np.array(PowerCruise_alt)
     
-    thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+    #### 
     PowerAva_simple = []
-    h_cruise_simple = np.arange(0,18000,500)
-    for V in V_array_simple:
-        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+    h_simple = np.arange(0,h_max_an+1000,1000)
+    for h in h_simple:
+        V = V_Cruise_alt[np.where(h_cruise == h)[0][0]]
+        thrust, torque, power_available, power, eta_p = Analyse_prop(airfoil_path, h, V, rpm)
         PowerAva_simple.append(power_available)
-    fit = np.polyfit(V_array_simple, PowerAva_simple, 1)
-    PowerAva = V_array * fit[0] + fit[1]
+    #fit = np.polyfit(h_simple, PowerAva_simple, 3)
+    fit = interp1d(h_simple,PowerAva_simple,1)
+    PowerAva_alt = fit(h_cruise)
+    #PowerAva_alt = fit[0]*h_cruise**3 + fit[1]*h_cruise**2 + fit[2]*h_cruise + fit[3]
     
     PowerAva_alt = np.array(PowerAva_alt)
     where = np.where(PowerCruise_alt < PowerAva_alt)[0][-1]
@@ -177,7 +192,7 @@ def calcAltMax(W_cruise,V_array,S):
     plt.show() 
     return PowerCruise_alt, PowerAva_alt, h_max
 
-#PowerCruise_alt, PowerAva_alt, h_max = calcAltMax(1600*9.81,np.arange(5,150,0.1),20)
+PowerCruise_alt, PowerAva_alt, h_max = calcAltMax(1600*9.81,np.arange(5,150,0.1),20)
 
 
 def calcPowerLoiter(W_loiter,V_array,S,h_loiter): # Calc Power Required during loiter. V needs to be array
