@@ -15,13 +15,18 @@ c_1 = np.linspace(p.c_r, 0.95*p.c_r, 1/dy)
 c_2 = np.linspace(0.95*p.c_r, 0.8*p.c_r, 1/dy)
 c_3 = np.linspace(0.8*p.c_r, 0.4*p.c_r, 1/dy)
 c = np.hstack((c_1,c_2,c_3))
+Ixx = moi.wingbox_MOI_total()[0] 
+Iyy = moi.wingbox_MOI_total()[1]
+Ixy = moi.wingbox_MOI_total()[2]
+y_NA = moi.wingbox_MOI_total()[4]
+x_NA = moi.wingbox_MOI_total()[3]
 
 def shear_box(dx,i,t,fh,rib1,rib2,T): #shear stress calc. dx dy are grid numbers (use 500 for each or so). start end are %cord where wingbox is (0.1 and 0.575 for wing). i is the location where you calculate shear (so if its 499 for dx=500 its at the root. or tip if you defined it like that). t thickness, rho is rho, fh is the force on the wing
-    if (i/dx<=rib1):
+    if (i/300<=rib1):
         airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
-    if (i/dx>rib1) and (i/dx<=rib2):
+    if (i/300>rib1) and (i/dx<=rib2):
         airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
-    if (i/dx>rib1):
+    if (i/300>rib1):
         airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
     x_x = np.linspace(0.15*c[i],0.575*c[i],dx)
     xcoordinates = np.zeros(len(airfoil_coordinates)) 
@@ -44,11 +49,7 @@ def shear_box(dx,i,t,fh,rib1,rib2,T): #shear stress calc. dx dy are grid numbers
         x_y_down[j] = f2(x_x[j])
     x_y_right = np.linspace(x_y_up[dx-1],x_y_down[dx-1],dx) 
     x_y_left = np.linspace(x_y_down[0],x_y_up[0],dx) 
-    Ixx = moi.wingbox_MOI_total()[0] 
-    Iyy = moi.wingbox_MOI_total()[1]
-    Ixy = moi.wingbox_MOI_total()[2]
-    y_NA = moi.wingbox_MOI_total()[4]
-    x_NA = moi.wingbox_MOI_total()[3]
+
     slope1 = np.zeros(dx)
     slope2 = np.zeros(dx)
     for j in range (0,dx):
