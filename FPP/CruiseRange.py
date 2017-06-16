@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import Common.CalcISA as ISA
+from FPP.propulsion import Analyse_prop
 
 # CalcCruise() and CruisePlots() combine all the other functions (except calcAltMax())
 
@@ -32,7 +33,13 @@ import Common.CalcISA as ISA
 # V_min
 # V_max
 # V_array = array with analysed speeds
+import os
+airfoil_path = os.getcwd() + '\Polars\Eppler_prop.npz'
+h=1200
+V=100
+rps = 2800./60
 
+thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps, pitch = 0.0)
 ###################################################################################################
 def calcPowerReq(W,V,S,h): # Calc Power Required [W] in steady cruise conditions for one or multiple TAS. Weight in Newton.
     rho = ISA.Dens(h)
@@ -61,8 +68,13 @@ def calcPowerReq(W,V,S,h): # Calc Power Required [W] in steady cruise conditions
 #    return PowerReq, LD, T
 
 def calcVminmax(W,V_array,S,h):
+    PowerAva = []
+    for V in V_array:
+        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps, pitch = 0.0)
+        PowerAva.append(power_available)
+        
     PowerReq, LD = calcPowerReq(W,V_array,S,h)
-    PowerAva = 450/0.00135 * np.ones(len(V_array)) # [W] calcPowerAva() !!!!!!!!
+#    PowerAva = 450/0.00135 * np.ones(len(V_array)) # [W] calcPowerAva() !!!!!!!!
     where = np.where(PowerReq < PowerAva)[0]
     V_min = V_array[where[0]]
     V_max = V_array[where[-1]]
@@ -250,7 +262,7 @@ def CruisePlots(MTOW,OEW,Mfuelmax,S,V_acc):
 
 #Range, Speed = CruisePlots(1700,950,450,20,0.01)
 #
-#R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array = calcCruise(1700,950,450,444,20,0.01)
+R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array = calcCruise(1700,950,450,444,20,0.01)
 
 
 #h_cruise = 18000 * 0.3048 # Cruise altitude [m]
