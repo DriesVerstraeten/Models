@@ -233,7 +233,7 @@ class BET(object):
         if len(twist) != len(advance_angle):
             raise ValueError("Shape mismatch, make sure the ")
         
-        alpha = twist-advance_angle
+        alpha = twist-advance_angle-pitch
         cl_cd = self.lift_drag(alpha)
         #construct array  for the conversion factors from lift to thrust
         cphi, sphi = np.cos(advance_angle), np.sin(advance_angle)
