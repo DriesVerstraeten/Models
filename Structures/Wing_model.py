@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 plt.close()
-fig = plt.figure(figsize = (8.5,6),tight_layout=True)
+#fig = plt.figure(figsize = (8.5,6),tight_layout=True)
 
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #CHORD LENGTH AT DIFFERENT SPANWISE LOCATIONS
