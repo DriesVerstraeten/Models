@@ -19,7 +19,7 @@ fig = plt.figure(figsize = (8.5,6),tight_layout=True)
 #CHORD LENGTH AT DIFFERENT SPANWISE LOCATIONS
 
 #def wing_parameters(b, MTOW, rho, V, S):
-dy = 0.1 #small spanwise section
+dy = 0.01 #small spanwise section
 
 r2 = .95
 r3 = .8
@@ -64,7 +64,7 @@ CL_45g = -4.5 * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coef
 #SHEAR AT 9G
 
 
-def wing_shear_9g(CL, rho, V):
+def wing_shear(CL, rho, V):
     dL_9g = CL * 1./2. * rho * V**2. * dy * c #the small lift contribution from every section                      
     dL_9g_total = np.zeros(len(y)) #make a list of zeroes to later overwrite these in the next loop
               
@@ -75,7 +75,7 @@ def wing_shear_9g(CL, rho, V):
             dL_9g_total[i] = dL_9g_total[i-1] - dL_9g[0]
         else:
             dL_9g_total[i] = dL_9g_total[i-1] - dL_9g[i-1]
-    
+    '''
     ax1 = fig.add_subplot(221)
     ax1.plot(y,dL_9g_total)  
     ax1.set_title('Shear force at 9g')
@@ -84,17 +84,16 @@ def wing_shear_9g(CL, rho, V):
     ax1.set_ylim(dL_9g_total[-1],dL_9g_total[0])
     ax1.set_xlim([y[0],y[-1]])
     plt.show()
-    
+    '''
     return dL_9g, dL_9g_total
-x = wing_shear_9g(CL_9g,p.rho_0,p.V_cruise)[1]
-
+#
 
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #BENDING AT 9g
 
 
-def wing_moment_9g(CL, rho, V):
-    dM_9g = wing_shear_9g(CL, rho, V)[0] * y
+def wing_moment(CL, rho, V):
+    dM_9g = wing_shear(CL, rho, V)[0] * y
     dM_9g_total = np.zeros(len(y))
     
     for i in range(0,len(y)):
@@ -104,7 +103,7 @@ def wing_moment_9g(CL, rho, V):
             dM_9g_total[i] = dM_9g_total[i-1] - dM_9g[0]
         else:
             dM_9g_total[i] = dM_9g_total[i-1] - dM_9g[i-1]
-    
+    '''
     ax2 = fig.add_subplot(222)
     ax2.plot(y1,dM_9g_total)  
     ax2.set_title('Bending moment at 9g')
@@ -113,11 +112,24 @@ def wing_moment_9g(CL, rho, V):
     ax2.set_ylim(dM_9g_total[-1],dM_9g_total[0])
     ax2.set_xlim([y[0],y[-1]])
     plt.show()
-    
+    '''
     return dM_9g, dM_9g_total
 
-wing_moment_9g(CL_9g,p.rho_0,p.V_cruise)
+#wing_moment_9g(CL_9g,p.rho_0,p.V_cruise)
 
+
+
+
+
+
+
+
+
+
+
+
+
+'''
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #BENDING AT -4.5g
 
@@ -178,3 +190,4 @@ print "Max moment 9g:", wing_moment_9g(CL_9g, p.rho_0, p.V_cruise)[1][0], "Nm"
 print "Max shear -4.5g:", wing_shear_45g(CL_45g, p.rho_0, p.V_cruise)[1][0], "N"
 print "Max moment -4.5g:", wing_moment_45g(CL_45g, p.rho_0, p.V_cruise)[1][0], "Nm"
 """ 
+'''
