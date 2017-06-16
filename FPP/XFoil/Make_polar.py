@@ -201,7 +201,7 @@ def construct_thicknesses(foilname, thicknesses, plot=False):
         #first interpolate both upper and lower side to specified densities
         x1 = np.arange(0,0.01,0.0005)
         x2 = np.arange(0.01,0.05,0.01)
-        x3 = np.arange(0.05,0.95,0.05)
+        x3 = np.arange(0.05,0.95,0.025)
         x4 = np.arange(0.95,1.001,0.01)
         x = np.concatenate((x1, x2, x3, x4),axis=0)
         s_upper_interp = interp1d(s_upper[:,0],s_upper[:,1])
@@ -273,7 +273,7 @@ def save_polar_set(foilname,RE,M):
         One-dimensional array containing the list of Mach numbers to analyse
     """    
     #construct different thicknesses around the camber line
-    thicks = np.arange(0.10,0.28, 0.02)
+    thicks = np.arange(0.10,0.40, 0.02)
     new_foils, thick_out = construct_thicknesses(foilname, thicks, plot=False)
     thick_out = defchar.replace(thick_out.astype(str),'.','')
     thick_out = defchar.replace(thick_out,'0','', count=1)
@@ -311,7 +311,27 @@ def save_polar_set(foilname,RE,M):
     
     return
 
+def save_existing_polar(fnames, savename, thicks):
+    """
+    Save an existing polar set to a '.npz' datafile
     
-    
-    
-    
+    Input
+    -----
+    fnames:     array-like
+        List or array of strings that contains all the filenames
+    """
+    fnames = np.asarray(fnames)
+    print fnames.dtype
+    print 
+    fnames = defchar.add('../Polars/',fnames)
+    savedata = []
+    for fname in fnames:
+        polar = np.genfromtxt(fname, skip_header=11)
+        alpha = polar[:,0]
+        cl = polar[:,1]
+        cd = polar[:,2]
+        cm = polar[:,4]
+        savedata.append(dict(alpha = alpha, CL = cl, CD = cd, CM = cm))
+    print savedata
+    np.savez('../Polars/'+savename, airfoils = savedata, thicknesses = thicks)
+        
