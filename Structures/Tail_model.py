@@ -650,7 +650,7 @@ def master_function(fh,fv,dx,dy,dz,dtheta,start,end,t,m1,m2):
     a = total_shear_stress_boom(dx,dz,dtheta,fh,fv,dz-1)
     b = total_bending_stress_boom(dx,dtheta,dx-1,fh,fv,1)
     c = highest_bending_box(dx,dy,start,end,t,mat.rho[m2],fh)
-    d = highest_shear_box(dx,dy,start,end,t,mat.rho[m2],fh)
+    d = highest_shear_box(dx,dy,start,end,t,mat.rho[m2],fh,T)
     print ('TAILBOX ANALYSIS:')  
     print ('Weight of the tailbox:')
     print wingbox_MOI(dy,start,end,t,mat.rho[m1])[3]
