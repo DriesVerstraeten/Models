@@ -243,8 +243,6 @@ def CalcDragForConddition(plane,W,V,rho,DynViscosity,data):
 
     totalDrag = VDrag + FD
 
-    print totalDrag
-
     return totalDrag
     
 currpath = os.path.dirname(os.path.abspath(__file__))
@@ -346,7 +344,7 @@ DynViscosity = 1.725*10**-5
 
 alpha = 4.
 V = 92.6
-rho = .7
+rho = 1.225
 
 alphastart = 0.0
 alphaend = 5.0
@@ -359,8 +357,6 @@ Vinfy = 0
 Vinfx = V*math.cos(math.pi/180.*alpha)
 
 Vvec = np.full((totalpanels,3),np.array([Vinfx,Vinfy,Vinfz]))
-
-CalcDragForConddition(plane,17200.0,V,rho,DynViscosity,viscdata)
 
 stabderives = VLMstab.stabderives(plane,Vvec,stabinputs,rho,deda,CNah,VhV)
 
