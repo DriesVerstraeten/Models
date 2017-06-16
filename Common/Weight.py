@@ -4,80 +4,51 @@ Created on Thu Jun 15 15:20:45 2017
 
 @author: Maxime
 """
-import math
-import numpy as np
-from Common.class12est import class2est
 
-def calcOEW(W_fuselage,W_wing,W_tail):
-#    W_avionics = 1
-    OEW = W_fuselage + W_wing + W_tail # Structural weight
+def calcOEW(W_fuselage,W_wing,W_tail, mtow,Mfuelmax): # input initial value for mtow
+    W_avionics = 50
+    W_engine = 200
     
-    weights,totalweight = class2est(inputlist,inputlist2,mtow,oew,fuelw,maxfuelw)
-    for i in [1,2,4]:
-        OEW += weights[i]
-    return
+    OEW = W_fuselage + W_wing + W_tail  +  W_avionics + W_engine
+    
+    W_gear, W_Fuel_sys, W_flightcontrol, W_els, W_api, W_fur = Class2est_simplified(mtow,Mfuelmax,W_avionics)
+    OEW += W_gear + W_Fuel_sys + W_flightcontrol + W_els + W_api + W_fur
+    return OEW # [kg]
 
-#weights = np.array([W_wing,W_h,W_v,W_fuselage,W_gear,W_pwr,W_Fuel_sys,W_flightcontrol,W_iae,W_els,W_api,W_ox,W_fur])
 
-Cd0 = 0.02
-e = .85
-A = 6.1
-propefficiency = .82
-u = .62
-Vcruise = 92.6
-height = 18000*0.3048
-payload = 444.0
-flightrange = 1400000
-loitertime = 2700
 
-aref = .614
-bref = -5.887
+def Class2est_simplified(mtow,Mfuelmax,W_avionics):
 
-CLmaxLand =2.1
-LandingDistance = 500.
+    N_pax = 4 # People capacity
+    M_D = 0.4 # Mach number
 
-mtowinitialestimate = 1700.
+    sep_tanks = 2 # Number of fuel tanks
+    Ne = 1 # Number of engines         
+    
+    Nult = 9 # Ultimate load factor
+    lsm = 0.75 # Length of landing gear strut [m]
+    integralfrac = 1 # Fuel tank: Qtot/(Qtot+Qint)
 
-sweep = 0.0
-sweepquarter = math.pi/180.*sweep
-taper = .3
-tc = 0.15
-Nult = 9.0
-rootcoord = 1.76
-Maxspeed = 150.0
-N_pax = 4
-M_D = .4
-Sh = 2.24
-bh = 2.97
-Ah = np.sqrt(bh**2/Sh)
-Ch_max = 0.833
-tch = .15
-trh = tch*Ch_max
-lh = 6.0
-Sv = 2.0
-Av = 3.0
-cv_max = 1.34
-tcv = 0.15
-Trv = tcv*cv_max
-bv = np.sqrt(Av*Sv)
-fuselage_l = 7.0
-fuse_width = 1.2
-fuse_height = 1.4
-Vc = 92.6
-maxfuelw = 400
+    W_gear =(0.054*((lsm/.3048)**0.501)*(((mtow*2.204)*Nult)**0.684))*0.45359237
+    W_Fuel_sys =(2.49*((Mfuelmax*2.204/6.55)**0.6*(1./(1+integralfrac))**0.3*(sep_tanks)**0.2*(Ne)**0.13)**1.21)*0.45359237
+    W_flightcontrol =1.066*((mtow*2.204)**0.626)*0.453592
+    W_els = 426.0*((((W_Fuel_sys/0.45359237)+(W_avionics/0.45359237))/1000)**0.51)*0.45359237
+    W_api = 0.265*((mtow*2.204)**0.52)*(N_pax**0.68)*((W_avionics/0.453592)**0.17)*(M_D**0.08)*0.453592
+    W_fur = 0.412*((N_pax)**1.145)*(((mtow*2.204))**0.489)*0.453592
+ 
+    return W_gear, W_Fuel_sys, W_flightcontrol, W_els, W_api, W_fur
 
-sep_tanks = 2
-We = 130.
-Ne = 1
 
-Nult1 = 5.7
-lsm = .75
-W_L = mtowinitialestimate
-integralfraction = 1
+mtow = 1700
+Mfuelmax = 450
 
-inputlist = np.array([Cd0,e,A,propefficiency,u,Vcruise,height,payload,flightrange,loitertime,aref,bref,CLmaxLand,LandingDistance])
-inputlist2 = np.array([sweepquarter,taper,tc,Nult,rootcoord,Maxspeed,N_pax,M_D,Sh,Ah,Ch_max,trh,bh,
-                       lh,Sv,Av,Trv,bv,cv_max,fuselage_l,fuse_width,fuse_height,Vc,sep_tanks,We,Ne,
-                       Nult1,lsm,W_L,integralfraction])
+W_fuselage = 200
+W_wing = 150
+W_tail = 100
 
-#mtow,oew,fuelw,WSland,weights = estweights(inputlist,inputlist2,100)
+OEW = calcOEW(W_fuselage,W_wing,W_tail, mtow,Mfuelmax)
+
+W_avionics = 450
+W_gear, W_Fuel_sys, W_flightcontrol, W_els, W_api, W_fur = Class2est_simplified(mtow,Mfuelmax,W_avionics)
+
+print OEW
