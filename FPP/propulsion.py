@@ -27,6 +27,7 @@ import Common.CalcISA as ISA
 import BEM
 import Init_Parameters as p
 from scipy.interpolate import interp1d
+import os
 
 #could be stored in the parameter file
 D = 1.8         #Prop diameter in meter
@@ -99,4 +100,4 @@ def Analyse_prop(airfoil_path, h, V, rps, pitch = 0.0):
     
     print eta_p
     print eta_prop
-    return thrust, torque, power
+    return thrust, torque, power_available

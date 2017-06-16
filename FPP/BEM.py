@@ -8,6 +8,8 @@ Created on Thu Jun 08 13:46:15 2017
 This file contains the classes used for the blade element theory and propulsion
 calculations.
 
+Modified from:  'https://github.com/ricklupton/py-bem'
+
 General assumptions
 -------------------
 
@@ -17,6 +19,7 @@ The incoming velocity is always perpendicular to the propellor disk
 
 import numpy as np
 from scipy.interpolate import interp1d
+from scipy.interpolate._fitpack import _bspleval
 
 class blade(object):
     """
@@ -107,8 +110,8 @@ def LTS(velocity, rps, radius):
     ||incoming vector + rotational vector||
     """
     return np.sqrt(velocity**2+(rps*radius*2*np.pi)**2)
-
-def fast_interpolation(x, y, new_x):
+'''
+def fast_interpolation(x, y, new_x, axis):
     """
     from https://stackoverflow.com/a/13504757
     
@@ -116,13 +119,13 @@ def fast_interpolation(x, y, new_x):
     efficiency than multiple interp1d calls
     """
     from scipy.interpolate._fitpack import _bspleval
-    f = interp1d(x, y, axis=-1, kind=3)
+    f = interp1d(x, y, axis=axis, kind=3)
     xj,cvals,k = f._spline
     result = np.empty_like(new_x)
     for (i, j), value in np.ndenumerate(new_x):
         result[i, j] = _bspleval(value, x, cvals[:, i, j], k, 0)
     return result
-
+'''
 def advance_angle(velocity, rps, radius):
     """
     Calculate the advance angle experienced by the rotorblades
@@ -137,6 +140,33 @@ def advance_angle(velocity, rps, radius):
         Radius at which the angle(s) is/are to be calculated
     """
     return np.arctan(velocity/(2*np.pi*rps*radius))
+
+class fast_interpolation:
+    def __init__(self, x, y, axis=-1):
+        assert len(x) == y.shape[axis]
+        self.x = x
+        self.y = y
+        self.axis = axis
+        self._f = interp1d(x, y, axis=axis, kind='slinear', copy=False)
+
+    def __getstate__(self):
+        return dict(x=self.x, y=self.y, axis=self.axis)
+
+    def __setstate__(self, state):
+        self.x = state['x']
+        self.y = state['y']
+        self.axis = state['axis']
+        self._f = interp1d(self.x, self.y, axis=self.axis,
+                           kind='slinear', copy=False)
+
+    def __call__(self, new_x):
+        #assert new_x.shape == y.shape
+        xj, cvals, k = self._f._spline.tck
+        result = np.empty_like(new_x)
+        for i, value in enumerate(new_x.flat):
+            result.flat[i] = _bspleval(value, self.x, cvals[:, i], k, 0)
+        return result
+
     
 
 class BET(object):
@@ -170,11 +200,11 @@ class BET(object):
         
         #airfoil data
         self.alpha = airfoil.alpha
-        self.lift_drag = np.array([
+        self.lift_drag_dat = np.array([
             airfoil.for_thickness(th)
             for th in self.blade.thickness])
         self._lift_drag_interp = fast_interpolation(
-            airfoil.alpha, self.lift_drag, axis=1)
+            airfoil.alpha, self.lift_drag_dat, axis=1)
         
     def lift_drag(self, alpha):
         """
@@ -208,7 +238,7 @@ class BET(object):
         #construct array  for the conversion from lift to thrust
         cphi, sphi = np.cos(advance_angle), np.sin(advance_angle)
         A = np.array([[cphi, -sphi], [sphi, cphi]])
-        return np.einsum("ijk,jk->ik", A, cl_cd)
+        return np.einsum("ijk,kj->ik", A, cl_cd)
         
     def forces(self,velocity, rho, rps, pitch):
         """
@@ -217,6 +247,7 @@ class BET(object):
         r = self.radii
         chord = self.blade.chord
         lts = LTS(velocity, rps,r)
+        print lts
         phi = advance_angle(velocity, rps,r)
         force_coeffs = self.force_coeffs(phi,pitch)
         forces = 0.5*rho*lts**2*force_coeffs * chord
@@ -227,11 +258,10 @@ class BET(object):
         Generate the forces on the rotordisk
         """
         r = self.radii
-        forces = self.forces(velocity, rho, rps)
-        fx, fy = zip(*forces)
-        thrust = self.num_blades * np.trapz(fx, x=r)
-        torque = self.num_blades * np.trapz(-np.array(fy) * r, x=r)
-        power = torque * rps * np.pi*2
+        forces = self.forces(velocity, rho, rps, pitch = pitch)
+        thrust = self.num_blades * np.trapz(forces[0], x=r)
+        torque = self.num_blades * np.trapz(-np.array(forces[1]) * r, x=r)
+        power = np.abs(torque * rps * np.pi*2)
         
         return thrust, torque, power
         
