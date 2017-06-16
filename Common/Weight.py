@@ -39,16 +39,16 @@ def Class2est_simplified(mtow,Mfuelmax,W_avionics):
     return W_gear, W_Fuel_sys, W_flightcontrol, W_els, W_api, W_fur
 
 
-mtow = 1700
-Mfuelmax = 450
-
-W_fuselage = 200
-W_wing = 150
-W_tail = 100
-
-OEW = calcOEW(W_fuselage,W_wing,W_tail, mtow,Mfuelmax)
-
-W_avionics = 450
-W_gear, W_Fuel_sys, W_flightcontrol, W_els, W_api, W_fur = Class2est_simplified(mtow,Mfuelmax,W_avionics)
-
-print OEW
+#mtow = 1700
+#Mfuelmax = 450
+#
+#W_fuselage = 200
+#W_wing = 150
+#W_tail = 100
+#
+#OEW = calcOEW(W_fuselage,W_wing,W_tail, mtow,Mfuelmax)
+#
+#W_avionics = 450
+#W_gear, W_Fuel_sys, W_flightcontrol, W_els, W_api, W_fur = Class2est_simplified(mtow,Mfuelmax,W_avionics)
+#
+#print OEW

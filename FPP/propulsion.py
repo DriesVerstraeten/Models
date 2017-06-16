@@ -98,6 +98,6 @@ def Analyse_prop(airfoil_path, h, V, rps, pitch = 0.0):
     power_available = thrust*V
     eta_prop = power_available/power
     
-    print eta_p
-    print eta_prop
+#    print eta_p
+#    print eta_prop
     return thrust, torque, power_available

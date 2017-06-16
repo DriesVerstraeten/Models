@@ -247,7 +247,7 @@ class BET(object):
         r = self.radii
         chord = self.blade.chord
         lts = LTS(velocity, rps,r)
-        print lts
+#        print lts
         phi = advance_angle(velocity, rps,r)
         force_coeffs = self.force_coeffs(phi,pitch)
         forces = 0.5*rho*lts**2*force_coeffs * chord

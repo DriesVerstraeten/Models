@@ -93,7 +93,7 @@ def section_ii(a,b_top,b_bot,d,y_c):
     return x,y
 
 def bending_i(M_x,M_y,a_i,b_i,material):
-    for i in range(np.shape(a_i)[0])
+    for i in range(np.shape(a_i)[0]):
         x = section_i(a_i[i],b_i[i])[0]
         y = section_i(a_i[i],b_i[i])[1]
         I_xx = moi_ellipse(a_i[i],b_i[i])[0]
