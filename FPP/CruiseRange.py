@@ -38,8 +38,17 @@ airfoil_path = os.getcwd() + '\Polars\Eppler_prop.npz'
 h=1200
 V=100
 rps = 2800./60
+#V_array = np.arange(5,150,1)
+#
+#thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+#PowerAva_simple = []
+#V_array_simple = [10,40,80,120,150]
+#for V in V_array_simple:
+#    thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+#    PowerAva_simple.append(power_available)
+#fit = np.polyfit(V_array_simple, PowerAva_simple, 1)
+#PowerAva = V_array * fit[0] + fit[1]
 
-thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps, pitch = 0.0)
 ###################################################################################################
 def calcPowerReq(W,V,S,h): # Calc Power Required [W] in steady cruise conditions for one or multiple TAS. Weight in Newton.
     rho = ISA.Dens(h)
@@ -68,11 +77,20 @@ def calcPowerReq(W,V,S,h): # Calc Power Required [W] in steady cruise conditions
 #    return PowerReq, LD, T
 
 def calcVminmax(W,V_array,S,h):
-    PowerAva = []
-    for V in V_array:
-        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps, pitch = 0.0)
-        PowerAva.append(power_available)
-        
+    PowerAva_simple = []
+    V_array_simple = [10,40,80,120,150]
+    for V in V_array_simple:
+        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+        PowerAva_simple.append(power_available)
+    fit = np.polyfit(V_array_simple, PowerAva_simple, 1)
+    PowerAva = V_array * fit[0] + fit[1]
+
+#    PowerAva = []
+#    for V in V_array:
+#        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+#        PowerAva.append(power_available)
+#    PowerAva = np.array(PowerAva)
+    
     PowerReq, LD = calcPowerReq(W,V_array,S,h)
 #    PowerAva = 450/0.00135 * np.ones(len(V_array)) # [W] calcPowerAva() !!!!!!!!
     where = np.where(PowerReq < PowerAva)[0]
@@ -88,6 +106,18 @@ def calcPowerCruise(W_cruise,V_array,S,h_cruise): # Calc Power Required for most
     V_Cruise_eff = V_array[where]    
     return PowerCruise_eff, V_Cruise_eff, LD_Cruise_eff # have to include engine efficiency at different speeds !!!!!!!!!!!!
 
+def calcPowerAva_alt(h_max,h_acc,h_acc_fit):
+    PowerAva_simple = []
+    h = np.arange(0,h_max,h_acc_fit)
+    h_simple = np.arange(0,h_max,h_acc_fit)
+    for h in h_simple:
+        
+        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+        PowerAva_simple.append(power_available)
+    fit = np.polyfit(h_simple, PowerAva_simple, 3)
+    PowerAva_alt = fit[0]*h**3 + fit[1]*h**2 + fit[2]*h + fit[3]
+    return PowerAva_alt
+
 def calcAltMax(W_cruise,V_array,S):
     PowerCruise_alt = []
     V_Cruise_alt = []
@@ -99,6 +129,16 @@ def calcAltMax(W_cruise,V_array,S):
         V_Cruise_alt.append(V_Cruise_eff)
         PowerAva_alt.append(450/0.00135 - h*30) # UPDATE !!!!!!
     PowerCruise_alt = np.array(PowerCruise_alt)
+    
+    thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+    PowerAva_simple = []
+    h_cruise_simple = np.arange(0,18000,500)
+    for V in V_array_simple:
+        thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
+        PowerAva_simple.append(power_available)
+    fit = np.polyfit(V_array_simple, PowerAva_simple, 1)
+    PowerAva = V_array * fit[0] + fit[1]
+    
     PowerAva_alt = np.array(PowerAva_alt)
     where = np.where(PowerCruise_alt < PowerAva_alt)[0][-1]
     h_max = h_cruise[where]
@@ -155,14 +195,14 @@ def calcCruise(MTOW,OEW,Mfuelmax,PL,S,V_acc): # Payload [kg], speed analysis acc
 #    Mfuelmax = 450 # Maximum fuel tank capacity [kg]
 #    S = 20 # Wing surface [m^2]
     prop_eff = 0.9
-    cp = 0.408 / 3.6E6 # [kg/J] UPDATE for different speeds and altitudes
+    cp = 1.04302E-7 # [kg/J] UPDATE for different speeds and altitudes
     E = 45*60 # Required endurance / Loiter duration [s]
     h_cruise = 18000 * 0.3048 # Cruise altitude [m]
     h_loiter = 3000 * 0.3048 # Loiter altitude [m]
     g = 9.81
     Mff_start = 0.965 # 0.990*0.995*0.995*0.985 # Fuel fraction from start to cruise altitude
     Mff_end = 0.98 # 0.985*0.995 # Fuel fraction from end loiter phase to end flight
-    V_array = np.arange(5,150,V_acc) # Set range and accuracy of speed analysis [m/s] !!!!!!!
+    V_array = np.arange(10,150,V_acc) # Set range and accuracy of speed analysis [m/s] !!!!!!!
     V_Cruise_spec = 92.6 # Specified cruise speed [m/s]
     
     W_loiter = ((OEW + PL) / Mff_end) * g * 1.005 # Weight at end of loiter phase [kg], multiplied by some factor
@@ -260,9 +300,9 @@ def CruisePlots(MTOW,OEW,Mfuelmax,S,V_acc):
     
    
 
-#Range, Speed = CruisePlots(1700,950,450,20,0.01)
-#
-R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array = calcCruise(1700,950,450,444,20,0.01)
+Range, Speed = CruisePlots(1700,950,450,20,0.01)
+##
+#R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array = calcCruise(1700,950,450,444,20,0.01)
 
 
 #h_cruise = 18000 * 0.3048 # Cruise altitude [m]
