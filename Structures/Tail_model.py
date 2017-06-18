@@ -23,6 +23,7 @@ v_t = p.ct_ht#tip cord length
 v_b = p.b_ht / 2#vertical tail span
 v_w = p.W_ht#weight of the vertical tail. gonna be recalculated a bit later
 
+
 """
 USE: master_function(500,500,100,100,100,100,0.0,0.6,0.002,0,0) - 
 input i used to test the code. first 2 are forces (on horizontal tail, then on vertical tail.). 
@@ -433,7 +434,7 @@ def wingbox_MOI(dy,start,end,t1,rho): #t1 is thickness of 2 fiber sheets togethe
    
     return Ixx, Iyy, Ixy, weight, xcoordinates1, ycoordinates1, f1, f2, y_NA, x_NA, x 
 
-def bending_box(dx,dy,start,end,t,rho,f,i):    #bending stress calc
+def bending_box(dx,dy,start,end,t,rho,f,i,Ixx):    #bending stress calc
     airfoil_coordinates = np.genfromtxt('NACA0012.txt',skip_header=0)
     x_x = np.linspace(start*c_tail(dy,i),end*c_tail(dy,i),dx)
     xcoordinates = np.zeros(len(airfoil_coordinates)) 
@@ -455,7 +456,6 @@ def bending_box(dx,dy,start,end,t,rho,f,i):    #bending stress calc
         x_y_up[j] = f1(x_x[j])
         x_y_down[j] = -x_y_up[j]
     x_y_right = np.linspace(x_y_up[dx-1],x_y_down[dx-1],dx) 
-    Ixx = wingbox_MOI(dx,start,end,t,rho)[0]
     stress_12 = tail_moment(dx,f,i) * x_y_up / Ixx[i]
     stress_23 = tail_moment(dx,f,i) * x_y_right / Ixx[i]
     stress_34 = tail_moment(dx,f,i) * x_y_down / Ixx[i]
@@ -510,11 +510,11 @@ def bending_box(dx,dy,start,end,t,rho,f,i):    #bending stress calc
 #        c = b
     return c
 
-def highest_bending_box(dx,dy,start,end,t1,rho,f):
+def highest_bending_box(dx,dy,start,end,t1,rho,f,Ixx):
     y = np.linspace(0,p.b_ht/2,dy)
     stress = np.zeros(dy)
     for i in range (0,dy):
-        stress[i] = bending_box(dx,dy,start,end,t1,rho,f,i)
+        stress[i] = bending_box(dx,dy,start,end,t1,rho,f,i,Ixx)
     plt.figure(figsize=(7,5))
     plt.suptitle('Highest bending stress in the tailbox')
     plt.plot(y,stress)
@@ -529,7 +529,7 @@ def highest_bending_box(dx,dy,start,end,t1,rho,f):
         c = b
     return c
 
-def shear_box(dx,dy,start,end,i,t,rho,fh,T): #shear stress calc
+def shear_box(dx,dy,start,end,i,t,rho,fh,T,Ixx): #shear stress calc
     airfoil_coordinates = np.genfromtxt('NACA0012.txt',skip_header=0)
     x_x = np.linspace(start*c_tail(dy,i),end*c_tail(dy,i),dx)
     xcoordinates = np.zeros(len(airfoil_coordinates)) 
@@ -552,7 +552,6 @@ def shear_box(dx,dy,start,end,i,t,rho,fh,T): #shear stress calc
         x_y_down[j] = -x_y_up[j]
     x_y_right = np.linspace(x_y_up[dx-1],x_y_down[dx-1],dx) 
 #    x_y_left = np.linspace(x_y_down[0],x_y_up[0],dx) 
-    Ixx = wingbox_MOI(dx,start,end,t,rho)[0]
 #    Iyy = wingbox_MOI(dx,start,end,t,rho)[1]
 #    Ixy = wingbox_MOI(dx,start,end,t,rho)[2]
 #    y_NA = wingbox_MOI(dx,start,end,t,rho)[8]
@@ -602,11 +601,11 @@ def shear_box(dx,dy,start,end,i,t,rho,fh,T): #shear stress calc
 #    plt.show()
     return max(abs(q2))
 
-def highest_shear_box(dx,dy,start,end,t,rho,fh):
+def highest_shear_box(dx,dy,start,end,t,rho,fh,T,Ixx):
     y = np.linspace(0,p.b_ht/2,dy)
     stress = np.zeros(dy)
     for i in range (0,dy):
-        stress[i] = shear_box(dx,dy,start,end,i,t,rho,fh)/t
+        stress[i] = shear_box(dx,dy,start,end,i,t,rho,fh,T,Ixx)/t
     plt.figure(figsize=(7,5))
     plt.suptitle('Highest shear stress in the tailbox')
     plt.plot(y,stress)
@@ -627,13 +626,14 @@ def master_function(fh,fv,T,dx,dy,dz,dtheta,start,end,t,m1,m2):
 #    Ixx = wingbox_MOI(dy,start,end,t,mat.rho[m1])[0]
 #    Ixy = wingbox_MOI(dy,start,end,t,mat.rho[m1])[2]
 #    Iyy = wingbox_MOI(dy,start,end,t,mat.rho[m1])[1]
+    Ixx = wingbox_MOI(dx,start,end,t,mat.rho[m1])[0]
     tail_plots(dy,fh)
     boom_plots(dx,fh,1)
     boom_plots_vertical(dx,fv)
     a = total_shear_stress_boom(dx,dz,dtheta,fh,fv,dz-1)
     b = total_bending_stress_boom(dx,dtheta,dx-1,fh,fv,1)
-    c = highest_bending_box(dx,dy,start,end,t,mat.rho[m2],fh)
-    d = highest_shear_box(dx,dy,start,end,t,mat.rho[m2],fh,T)
+    c = highest_bending_box(dx,dy,start,end,t,mat.rho[m2],fh,Ixx)
+    d = highest_shear_box(dx,dy,start,end,t,mat.rho[m2],fh,T,Ixx)
     print ('TAILBOX ANALYSIS:')  
     print ('Weight of the tailbox:')
     print wingbox_MOI(dy,start,end,t,mat.rho[m1])[3]
