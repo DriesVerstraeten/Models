@@ -19,6 +19,8 @@ c_1 = wm.c_1
 c_2 = wm.c_2
 c_3 = wm.c_3
 c = wm.c
+FS_location = 0.15 #front spar location as % of chord
+BS_location = 0.575 #front spar location as % of chord
 
 def MOI_section_1():
     
@@ -40,7 +42,7 @@ def MOI_section_1():
     
     
     
-    for i in range(len(c_1)):
+    for i in range(len(c_1+1)):
         xcoordinates1 = xcoordinates * c_1[i]
         ycoordinates1 = ycoordinates * c_1[i]
         
@@ -48,7 +50,7 @@ def MOI_section_1():
         f1 = np.poly1d(fit1) #upper skin
         f11 = f1.deriv(1)
         
-        fit2 = np.polyfit(xcoordinates1[133:256],ycoordinates1[133:256],5)
+        fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
         f2 = np.poly1d(fit2) #lower skin
         f22 = f2.deriv(1)
         '''
@@ -56,8 +58,8 @@ def MOI_section_1():
         plt.axes().set_aspect('equal','datalim')
         plt.show()
         '''
-        front_spar = 0.15 * c_1[i]
-        back_spar = 0.575 * c_1[i]
+        front_spar = FS_location * c_1[i]
+        back_spar = BS_location * c_1[i]
 
         #sections = 100.             
         #dx = 1./sections             
@@ -131,14 +133,14 @@ def MOI_section_2():
         plt.axes().set_aspect('equal','datalim')
         plt.show()
         '''
-        front_spar = 0.15 * c_2[i]
-        back_spar = 0.575 * c_2[i]
+        front_spar = FS_location * c_2[i]
+        back_spar = BS_location * c_2[i]
 
         #sections = 100.             
         #dx = 1./sections             
         x = np.linspace(front_spar,back_spar,len(wm.y))
         dx = (back_spar - front_spar)/len(wm.y)
-        area_section = dx * t * 2
+        area_section = dx * t * 2.
         x_span.append(x)
 
         arc_length_US = integrate.quad(lambda x: np.sqrt(1+f11(x)**2), front_spar, back_spar) #upper skin
@@ -198,7 +200,7 @@ def MOI_section_3():
         f1 = np.poly1d(fit1) #upper skin
         f11 = f1.deriv(1)
         
-        fit2 = np.polyfit(xcoordinates1[133:256],ycoordinates1[133:256],5)
+        fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
         f2 = np.poly1d(fit2) #lower skin
         f22 = f2.deriv(1)
         '''
@@ -206,14 +208,14 @@ def MOI_section_3():
         plt.axes().set_aspect('equal','datalim')
         plt.show()
         '''
-        front_spar = 0.15 * c_3[i]
-        back_spar = 0.575 * c_3[i]
+        front_spar = FS_location * c_3[i]
+        back_spar = BS_location * c_3[i]
 
         #sections = 100.             
         #dx = 1./sections             
         x = np.linspace(front_spar,back_spar,len(wm.y))
         dx = (back_spar - front_spar)/len(wm.y)
-        area_section = dx * t * 2
+        area_section = dx * t * 2.
         x_span.append(x)
 
         arc_length_US = integrate.quad(lambda x: np.sqrt(1+f11(x)**2), front_spar, back_spar) #upper skin
@@ -246,7 +248,7 @@ def MOI_section_3():
 
 
 def wingbox_MOI_total():
-    Ixx = np.hstack((MOI_section_1()[0], MOI_section_2()[0], MOI_section_3()[0]))
+    Ixx = np.hstack((MOI_section_1()[0], MOI_section_2()[0][1:], MOI_section_3()[0][1:]))
     Iyy = np.hstack((MOI_section_1()[1], MOI_section_2()[1], MOI_section_3()[1]))
     Ixy = np.hstack((MOI_section_1()[2], MOI_section_2()[2], MOI_section_3()[2]))
     x_NA = np.hstack((MOI_section_1()[6], MOI_section_2()[6], MOI_section_3()[6]))
@@ -260,14 +262,14 @@ Ixx, Iyy, Ixy, x_NA, y_NA, x_span = wingbox_MOI_total()
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
-'''
-plt.plot(wm.y,Ixx, color = 'r')
+
+plt.plot(wm.y[:-2],Ixx, color = 'r')
 plt.plot(wm.y,Iyy, color = 'b')
 plt.plot(wm.y,Ixy, color = 'g')
 plt.show()
 
 
-
+'''
 
 
 

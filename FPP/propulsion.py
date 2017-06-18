@@ -30,7 +30,7 @@ from scipy.interpolate import interp1d
 import os
 
 #could be stored in the parameter file
-D = 1.8         #Prop diameter in meter
+D = 2.1         #Prop diameter in meter
 N = 4           #Number of blades
 d_spin = 0.4    #Spinner diameter
 
@@ -79,7 +79,7 @@ def Analyse_prop(airfoil_path, h, V, rpm, pitch = 0.0):
     pitch:          float
         Additional pitch
     """
-    x = np.arange(0,(D-d_spin)/2+dx,dx) #blade length
+    x = np.arange(0,(D-d_spin)/2+dx,dx) #blade length: subtract the spinner radius 
     chord_ref = interp1d(x,chord_distr(x, x[-1]))
     rps = rpm/60.
     chord = chord_ref(x)
@@ -100,5 +100,5 @@ def Analyse_prop(airfoil_path, h, V, rpm, pitch = 0.0):
     
     #print eta_p
     #print eta_prop
-    return thrust, torque, power_available
+    return thrust, torque, power_available, power, eta_p
 

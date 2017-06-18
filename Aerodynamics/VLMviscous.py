@@ -36,7 +36,7 @@ def CalcWingDrag(planecoords,planepanels,xpanels,data,forces,spanpanels,
 
         Clocal = (c1+c2)/2.0
 
-        Reynolds = Rho*V*Clocal/DynViscosity
+        Reynolds = Rho*V*Clocal/DynViscosity     
 
         panelspan1 = planecoords[firstpanel[1]][1]
         panelspan2 = planecoords[firstpanel[2]][1]
@@ -363,7 +363,7 @@ def ViscousDrag(plane,forces,wingarray,htailarray,vtailarray,data,V,Rho,foilarra
     dihedral = wingarray[10]
     dihedralh = htailarray[8]
 
-    zVtail = htailarray[7]
+    zVtail = vtailarray[7]
 
     Dragwing = CalcWingDrag(planecoords,planepanels,xpanelswing,data,Force2,spanpanelswing,
                wingstartpanel,V,Rho,foilarray,DynViscosity,fusewidth,b,dihedral)

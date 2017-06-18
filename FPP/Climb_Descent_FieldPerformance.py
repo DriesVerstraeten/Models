@@ -5,20 +5,16 @@
 #P_TO = P_BHP at sea level
 #
 #
-################## TBD #####################
 
-#W_landing = ??
-#W_descent = ??
-
-################# TBD #####################
 
 #Importing modules
 import numpy as np
-from math import *
 import matplotlib.pyplot as plt
+import os
 
 #Importing functions
 import Common.CalcISA as ISA
+from FPP.propulsion import Analyse_prop
 
 #ISA lists
 Ttab = []
@@ -32,6 +28,10 @@ for h in range(0,84000):
     Rhotab.append(State[2])
     ptab.append(State[1])
     htab.append(h)
+
+
+airfoil_path = os.getcwd() + '\Polars\Eppler_prop.npz'
+rpm = 2800
 
 ###############################################################################
 ##############################  INPUTS  #######################################
@@ -106,12 +106,15 @@ for h in range(0,84000):
 #Difference is explained by higher vstall than calculated
 """
 
-def Takeoff(MTOW, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_TO, D_prop, D_spinner, V_c, V_H):
+def Takeoff(MTOW, S, A, e, CD_0, CL_0, CL_alpha, alpha_TO, CL_max_TO, V_c, V_H):
 
 
     #NOTES:
     #All input values and formulas are performed using imperial units
     #The method used is described in chapter 17 method #3
+    
+    #Importing power parameters
+    T_static, NA1, NA2, P_TO, NA3 = Analyse_prop(airfoil_path, 0, 0, rpm)
     
     #Weight from kg to N
     MTOW = MTOW*9.80665
@@ -125,26 +128,25 @@ def Takeoff(MTOW, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
     #Converting the input values from si units to imperial units
     MTOW = MTOW*0.224808943871 #Newton to lbf
     S = S*10.7639104 #m2 to ft2
-    D_prop = D_prop*3.2808399 #m to ft
-    D_spinner = D_spinner*3.2808399 #m to ft
+    #D_prop = D_prop*3.2808399 #m to ft
+    #D_spinner = D_spinner*3.2808399 #m to ft
     V_c = V_c*1.943844 #m/s to kts
     V_H = V_H*1.943844 #m/s to kts
-    P_TO = P_TO*1.3410220888*1000 #W to BHP
+    P_TO = P_TO*1.3410220888/1000 #W to BHP
     
     #Basic functions taken from Chapter 17 of the General Aviation book
     CL_TO = CL_0 + CL_alpha * alpha_TO 
-    CD_TO = CD_0 + ((CL_TO**2)/(pi*A*e))
-    V_S1 = sqrt((2.*MTOW)/(rho_sealevel*S*CL_max_TO)) #ft/s
+    CD_TO = CD_0 + ((CL_TO**2)/(np.pi*A*e))
+    V_S1 = np.sqrt((2.*MTOW)/(rho_sealevel*S*CL_max_TO)) #ft/s
     V_LOF = 1.1 * V_S1 #ft/s
+    
+    V_LOF_ms = 0.3048*V_LOF
+    BLA1, BLA2, BLA3, BLA4, etha_p = Analyse_prop(airfoil_path, 0, V_LOF_ms, rpm)
+    
     T_c = (etha_p*550.*P_TO)/(V_c*1.68781) #lbf
     T_H = (etha_p*550.*P_TO)/(V_H*1.68781) #lbf  
     
-    A_prop = 0.25*pi*D_prop**2
-    A_spinner = 0.25*pi*D_spinner**2
-    T_static = 0.85*((550*P_TO)**(2./3.))*((2.*rho_sealevel*A_prop)**(1./3.))*(1. - (A_spinner/A_prop)) #What power to use
-    #T_static apart laten berekenen voor landing?
-    #T_static als output van propulsion functie?
-    
+  
     #Setting up the factors of a cubic spline as is explained on page 810 from the book
     Q = np.matrix([[0., 0., 0., 1.],
                    [(V_c**3.), (V_c**2.), V_c, 1.],
@@ -163,7 +165,7 @@ def Takeoff(MTOW, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
     
     i = 0
     time = 0
-    dt = 0.01
+    dt = 1
     t = []
     V = [0.]
     L = []
@@ -176,7 +178,7 @@ def Takeoff(MTOW, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
     T_V = []
     # Pas terug aan naar 10000
     
-    for i in range(0, 10000):
+    for i in range(0, 1):
         if i == 0:
             time = 0
             thrust = E
@@ -263,12 +265,12 @@ def Takeoff(MTOW, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
     
     S_TR = (0.2156*((V_S1)**2)*((T_V[loc_list]/MTOW)-(1/(CL_VTR/CD_VTR)))) #ft
     
-    theta_climb = np.arcsin(((T_V[loc_list]/MTOW)-(1/(CL_VTR/CD_VTR))))*(180/pi) #degrees
+    theta_climb = np.arcsin(((T_V[loc_list]/MTOW)-(1/(CL_VTR/CD_VTR))))*(180/np.pi) #degrees
     R_transition = (0.2156*(V_S1)**2) #ft
-    h_transition = R_transition*(1. - np.cos(theta_climb*(pi/180))) #ft
+    h_transition = R_transition*(1. - np.cos(theta_climb*(np.pi/180))) #ft
     
     h_obst = 50 #ft, this is a CS23 requirement
-    S_C = (h_obst-h_transition)/(np.tan(theta_climb*(pi/180))) #ft
+    S_C = (h_obst-h_transition)/(np.tan(theta_climb*(np.pi/180))) #ft
     
     #SI units outputs
     S_TO_si = (S_G[loc_list_VLOF] + S_ROT + S_TR + S_C)*0.3048
@@ -276,7 +278,7 @@ def Takeoff(MTOW, S, A, e, CD_0, etha_p, P_TO, CL_0, CL_alpha, alpha_TO, CL_max_
     V_S1_si = V_S1*0.3048
 
       
-    return(CL_TO, CD_TO, V_S1_si, V_LOF_si, S_TO_si)
+    return(CL_TO, CD_TO, V_S1_si, V_LOF_si, S_TO_si, T_static, P_TO, etha_p)
 
 
 ###############################################################################
@@ -326,7 +328,7 @@ def Climb(MTOW, S, A, e, CD_0, etha_p, P, LD_max, hcruise):
     
     for i in range(0, hmax):
         rho_h = Rhotab[i] * 0.00194032033 #Converted to slugs/ft3       
-        V_Y = sqrt((2./rho_h)*(MTOW/S)*sqrt((1./(pi*A*e))/(3.*CD_0)))
+        V_Y = np.sqrt((2./rho_h)*(MTOW/S)*np.sqrt((1./(np.pi*A*e))/(3.*CD_0)))
         V_Y_list.append(V_Y)
     
     #Rate of climb
@@ -413,7 +415,7 @@ def Descent(MTOW, S, A, e, CD_0, LD_max, hcruise):
     
     for i in range(0, hcruise):
         rho_h = Rhotab[i] * 0.00194032033 #Converted to slugs/ft3       
-        V_BG = sqrt((2/rho_h)*(sqrt((1./(pi*A*e))/CD_0))*(W_descent/S)) #What weight are we going to take?
+        V_BG = np.sqrt((2/rho_h)*(np.sqrt((1./(np.pi*A*e))/CD_0))*(W_descent/S)) #What weight are we going to take?
         V_BG_list.append(V_BG)
     
     V_BG_list = V_BG_list[::-1] #Reversing the list, we're descending here
@@ -481,12 +483,12 @@ def Landing(MTOW, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, CL_la
 
     # Functions
     
-    CD_landing_td = CD_0 + ((CL_landing_td**2)/(pi*A*e))
+    CD_landing_td = CD_0 + ((CL_landing_td**2)/(np.pi*A*e))
     
     T_landing = 0.07*T_static #lbf
     T_landing_reverse_thrust = -0.6*T_static #lbf
 
-    V_SO = sqrt((W_landing/S)*(2./rho_sealevel)*(1./CL_landing_max)) #Landing stall speed in ft/s
+    V_SO = np.sqrt((W_landing/S)*(2./rho_sealevel)*(1./CL_landing_max)) #Landing stall speed in ft/s
     V_REF = 1.3*V_SO #Approach speed
     V_FLR = 1.3*V_SO #Flare speed in ft/s
     V_TD = 1.1 * V_SO #Touchdown speed in ft/s
@@ -495,17 +497,17 @@ def Landing(MTOW, S, A, e, CD_0, etha_p_landing, CL_landing_max, T_static, CL_la
     P_BHP_idle = T_landing*V_TD * 0.001818181818179 #Converts lbf*ft/s to horsepower
     P_BHP_reverse = T_landing_reverse_thrust*V_TD * 0.001818181818179 #Converts lbf*ft/s to horsepower
 
-    L_landing_td = 0.5*rho_sealevel*((V_BR/sqrt(2))**2)*S*CL_landing_td
-    D_landing_td = 0.5*rho_sealevel*((V_BR/sqrt(2))**2)*S*CD_landing_td
+    L_landing_td = 0.5*rho_sealevel*((V_BR/np.sqrt(2))**2)*S*CL_landing_td
+    D_landing_td = 0.5*rho_sealevel*((V_BR/np.sqrt(2))**2)*S*CD_landing_td
     
-    theta_app = np.arcsin((1./(CL_landing_td/CD_landing_td))-(T_landing/W_landing))*(180./pi)
+    theta_app = np.arcsin((1./(CL_landing_td/CD_landing_td))-(T_landing/W_landing))*(180./np.pi)
 
-    h_f = 0.1512*(V_SO**2.)*(1.-np.cos(theta_app*(pi/180.)))
-    S_A = (h_obst - h_f)/(np.tan(theta_app*(pi/180.)))
-    S_F = 0.1512*(V_SO**2.)*np.sin(theta_app*(pi/180))
+    h_f = 0.1512*(V_SO**2.)*(1.-np.cos(theta_app*(np.pi/180.)))
+    S_A = (h_obst - h_f)/(np.tan(theta_app*(np.pi/180.)))
+    S_F = 0.1512*(V_SO**2.)*np.sin(theta_app*(np.pi/180))
     S_FR = V_TD
-    S_BR = abs(((V_BR**2.)*W_landing)/(2.*g*((sqrt(2.)*etha_p_landing*550.*(P_BHP_idle/V_BR))-D_landing_td-(mu_g_brakes*(W_landing-L_landing_td)))))
-    S_BR_reverse = abs(((V_BR**2.)*W_landing)/(2.*g*((sqrt(2.)*etha_p_landing*550.*(P_BHP_reverse/V_BR))-D_landing_td-(mu_g_brakes*(W_landing-L_landing_td)))))
+    S_BR = abs(((V_BR**2.)*W_landing)/(2.*g*((np.sqrt(2.)*etha_p_landing*550.*(P_BHP_idle/V_BR))-D_landing_td-(mu_g_brakes*(W_landing-L_landing_td)))))
+    S_BR_reverse = abs(((V_BR**2.)*W_landing)/(2.*g*((np.sqrt(2.)*etha_p_landing*550.*(P_BHP_reverse/V_BR))-D_landing_td-(mu_g_brakes*(W_landing-L_landing_td)))))
 
     S_landing  = S_A + S_F + S_FR + S_BR
     S_ground_roll = S_FR + S_BR

@@ -11,13 +11,13 @@ import numpy as np
 
 
 #ATMOSPHERIC PARAMETERS
-rho_0 = 1.226 #density at sea level
+rho_0 = 1.225 #density at sea level
 rho_cruise = 0.698145 #density at cruise altitude
 g = 9.80665 #gravitational acceleration
 
 
 #MISSION PARAMETERS
-Nz = 9 #ultimate load factor
+Nz = 9. #ultimate load factor
 h_cruise = 5486.4 #5486.4m or 18000 ft - cruise altitude
 V_cruise = 92.6 #m/s or 180 knots - cruise speed
 W_PL = 444. #kg - Payload
@@ -32,7 +32,7 @@ Cd0 = 0.02 #-
 n_p = 0.82 #propeller efficiency 
 L_m = 0.7 #main gear length, cm
 L_n = 0.7 #nose gear length, cm
-MTOW = 1677.1 #max TO weight, in kg!!!!!!!!
+MTOW = 1677. #max TO weight, in kg!!!!!!!!
 
 
 #FUSELAGE PARAMETERS
@@ -43,7 +43,7 @@ Lf = 9.04#m - fuselage length
 #WING PARAMETERS
 S = 14.31 #m2 - Wing surface area
 A = 7.35 #Aspect Ratio
-b = 10 #m - wing span
+b = 10. #m - wing span
 bh = 2.997 #m - horizontal wing span
 c_r = 2.011 #m - root chord
 c_t = 0.844 #m - tip chord
@@ -75,5 +75,10 @@ ct_ht = 0.629 #tip cord hor tail
 b_ht = 2.828 #span hor tail
 W_ht = 13.432 #mass hor tail
 
+
+#MATERIAL PROPERTIES
+rho_CF = 1800 #kg/m3
+E_CF = 365*10**9 #Pa, 365GPa
+sigma_tensile = 4500*10**6 #MPa
 
 

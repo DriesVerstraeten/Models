@@ -50,7 +50,7 @@ def piecewise_poly_1():
         y_position_FS_u.append(f1(x_span[i][0]))
         y_position_BS_u.append(f1(x_span[i][-1]))
         
-        fit2 = np.polyfit(xcoordinates1[133:256],ycoordinates1[133:256],5)
+        fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
         f2 = np.poly1d(fit2)
         y_position_LS.append(f2(x_span[i]))
         y_position_FS_l.append(f2(x_span[i][0]))
@@ -63,7 +63,7 @@ def piecewise_poly_1():
 
 def piecewise_poly_2():
     
-    airfoil_coordinates = np.genfromtxt('NACA63215.txt',skip_header=1)
+    airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
     
     xcoordinates = np.zeros(len(airfoil_coordinates)) 
     ycoordinates = np.zeros(len(airfoil_coordinates)) 
@@ -84,13 +84,13 @@ def piecewise_poly_2():
         xcoordinates1 = xcoordinates * c_2[i]
         ycoordinates1 = ycoordinates * c_2[i]
         
-        fit1 = np.polyfit(xcoordinates1[0:26],ycoordinates1[0:26],5)
+        fit1 = np.polyfit(xcoordinates1[0:133],ycoordinates1[0:133],5)
         f1 = np.poly1d(fit1)
         y_position_US.append(f1(x_span[i]))
         y_position_FS_u.append(f1(x_span[i][0]))
         y_position_BS_u.append(f1(x_span[i][-1]))
         
-        fit2 = np.polyfit(xcoordinates1[25:],ycoordinates1[25:],5)
+        fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
         f2 = np.poly1d(fit2)
         y_position_LS.append(f2(x_span[i]))
         y_position_FS_l.append(f2(x_span[i][0]))
@@ -130,7 +130,7 @@ def piecewise_poly_3():
         y_position_FS_u.append(f1(x_span[i][0]))
         y_position_BS_u.append(f1(x_span[i][-1]))
         
-        fit2 = np.polyfit(xcoordinates1[133:256],ycoordinates1[133:256],5)
+        fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
         f2 = np.poly1d(fit2)
         y_position_LS.append(f2(x_span[i]))
         y_position_FS_l.append(f2(x_span[i][0]))
@@ -173,19 +173,21 @@ def wingbox_bending_stress():
     return sigma_bending_US, sigma_bending_LS, sigma_bending_FS, sigma_bending_BS
 
 sigma_bending_US, sigma_bending_LS, sigma_bending_FS, sigma_bending_BS = wingbox_bending_stress()
-'''
+
 maxpoints = np.ones(len(wm.y))
 for i in range(len(wm.y)):
     
     maxpoints[i] = np.max(sigma_bending_US[i])
-'''
+
+print max(maxpoints)
+
 #plt.plot(wm.y, y_US[0])
-plt.plot(x_span[0],sigma_bending_US[0], color='r')
-plt.plot(x_span[0],sigma_bending_LS[0], color='b')
-plt.plot(np.ones(len(wm.y))*x_span[0][0],sigma_bending_FS[0], color='y')
-plt.plot(np.ones(len(wm.y))*x_span[0][-1],sigma_bending_BS[0], color='m')
+#plt.plot(x_span[0],sigma_bending_US[0], color='r')
+#plt.plot(x_span[0],sigma_bending_LS[0], color='b')
+#plt.plot(np.ones(len(wm.y))*x_span[0][0],sigma_bending_FS[0], color='y')
+#plt.plot(np.ones(len(wm.y))*x_span[0][-1],sigma_bending_BS[0], color='m')
 #plt.plot(wm.y,maxpoints, color='b')
-plt.show()
+#plt.show()
 
 
 
