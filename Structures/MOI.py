@@ -42,7 +42,7 @@ def MOI_section_1():
     
     
     
-    for i in range(len(c_1+1)):
+    for i in range(len(c_1)):
         xcoordinates1 = xcoordinates * c_1[i]
         ycoordinates1 = ycoordinates * c_1[i]
         
@@ -248,7 +248,7 @@ def MOI_section_3():
 
 
 def wingbox_MOI_total():
-    Ixx = np.hstack((MOI_section_1()[0], MOI_section_2()[0][1:], MOI_section_3()[0][1:]))
+    Ixx = np.hstack((MOI_section_1()[0], MOI_section_2()[0], MOI_section_3()[0])) 
     Iyy = np.hstack((MOI_section_1()[1], MOI_section_2()[1], MOI_section_3()[1]))
     Ixy = np.hstack((MOI_section_1()[2], MOI_section_2()[2], MOI_section_3()[2]))
     x_NA = np.hstack((MOI_section_1()[6], MOI_section_2()[6], MOI_section_3()[6]))
@@ -263,7 +263,7 @@ Ixx, Iyy, Ixy, x_NA, y_NA, x_span = wingbox_MOI_total()
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
-plt.plot(wm.y[:-2],Ixx, color = 'r')
+plt.plot(wm.y,Ixx, color = 'r')
 plt.plot(wm.y,Iyy, color = 'b')
 plt.plot(wm.y,Ixy, color = 'g')
 plt.show()
