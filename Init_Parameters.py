@@ -51,6 +51,7 @@ c_rh = 0.832 #m - horizontal root chord
 c_th = 0.67 #m - horizontal tip chord
 MAC = 1.568 #m - mean aerodynamic chord
 Y = 2.327 #m - lateral MAC position
+X_le_mac = 2.373 
 theta_LE = np.radians(3.336) 
 theta_TE = np.radians(9.919)
 
