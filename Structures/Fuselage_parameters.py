@@ -1,51 +1,72 @@
 import numpy as np
-#import Init_parameters as i
+
+import sys
+sys.path.insert(0, 'C:\Users\Claudia\Models')
+import Init_Parameters as i
+
 ## FUSELAGE PARAMETERS
-t_min   = 0.5    #mm
-L_f     = 9.04   # m 
+L_f     = i.Lf   # m 
                  # This depends on the aerodynamic mesh and the location of the
                  # forces and moments
-dl      = 0.01   # mm
+
+## LOADS ON FUSELAGE
 dp      = 101325-50600.9 # Pressure difference at 18000 ft
-#W       = i.MTOW*9.81    # Fully Loaded Aircraft
-# For ease of calculation all sections are assumed to taper uniformly 
+p_fus   = 0.1985
+x_cg    = 0.42*i.MAC+i.X_le_mac
+W_fus   = ((i.MTOW*9.81)*p_fus)/L_f # Uniform weight distribution
+
+
+# MESH OF THE FUSELAGE @ EVERY CM ALONG FUSELAGE LENGTH 
+dl      = 0.01   # cm
+# For ease of calculation all sections are assumed to taper uniformly
+
 ## SECTION 1: ENGINE MOUNT + FIREWALL:
 r_i       = 0.4    #m
 L_i       = 1.35   #m
+
 x_i       = np.linspace(0,L_i,L_i/dl)
-r_s_i       = r_i*np.ones(np.shape(x_i)[0])
+r_s_i     = r_i*np.ones(np.shape(x_i)[0])
+
 ## SECTION 2: COCKPIT
 r_ii_front = r_i      #m
 r_ii_max   = 0.7      #m
 r_ii_back  = 0.4      #m
+
 L_ii = 3.0            #m         
 L_ii_front    = 1.3   #m
-L_ii_const    = 0.9   #m 
+L_ii_const    = 0.9   #m
 L_ii_back     = L_ii-L_ii_front-L_ii_const #m
+
+
 x_front   = np.linspace(L_i,L_ii_front+L_i,L_ii_front/dl)
 x_const   = np.linspace(L_ii_front+L_i,L_ii_front+L_i+L_ii_const,L_ii_const/dl)
 x_back    = np.linspace(L_ii_front+L_i+L_ii_const,L_ii_front+L_i+ \
                         L_ii_const+L_ii_back,L_ii_back/dl)
+
 r_s_ii_front = np.linspace(r_ii_front,r_ii_max,np.shape(x_front)[0])
 r_s_ii_const = r_ii_max*np.ones(np.shape(x_const)[0])
 r_s_ii_back  = np.linspace(r_ii_max,r_ii_back,np.shape(x_back)[0])
+
 ## SECTION 3: BACK PART
-r_iii_front       = r_ii_back    #m
-r_iii_back        = 0.1   
-L_iii             = L_f -L_i-L_ii   #m
+r_iii_front       = r_ii_back #m
+r_iii_back        = 0.1
+
+L_iii             = L_f -L_i-L_ii
+
 x_iii             = np.linspace(L_ii+L_i,L_f,L_iii/dl)
 r_s_iii           = np.linspace(r_iii_front,r_iii_back,np.shape(x_iii)[0])
 
-## 
+## COMBINED  SECTIONS 1+2+3
 x = np.concatenate((x_i,x_front))
 x = np.append(x,x_const)
 x = np.append(x,x_back)
 x = np.append(x,x_iii)
-##
+
 r= np.concatenate((r_s_i,r_s_ii_front))
 r= np.append(r,r_s_ii_const)
 r= np.append(r,r_s_ii_back)
 r= np.append(r,r_s_iii)
+
 
 ## Material Properties Core Material
 E_c     = 400*10**6
