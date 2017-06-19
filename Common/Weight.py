@@ -13,7 +13,7 @@ def calcOEW(W_fuselage,W_wing,W_tail, mtow,Mfuelmax): # input initial value for 
     
     W_gear, W_Fuel_sys, W_flightcontrol, W_els, W_api, W_fur = Class2est_simplified(mtow,Mfuelmax,W_avionics)
     OEW += W_gear + W_Fuel_sys + W_flightcontrol + W_els + W_api + W_fur
-    return OEW # [kg]
+    return OEW, W_fuselage, W_wing, W_tail, W_avionics, W_engine, W_gear, W_Fuel_sys, W_flightcontrol, W_els, W_api, W_fur  # [kg]
 
 
 
