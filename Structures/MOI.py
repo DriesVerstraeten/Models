@@ -10,14 +10,19 @@ import Init_Parameters as p
 import Wing_model as wm
 import numpy as np
 import matplotlib.pyplot as plt
-
+import scipy.integrate as integrate
+import time 
+start_time = time.time()
 
 t = p.t_skin
+c_1 = wm.c_1
+c_2 = wm.c_2
+c_3 = wm.c_3
 c = wm.c
-#c_r = p.c_r
-aifoil_file_name = 'foil1_modified.dat'
+FS_location = 0.15 #front spar location as % of chord
+BS_location = 0.575 #front spar location as % of chord
 
-def wingbox_MOI():
+def MOI_section_1():
     
     airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
     
@@ -37,15 +42,15 @@ def wingbox_MOI():
     
     
     
-    for i in range(len(c)):
-        xcoordinates1 = xcoordinates * c[i]
-        ycoordinates1 = ycoordinates * c[i]
+    for i in range(len(c_1+1)):
+        xcoordinates1 = xcoordinates * c_1[i]
+        ycoordinates1 = ycoordinates * c_1[i]
         
         fit1 = np.polyfit(xcoordinates1[0:133],ycoordinates1[0:133],5)
         f1 = np.poly1d(fit1) #upper skin
         f11 = f1.deriv(1)
         
-        fit2 = np.polyfit(xcoordinates1[133:256],ycoordinates1[133:256],5)
+        fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
         f2 = np.poly1d(fit2) #lower skin
         f22 = f2.deriv(1)
         '''
@@ -53,46 +58,218 @@ def wingbox_MOI():
         plt.axes().set_aspect('equal','datalim')
         plt.show()
         '''
-        front_spar = 0.15 * c[i]
-        back_spar = 0.575 * c[i]
+        front_spar = FS_location * c_1[i]
+        back_spar = BS_location * c_1[i]
 
-        sections = 100.             
-        dx = 1./sections             
-        area_section = dx * t
+        #sections = 100.             
+        #dx = 1./sections             
         x = np.linspace(front_spar,back_spar,len(wm.y))
+        dx = (back_spar - front_spar)/len(wm.y)
+        area_section = dx * t * 2 #multiplied by two because it is a honeycomb structure
         x_span.append(x)
-        #print x_span
-    
-        arc_length_US = sum(np.sqrt(1+f11(x)**2)*dx) #upper skin
-        arc_length_LS = sum(np.sqrt(1+f22(x)**2)*dx) #lower skin
-        
+
+        arc_length_US = integrate.quad(lambda x: np.sqrt(1+f11(x)**2), front_spar, back_spar) #upper skin
+        arc_length_LS = integrate.quad(lambda x: np.sqrt(1+f22(x)**2), front_spar, back_spar) #lower skin
+                           
         front_spar_length = np.abs(f1(front_spar)) + np.abs(f2(front_spar))
         back_spar_length = np.abs(f1(back_spar)) + np.abs(f2(back_spar))
         
         front_spar_area = (front_spar_length)*t
         back_spar_area = (back_spar_length)*t
-        
-        total_area = (arc_length_US + arc_length_LS)*t + front_spar_area + back_spar_area
-        
+
+        total_area = (arc_length_US[0] + arc_length_LS[0])*2*t + front_spar_area + back_spar_area
+
         y_NA_sec = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
         x_NA_sec = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area * back_spar) / total_area
                    
         x_NA.append(x_NA_sec)
         y_NA.append(y_NA_sec)
-        
-        Ixx_section = 2*dx*t**3/12 + area_section * sum(f1(x)**2 + f2(x)**2) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA[i]))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA[i]))**2)
-        Iyy_section = (front_spar_area * (front_spar-x_NA[i])**2) + (back_spar_area * (back_spar-x_NA[i])**2) + area_section*(sum(x**2)-2*x_NA[i]*sum(x)+len(x)*x_NA[i]**2)
+        '''front_spar_area * (front_spar-x_NA[i])**2 + back_spar_area * (back_spar-x_NA[i])**2'''
+        Ixx_section = area_section*(sum(f1(x)**2) + sum(f2(x)**2)) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA[i]))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA[i]))**2)
+        Iyy_section = front_spar_area * (front_spar-x_NA[i])**2 + back_spar_area * (back_spar-x_NA[i])**2 + sum(2*area_section*(x-x_NA[i])**2)    #(sum(x**2)-2*x_NA[i]*sum(x)+len(x)*x_NA[i]**2)
         Ixy_section = area_section*(sum((x-x_NA[i])*(f1(x)-y_NA[i])) + sum((x-x_NA[i])*(f2(x)-y_NA[i]))) + front_spar_area * (front_spar - x_NA[i]) * ((f1(front_spar) + f2(front_spar))/2 - y_NA[i]) + back_spar_area * (back_spar - x_NA[i]) * ((f1(back_spar) + f2(back_spar))/2 - y_NA[i])
-    
+
         Ixx.append(Ixx_section)
         Iyy.append(Iyy_section)
         Ixy.append(Ixy_section)
 
         
     return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x, x_span
-wingbox_MOI()
 
-x_span = wingbox_MOI()[8]
+
+def MOI_section_2():
+    
+    airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
+    
+    Ixx = []
+    Iyy = []
+    Ixy = []
+    x_span = []
+    x_NA = []
+    y_NA = []
+    
+    xcoordinates = np.zeros(len(airfoil_coordinates)) 
+    ycoordinates = np.zeros(len(airfoil_coordinates)) 
+        
+    for i in range(len(airfoil_coordinates)):
+        xcoordinates[i] = airfoil_coordinates[i][0]
+        ycoordinates[i] = airfoil_coordinates[i][1] 
+    
+    
+    
+    for i in range(len(c_2)):
+        xcoordinates1 = xcoordinates * c_2[i]
+        ycoordinates1 = ycoordinates * c_2[i]
+        
+        fit1 = np.polyfit(xcoordinates1[0:133],ycoordinates1[0:133],5)
+        f1 = np.poly1d(fit1) #upper skin
+        f11 = f1.deriv(1)
+        
+        fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
+        f2 = np.poly1d(fit2) #lower skin
+        f22 = f2.deriv(1)
+        '''
+        plt.plot(xcoordinates1,ycoordinates1)
+        plt.axes().set_aspect('equal','datalim')
+        plt.show()
+        '''
+        front_spar = FS_location * c_2[i]
+        back_spar = BS_location * c_2[i]
+
+        #sections = 100.             
+        #dx = 1./sections             
+        x = np.linspace(front_spar,back_spar,len(wm.y))
+        dx = (back_spar - front_spar)/len(wm.y)
+        area_section = dx * t * 2.
+        x_span.append(x)
+
+        arc_length_US = integrate.quad(lambda x: np.sqrt(1+f11(x)**2), front_spar, back_spar) #upper skin
+        arc_length_LS = integrate.quad(lambda x: np.sqrt(1+f22(x)**2), front_spar, back_spar) #lower skin
+                           
+        front_spar_length = np.abs(f1(front_spar)) + np.abs(f2(front_spar))
+        back_spar_length = np.abs(f1(back_spar)) + np.abs(f2(back_spar))
+        
+        front_spar_area = (front_spar_length)*t
+        back_spar_area = (back_spar_length)*t
+
+        total_area = (arc_length_US[0] + arc_length_LS[0])*2*t + front_spar_area + back_spar_area
+
+        y_NA_sec = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
+        x_NA_sec = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area * back_spar) / total_area
+                   
+        x_NA.append(x_NA_sec)
+        y_NA.append(y_NA_sec)
+        '''front_spar_area * (front_spar-x_NA[i])**2 + back_spar_area * (back_spar-x_NA[i])**2'''
+        Ixx_section = area_section*(sum(f1(x)**2) + sum(f2(x)**2)) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA[i]))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA[i]))**2)
+        Iyy_section = front_spar_area * (front_spar-x_NA[i])**2 + back_spar_area * (back_spar-x_NA[i])**2 + sum(2*area_section*(x-x_NA[i])**2)    #(sum(x**2)-2*x_NA[i]*sum(x)+len(x)*x_NA[i]**2)
+        Ixy_section = area_section*(sum((x-x_NA[i])*(f1(x)-y_NA[i])) + sum((x-x_NA[i])*(f2(x)-y_NA[i]))) + front_spar_area * (front_spar - x_NA[i]) * ((f1(front_spar) + f2(front_spar))/2 - y_NA[i]) + back_spar_area * (back_spar - x_NA[i]) * ((f1(back_spar) + f2(back_spar))/2 - y_NA[i])
+
+        Ixx.append(Ixx_section)
+        Iyy.append(Iyy_section)
+        Ixy.append(Ixy_section)
+
+        
+    return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x, x_span
+
+
+def MOI_section_3():
+    
+    airfoil_coordinates = np.genfromtxt('foil1_modified.dat',skip_header=1)
+    
+    Ixx = []
+    Iyy = []
+    Ixy = []
+    x_span = []
+    x_NA = []
+    y_NA = []
+    
+    xcoordinates = np.zeros(len(airfoil_coordinates)) 
+    ycoordinates = np.zeros(len(airfoil_coordinates)) 
+        
+    for i in range(len(airfoil_coordinates)):
+        xcoordinates[i] = airfoil_coordinates[i][0]
+        ycoordinates[i] = airfoil_coordinates[i][1] 
+    
+    
+    
+    for i in range(len(c_3)):
+        xcoordinates1 = xcoordinates * c_3[i]
+        ycoordinates1 = ycoordinates * c_3[i]
+        
+        fit1 = np.polyfit(xcoordinates1[0:133],ycoordinates1[0:133],5)
+        f1 = np.poly1d(fit1) #upper skin
+        f11 = f1.deriv(1)
+        
+        fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
+        f2 = np.poly1d(fit2) #lower skin
+        f22 = f2.deriv(1)
+        '''
+        plt.plot(xcoordinates1,ycoordinates1)
+        plt.axes().set_aspect('equal','datalim')
+        plt.show()
+        '''
+        front_spar = FS_location * c_3[i]
+        back_spar = BS_location * c_3[i]
+
+        #sections = 100.             
+        #dx = 1./sections             
+        x = np.linspace(front_spar,back_spar,len(wm.y))
+        dx = (back_spar - front_spar)/len(wm.y)
+        area_section = dx * t * 2.
+        x_span.append(x)
+
+        arc_length_US = integrate.quad(lambda x: np.sqrt(1+f11(x)**2), front_spar, back_spar) #upper skin
+        arc_length_LS = integrate.quad(lambda x: np.sqrt(1+f22(x)**2), front_spar, back_spar) #lower skin
+                           
+        front_spar_length = np.abs(f1(front_spar)) + np.abs(f2(front_spar))
+        back_spar_length = np.abs(f1(back_spar)) + np.abs(f2(back_spar))
+        
+        front_spar_area = (front_spar_length)*t
+        back_spar_area = (back_spar_length)*t
+
+        total_area = (arc_length_US[0] + arc_length_LS[0])*2*t + front_spar_area + back_spar_area
+
+        y_NA_sec = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
+        x_NA_sec = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area * back_spar) / total_area
+                   
+        x_NA.append(x_NA_sec)
+        y_NA.append(y_NA_sec)
+        '''front_spar_area * (front_spar-x_NA[i])**2 + back_spar_area * (back_spar-x_NA[i])**2'''
+        Ixx_section = area_section*(sum(f1(x)**2) + sum(f2(x)**2)) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA[i]))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA[i]))**2)
+        Iyy_section = front_spar_area * (front_spar-x_NA[i])**2 + back_spar_area * (back_spar-x_NA[i])**2 + sum(2*area_section*(x-x_NA[i])**2)    #(sum(x**2)-2*x_NA[i]*sum(x)+len(x)*x_NA[i]**2)
+        Ixy_section = area_section*(sum((x-x_NA[i])*(f1(x)-y_NA[i])) + sum((x-x_NA[i])*(f2(x)-y_NA[i]))) + front_spar_area * (front_spar - x_NA[i]) * ((f1(front_spar) + f2(front_spar))/2 - y_NA[i]) + back_spar_area * (back_spar - x_NA[i]) * ((f1(back_spar) + f2(back_spar))/2 - y_NA[i])
+
+        Ixx.append(Ixx_section)
+        Iyy.append(Iyy_section)
+        Ixy.append(Ixy_section)
+
+        
+    return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x, x_span
+
+
+def wingbox_MOI_total():
+    Ixx = np.hstack((MOI_section_1()[0], MOI_section_2()[0][1:], MOI_section_3()[0][1:]))
+    Iyy = np.hstack((MOI_section_1()[1], MOI_section_2()[1], MOI_section_3()[1]))
+    Ixy = np.hstack((MOI_section_1()[2], MOI_section_2()[2], MOI_section_3()[2]))
+    x_NA = np.hstack((MOI_section_1()[6], MOI_section_2()[6], MOI_section_3()[6]))
+    y_NA = np.hstack((MOI_section_1()[5], MOI_section_2()[5], MOI_section_3()[5]))
+    x_span = np.vstack((MOI_section_1()[8], MOI_section_2()[8], MOI_section_3()[8]))
+    
+    return Ixx, Iyy, Ixy, x_NA, y_NA, x_span
+
+
+Ixx, Iyy, Ixy, x_NA, y_NA, x_span = wingbox_MOI_total()
+
+print("--- %s seconds ---" % (time.time() - start_time))
+
+
+plt.plot(wm.y[:-2],Ixx, color = 'r')
+plt.plot(wm.y,Iyy, color = 'b')
+plt.plot(wm.y,Ixy, color = 'g')
+plt.show()
+
+
+'''
 
 
 
@@ -101,7 +278,7 @@ x_span = wingbox_MOI()[8]
 
 #plt.figure(figsize = (8.5,6),tight_layout=True)
 
-'''
+
 xfront = 0.15 * np.ones(2)
 xback = 0.57 * np.ones(2)
 yfront = [-0.04,0.07]
@@ -109,13 +286,10 @@ yback = [-0.04,0.09]
 
 plt.plot(xfront,yfront)
 plt.plot(xback,yback)
-'''
 
-'''
-plt.plot(wm.y,wingbox_MOI()[0], color = 'r')
-plt.plot(wm.y,wingbox_MOI()[1], color = 'b')
-plt.plot(wm.y,wingbox_MOI()[2], color = 'g')
-plt.show()
+
+
+
 '''
 
 """

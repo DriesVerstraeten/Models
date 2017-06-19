@@ -93,6 +93,7 @@ def section_ii(a,b_top,b_bot,d,y_c):
     y = np.append(y,y_d_r)
     return x,y
 
+<<<<<<< HEAD
 M_x = 10500
 M_y = 20000
 #def bending_i(M_x,M_y,a_i,b_i,material):
@@ -112,3 +113,15 @@ for i in range(np.shape(fp.a_i)[0]):
 #    if sigma_t_min > min_sigma_t:
 #        min_sigma_t = sigma_t_min
 
+=======
+def bending_i(M_x,M_y,a_i,b_i,material):
+    for i in range(np.shape(a_i)[0]):
+        x = section_i(a_i[i],b_i[i])[0]
+        y = section_i(a_i[i],b_i[i])[1]
+        I_xx = moi_ellipse(a_i[i],b_i[i])[0]
+        I_yy = moi_ellipse(a_i[i],b_i[i])[0]
+        sigma_t = M_x/I_xx*y+M_y/I_yy*x 
+        
+    
+    return 
+>>>>>>> 7c7249a8f7985b0dac579f44906ff24ae3345e59
