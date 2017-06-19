@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import time 
 start_time = time.time()
 
-plt.close()
 
 c_1 = wm.c_1
 c_2 = wm.c_2
@@ -179,15 +178,13 @@ for i in range(len(wm.y)):
     
     maxpoints[i] = np.max(sigma_bending_US[i])
 
-print max(maxpoints)
-
 #plt.plot(wm.y, y_US[0])
 #plt.plot(x_span[0],sigma_bending_US[0], color='r')
 #plt.plot(x_span[0],sigma_bending_LS[0], color='b')
 #plt.plot(np.ones(len(wm.y))*x_span[0][0],sigma_bending_FS[0], color='y')
 #plt.plot(np.ones(len(wm.y))*x_span[0][-1],sigma_bending_BS[0], color='m')
-#plt.plot(wm.y,maxpoints, color='b')
-#plt.show()
+plt.plot(wm.y,maxpoints, color='b')
+plt.show()
 
 
 
