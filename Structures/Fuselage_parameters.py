@@ -13,7 +13,11 @@ L_f     = i.Lf   # m
 dp      = 101325-50600.9 # Pressure difference at 18000 ft
 p_fus   = 0.1985
 x_cg    = 0.42*i.MAC+i.X_le_mac
-W_fus   = ((i.MTOW*9.81)*p_fus)/L_f # Uniform weight distribution
+n       = 6*2
+q_fus   = n*((i.MTOW*9.81)*p_fus)/2
+x_ac    = 
+
+## Sideslipping Fligth
 
 
 # MESH OF THE FUSELAGE @ EVERY CM ALONG FUSELAGE LENGTH 

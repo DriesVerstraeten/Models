@@ -24,7 +24,7 @@ def section_i(r):
     y = r*np.sin(angle)
     return x,y
     
-def bending_i(M_x,M_y,r):
+def bending_i(P,M_x,M_y,r):
     max_sigma_t = 0
     min_sigma_t = 0 
     for i in range(np.shape(r)[0]):
@@ -60,7 +60,7 @@ def ip(r,dp,sigma_hoop):
     t = dp*r/sigma_hoop
     return t
 
-def thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,dp,sigma_hoop):
+def thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,dp,sigma_hoop,E_x,E_c):
     t_bt = bending_i(M_x,M_y,r)[0]/sigma_t
     t_bc = bending_i(M_x,M_y,r)[1]/sigma_c
     t_s  = shear_i(r,S_x,S_y,T)/tau
@@ -72,14 +72,17 @@ def thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,dp,sigma_hoop):
     h_c = (-6*t_f + delta**(0.5))/(2*3)
     if h_c < 0:
         h_c = t_c_min
+    sigma_wrinkling = 3*(E_x*E_c**2/(12*(3-1./3)**2*(1+1./3)**2))**(1./3)
+    if sigma_wrinkling > sigma_c:
+        print("WRINKLING FAIL WRINKLING")
     return t_f,h_c
 
-def mass(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,dp,sigma_hoop,rho_f,rho_c):
+def mass(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,dp,sigma_hoop,rho_f,rho_c,E_x,E_c):
         dm = (2*thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,dp,sigma_hoop)[0] \
          *rho_f+thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,dp,sigma_hoop)[1]*\
          rho_c)*2*np.pi*r
         return dm
 
-         
+
 
 
