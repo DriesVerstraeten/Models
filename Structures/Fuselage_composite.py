@@ -1,5 +1,6 @@
 ## Composite Analysis:
 import numpy as np
+import Fuselage_parameters as fp
 
 def moi_ellipse(a,b):
     I_xx = np.pi / 4 * b**2 *(3*a+b)
@@ -60,14 +61,14 @@ def moi_cockpit(a_ellipse,b_ellipse_top,b_ellipse_bot,d):
     return y_c,I_xx,I_yy
 
 def section_i(a_I,b_I):
-    angle = np.arange(361)*np.pi/180
+    angle = np.arange(360)*np.pi/180
     x = a_I*np.cos(angle)
     y = b_I*np.sin(angle)
     return x,y
 
 def section_ii(a,b_top,b_bot,d,y_c):
     angle_top = np.arange(181)*np.pi/180
-    angle_bot = np.arange(180,361)*np.pi/180
+    angle_bot = np.arange(180,360)*np.pi/180
     dl  = np.round(arclength(angle_top,a,b_top),1)
     
     x_t = a*np.cos(angle_top)
@@ -92,13 +93,22 @@ def section_ii(a,b_top,b_bot,d,y_c):
     y = np.append(y,y_d_r)
     return x,y
 
-def bending_i(M_x,M_y,a_i,b_i,material):
-    for i in range(np.shape(a_i)[0])
-        x = section_i(a_i[i],b_i[i])[0]
-        y = section_i(a_i[i],b_i[i])[1]
-        I_xx = moi_ellipse(a_i[i],b_i[i])[0]
-        I_yy = moi_ellipse(a_i[i],b_i[i])[0]
-        sigma_t = M_x/I_xx*y+M_y/I_yy*x 
-        
-    
-    return 
+M_x = 10500
+M_y = 20000
+#def bending_i(M_x,M_y,a_i,b_i,material):
+max_sigma_t = 0
+min_sigma_t = 0 
+for i in range(np.shape(fp.a_i)[0]):
+    x = section_i(fp.a_i[i],fp.b_i[i])[0]
+    y = section_i(fp.a_i[i],fp.b_i[i])[1]
+    I_xx = moi_ellipse(fp.a_i[i],fp.b_i[i])[0]
+    I_yy = moi_ellipse(fp.a_i[i],fp.b_i[i])[1]
+    sigma_t = M_x/I_xx*y+M_y/I_yy*x 
+#    sigma_t_max = np.amax(sigma_t)
+    sigma_t_min = np.amax(sigma_t)
+    print(sigma_t_min)
+#    if sigma_t_max > max_sigma_t:
+#        max_sigma_t = sigma_t_max
+#    if sigma_t_min > min_sigma_t:
+#        min_sigma_t = sigma_t_min
+
