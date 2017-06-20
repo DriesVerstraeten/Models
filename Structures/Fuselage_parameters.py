@@ -19,7 +19,7 @@ p_fus   = 0.1985
 x_cg    = 0.42*p.MAC+ p.X_le_mac
 x_ac    = 0.25*p.MAC+ p.X_le_mac
 q_fus   = n*((p.MTOW*9.81)*p_fus)/L_f
-L_w_y   = w.wing_shear(w.CL_9g,p.rho_0,p.V_cruise)[-1][0]
+L_w_y   = w.wing_shear(w.CL_9g,p.rho_0,p.V_cruise)[-1][0]/1.5
 
 
 # MESH OF THE FUSELAGE @ EVERY CM ALONG FUSELAGE LENGTH 
@@ -41,7 +41,7 @@ r_ii_back  = 0.4      #m
 L_ii = 3.0            #m         
 L_ii_front    = 1.3   #m
 L_ii_const    = 0.9   #m
-L_ii_back     = L_ii-L_ii_front-L_ii_const #m
+L_ii_back     = L_ii-L_ii_front-L_ii_const #m 
 
 
 x_front   = np.linspace(L_i,L_ii_front+L_i,L_ii_front/dl)
@@ -82,8 +82,6 @@ for space in range(np.shape(x)[0]):
     if x[space] > (L_f-x_ac):
         S_y[space] = q_fus*x[space]-L_w_y
         M_x[space] = q_fus*x[space]**2/2-L_w_y*(x[space]-x_ac)
-S_y = S_y[::-1]
-M_x = M_x[::-1]
 S_x = np.zeros(np.shape(x)[0])
 M_y = np.zeros(np.shape(x)[0])
 T= np.zeros(np.shape(x)[0])
@@ -101,14 +99,14 @@ E_x     = 60.1*10**9
 E_y     = 60.1*10**9
 v_xy    = 0.307
 rho_f   = 1580
-sigma_t = 356*10**6
-sigma_c = 657*10**6
+sigma_t = 356.*10**6
+sigma_c = 657.*10**6
 e_t     = sigma_t/E_x
 e_c     = sigma_c/E_y
 t_f_min = 0.3
 tau     = 11.5*10**6
 sigma_hoop    = 100*10**6
-m = 0
 d =fc.thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,sigma_c,tau,t_c_min,dp,sigma_hoop,E_x,E_c)
 #d = fc.shear_i(r,S_x,S_y,T)
-m = fc.mass(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,sigma_c,dp,sigma_hoop,rho_f,rho_c,E_x,E_c)
+m = np.sum(fc.mass(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,sigma_c,dp,sigma_hoop,rho_f,rho_c,E_x,E_c))
+#b = fc.bending_i(M_x,M_y,r)[0]/sigma_t
