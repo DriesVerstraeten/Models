@@ -19,8 +19,9 @@ p_fus   = 0.1985
 x_cg    = 0.42*p.MAC+ p.X_le_mac
 x_ac    = 0.25*p.MAC+ p.X_le_mac
 q_fus   = n*((p.MTOW*9.81)*p_fus)/L_f
-L_w_y   = w.wing_shear(w.CL_9g,p.rho_0,p.V_cruise)[-1][0]/1.5
 
+L_w_y   = w.wing_shear(w.CL_9g,p.rho_0,p.V_cruise)[-1][0]
+L_h_y   = q_fus*L_f-L_w_y
 
 
 # MESH OF THE FUSELAGE @ EVERY CM ALONG FUSELAGE LENGTH 
@@ -88,7 +89,6 @@ M_y = np.zeros(np.shape(x)[0])
 T= np.zeros(np.shape(x)[0])
 
 
-
 ## Material Properties Core Material
 E_c     = 400*10**6
 t_c_min = 3*10**(-3)
@@ -101,7 +101,7 @@ E_x     = 60.1*10**9
 E_y     = 60.1*10**9
 v_xy    = 0.307
 rho_f   = 1580
-sigma_t = 356.*10**6
+sigma_t = 900*10**6 #$356.*10**6
 sigma_c = 657.*10**6
 e_t     = sigma_t/E_x
 e_c     = sigma_c/E_y
