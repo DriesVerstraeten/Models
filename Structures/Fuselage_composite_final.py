@@ -24,7 +24,7 @@ def section_i(r):
     y = r*np.sin(angle)
     return x,y
     
-def bending_i(M_x,M_y,r):
+def bending_i(P,M_x,M_y,r):
     max_sigma_t = 0
     min_sigma_t = 0 
     for i in range(np.shape(r)[0]):
@@ -70,6 +70,7 @@ def ip(r,dp,sigma_hoop):
     return t
 
 def thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,sigma_c,tau,t_c_min,dp,sigma_hoop,E_x,E_c):
+
     t_bt = bending_i(M_x,M_y,r)[0]/sigma_t
     print t_bt
     t_bc = bending_i(M_x,M_y,r)[1]/sigma_c

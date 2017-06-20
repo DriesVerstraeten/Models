@@ -22,6 +22,7 @@ q_fus   = n*((p.MTOW*9.81)*p_fus)/L_f
 L_w_y   = w.wing_shear(w.CL_9g,p.rho_0,p.V_cruise)[-1][0]/1.5
 
 
+
 # MESH OF THE FUSELAGE @ EVERY CM ALONG FUSELAGE LENGTH 
 dl      = 0.01   # cm
 # For ease of calculation all sections are assumed to taper uniformly
@@ -85,6 +86,7 @@ for space in range(np.shape(x)[0]):
 S_x = np.zeros(np.shape(x)[0])
 M_y = np.zeros(np.shape(x)[0])
 T= np.zeros(np.shape(x)[0])
+
 
 
 ## Material Properties Core Material

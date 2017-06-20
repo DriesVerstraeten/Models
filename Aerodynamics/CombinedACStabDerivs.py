@@ -35,7 +35,7 @@ def CalcMomentCoeff(Force,cx,cy,cz,rho,Vinfx,S,wingspan,coord):
     Cl = l/(0.5*rho*Vinfx*Vinfx*S*wingspan)
     # Cm, pitching moment coefficient
     Myx = sum(Force[:,0]*cz)
-    Myz = -sum(Force[:,2]*cx)
+    Myz = sum(Force[:,2]*cx)
     m = (Myx+Myz)
     Cm = m/(0.5*rho*Vinfx*Vinfx*S*coord)    
     # Cn, Yawing moment coefficient
@@ -67,7 +67,7 @@ def Calcmomentderiv(Force,cx,cy,cz,rho,Vinfx,S,coord,Cl,Cm,Cn,wingspan):
     dcmcx = (((Cmx-Cm)/Cm)*100)
     # dcmcz, dCm/dcz
     Myxmz = sum(Force[:,0]*cz)
-    Myzmz = -sum(((1.01*Force[:,2])*cx))
+    Myzmz = sum(((1.01*Force[:,2])*cx))
     mz = (Myxmz + Myzmz)
     Cmz = mz/(0.5*rho*Vinfx*Vinfx*S*coord)
     dcmcz = (((Cmz-Cm)/Cm)*100)
@@ -99,17 +99,18 @@ def calcpanelloc(coords,coordpanels,spanpanels,wingspan):
     
     return [coordlocx,spanlocy,panellocz]
     
-def actualAC(refx,refy,refz,cx,cy,cz,dclcy,dclcz,dcmcx,dcmcz,dcncx,dcncy,coordlocx,spanlocy,panellocz,coordpanels,spanpanels,coord):
+def actualAC(refx,refy,refz,Force,cx,coord):
     # Xac, X-location Aerodynamic center
-    Xacp = refx+cx*dcmcz+cx*dcncy
-    Xac = (sum(Xacp)-(sum(coordlocx)))/spanpanels
+    FZ1 = Force[:180,2]    
+    FZt = sum(FZ1)
+    cxred = cx[:180]
+    mred = Force[:180,2]*cxred   
+    Xac = (sum(mred/FZt))-np.amin(cxred)
     Xacc = Xac/coord
     # Yac, Y-location Aerodynamic center
-    Yacp = refy+cy*dclcz+cy*dcncx
-    Yac = (sum(Yacp)-(sum(spanlocy)))/coordpanels
+    Yac = 0
     # Zac, Z-location Aerodyanmic center
-    Zacp = refz+cz*dclcy+cz*dcmcx
-    Zac = (sum(Zacp)-(sum(panellocz)))/spanpanels
+    Zac = 0
         
     return [Xac,Yac,Zac,Xacc]
 
@@ -158,7 +159,7 @@ def calcAC(plane,refx,refy,refz,Force,rho,Vinfx):
     spanlocy = panellocs[1]
     panellocz = panellocs[2]
     
-    AC = actualAC(refx,refy,refz,cx,cy,cz,dclcy,dclcz,dcmcx,dcmcz,dcncx,dcncy,coordlocx,spanlocy,panellocz,coordpanels,spanpanels,coord)
+    AC = actualAC(refx,refy,refz,Force,m,cx,coord)
     
     return [AC,l,m,n],reflength
     

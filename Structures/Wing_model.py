@@ -12,8 +12,8 @@ import Init_Parameters as p
 import numpy as np
 import matplotlib.pyplot as plt
 
-plt.close()
-#fig = plt.figure(figsize = (8.5,6),tight_layout=True)
+#plt.close()
+fig = plt.figure(figsize = (8.5,6),tight_layout=True)
 
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #CHORD LENGTH AT DIFFERENT SPANWISE LOCATIONS
@@ -56,8 +56,8 @@ y1 = np.linspace(0,p.b/2.+2*dy, len(c))
 #c = p.c_r - d_cLE - d_cTE #chord at each spanwise section
     
 
-CL_9g = 9. * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #lift coefficient at 9g
-CL_45g = -4.5 * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coefficient at -4.5g
+CL_9g = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #lift coefficient at N g
+CL_45g = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coefficient at -4.5g
     
                       
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
@@ -86,8 +86,7 @@ def wing_shear(CL, rho, V):
     plt.show()
     '''
     return dL_9g, dL_9g_total
-
-
+#wing_shear(CL_9g, p.rho_0, p.V_cruise)
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #BENDING AT 9g
 
@@ -115,17 +114,7 @@ def wing_moment(CL, rho, V):
     '''
     return dM_9g, dM_9g_total
 
-#wing_moment_9g(CL_9g,p.rho_0,p.V_cruise)
-
-
-
-
-
-
-
-
-
-
+#wing_moment(CL_9g,p.rho_0,p.V_cruise)
 
 
 

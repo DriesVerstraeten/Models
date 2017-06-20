@@ -66,7 +66,7 @@ S1 = 0.5*(hr1+hr2)*wr #surface area at root
 S2 = 0.5*(ht1+ht2)*wt #surface area at tip
 V_fuel = Lf/3. * (S1+S2 + (S1*S2)**0.5) #maximum fuel volume in main wing
 
-t_skin = 0.0015 #m - skin thickness
+t_skin = 0.002 #m - skin thickness
 
 
 #TAIL
