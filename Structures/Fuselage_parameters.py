@@ -2,22 +2,24 @@ import numpy as np
 
 import sys
 sys.path.insert(0, 'C:\Users\Claudia\Models')
-import Init_Parameters as i
+import Init_Parameters as p
+import Wing_model as w
+import Fuselage_composite_final as fc
 
 ## FUSELAGE PARAMETERS
-L_f     = i.Lf   # m 
+L_f     = p.Lf   # m 
                  # This depends on the aerodynamic mesh and the location of the
                  # forces and moments
+n       =  2*6
+
 
 ## LOADS ON FUSELAGE
 dp      = 101325-50600.9 # Pressure difference at 18000 ft
 p_fus   = 0.1985
-x_cg    = 0.42*i.MAC+i.X_le_mac
-n       = 6*2
-q_fus   = n*((i.MTOW*9.81)*p_fus)/2
-x_ac    = 
-
-## Sideslipping Fligth
+x_cg    = 0.42*p.MAC+ p.X_le_mac
+x_ac    = 0.25*p.MAC+ p.X_le_mac
+q_fus   = n*((p.MTOW*9.81)*p_fus)/L_f
+L_w_y   = w.wing_shear(w.CL_9g,p.rho_0,p.V_cruise)[-1][0]
 
 
 # MESH OF THE FUSELAGE @ EVERY CM ALONG FUSELAGE LENGTH 
@@ -66,10 +68,25 @@ x = np.append(x,x_const)
 x = np.append(x,x_back)
 x = np.append(x,x_iii)
 
+
 r= np.concatenate((r_s_i,r_s_ii_front))
 r= np.append(r,r_s_ii_const)
 r= np.append(r,r_s_ii_back)
 r= np.append(r,r_s_iii)
+S_y = np.zeros(np.shape(x))
+M_x = np.zeros(np.shape(x))
+for space in range(np.shape(x)[0]):
+    if x[space] < (L_f-x_ac):
+        S_y[space] = q_fus*x[space]
+        M_x[space] = q_fus*x[space]**2/2
+    if x[space] > (L_f-x_ac):
+        S_y[space] = q_fus*x[space]-L_w_y
+        M_x[space] = q_fus*x[space]**2/2-L_w_y*(x[space]-x_ac)
+S_y = S_y[::-1]
+M_x = M_x[::-1]
+S_x = np.zeros(np.shape(x)[0])
+M_y = np.zeros(np.shape(x)[0])
+T= np.zeros(np.shape(x)[0])
 
 
 ## Material Properties Core Material
@@ -90,5 +107,8 @@ e_t     = sigma_t/E_x
 e_c     = sigma_c/E_y
 t_f_min = 0.3
 tau     = 11.5*10**6
-hoop    = 100*10**6
-
+sigma_hoop    = 100*10**6
+m = 0
+d =fc.thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,sigma_c,tau,t_c_min,dp,sigma_hoop,E_x,E_c)
+#d = fc.shear_i(r,S_x,S_y,T)
+m = fc.mass(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,sigma_c,dp,sigma_hoop,rho_f,rho_c,E_x,E_c)
