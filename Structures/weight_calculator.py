@@ -18,20 +18,24 @@ c = wm.c
 dy = wm.dy
 t = p.t_skin
 
-h = wm.bsection
-a1 = np.abs(bs.poly1_out[2][0])+np.abs(bs.poly1_out[4][0])
-c1 = np.abs(bs.poly1_out[2][-1])+np.abs(bs.poly1_out[4][-1])
-a2 = c1
-c2 = np.abs(bs.poly2_out[2][-1])+np.abs(bs.poly2_out[4][-1])
-a3 = c2
-c3 = np.abs(bs.poly3_out[2][-1])+np.abs(bs.poly3_out[4][-1])
+poly1_out = bs.poly1_out
+poly2_out = bs.poly2_out
+poly3_out = bs.poly3_out
 
-a4 = np.abs(bs.poly1_out[3][0])+np.abs(bs.poly1_out[5][0])
-c4 = np.abs(bs.poly1_out[3][-1])+np.abs(bs.poly1_out[5][-1])
+h = wm.bsection
+a1 = np.abs(poly1_out[2][0])+np.abs(poly1_out[4][0])
+c1 = np.abs(poly1_out[2][-1])+np.abs(poly1_out[4][-1])
+a2 = c1
+c2 = np.abs(poly2_out[2][-1])+np.abs(poly2_out[4][-1])
+a3 = c2
+c3 = np.abs(poly3_out[2][-1])+np.abs(poly3_out[4][-1])
+
+a4 = np.abs(poly1_out[3][0])+np.abs(poly1_out[5][0])
+c4 = np.abs(poly1_out[3][-1])+np.abs(poly1_out[5][-1])
 a5 = c4
-c5 = np.abs(bs.poly2_out[3][-1])+np.abs(bs.poly2_out[5][-1])
+c5 = np.abs(poly2_out[3][-1])+np.abs(poly2_out[5][-1])
 a6 = c5
-c6 = np.abs(bs.poly3_out[3][-1])+np.abs(bs.poly3_out[5][-1])
+c6 = np.abs(poly3_out[3][-1])+np.abs(poly3_out[5][-1])
 
 a_FS = np.hstack((a1,a2,a3))
 c_FS = np.hstack((c1,c2,c3))

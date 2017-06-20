@@ -283,17 +283,20 @@ def MOI_section_3():
         
     return np.array(Ixx), np.array(Iyy), np.array(Ixy), f1, f2, y_NA, x_NA, x, x_span, LE_area, TE_area, cross_section_area[0]
 
+Ixx_1, Iyy_1, Ixy_1, f1_1, f2_1, y_NA_1, x_NA_1, x_1, x_span_1, LE_area_1, TE_area_1, ribs_area_1 = MOI_section_1()
+Ixx_2, Iyy_2, Ixy_2, f1_2, f2_2, y_NA_2, x_NA_2, x_2, x_span_2, LE_area_2, TE_area_2, ribs_area_2 = MOI_section_2()
+Ixx_3, Iyy_3, Ixy_3, f1_3, f2_3, y_NA_3, x_NA_3, x_3, x_span_3, LE_area_3, TE_area_3, ribs_area_3 = MOI_section_3()
 
 def wingbox_MOI_total():
-    Ixx = np.hstack((MOI_section_1()[0], MOI_section_2()[0], MOI_section_3()[0])) 
-    Iyy = np.hstack((MOI_section_1()[1], MOI_section_2()[1], MOI_section_3()[1]))
-    Ixy = np.hstack((MOI_section_1()[2], MOI_section_2()[2], MOI_section_3()[2]))
-    x_NA = np.hstack((MOI_section_1()[6], MOI_section_2()[6], MOI_section_3()[6]))
-    y_NA = np.hstack((MOI_section_1()[5], MOI_section_2()[5], MOI_section_3()[5]))
-    x_span = np.vstack((MOI_section_1()[8], MOI_section_2()[8], MOI_section_3()[8]))
-    LE_area = sum(np.hstack((MOI_section_1()[9], MOI_section_2()[9], MOI_section_3()[9])))
-    TE_area = sum(np.hstack((MOI_section_1()[10], MOI_section_2()[10], MOI_section_3()[10])))
-    ribs_area = np.hstack((MOI_section_1()[11], MOI_section_2()[11], MOI_section_3()[11]))
+    Ixx = np.hstack((Ixx_1, Ixx_2, Ixx_3)) 
+    Iyy = np.hstack((Iyy_1, Iyy_2, Iyy_3))
+    Ixy = np.hstack((Ixy_1, Ixy_2, Ixy_3))
+    x_NA = np.hstack((x_NA_1, x_NA_2, x_NA_3))
+    y_NA = np.hstack((y_NA_1, y_NA_2, y_NA_3))
+    x_span = np.vstack((x_span_1, x_span_2, x_span_3))
+    LE_area = sum(np.hstack((LE_area_1, LE_area_2, LE_area_3)))
+    TE_area = sum(np.hstack((TE_area_1, TE_area_2, TE_area_3)))
+    ribs_area = np.hstack((ribs_area_1, ribs_area_2, ribs_area_3))
     
     return Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area
 

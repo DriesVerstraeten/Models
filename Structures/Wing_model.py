@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #plt.close()
-fig = plt.figure(figsize = (8.5,6),tight_layout=True)
+#fig = plt.figure(figsize = (8.5,6),tight_layout=True)
 
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #CHORD LENGTH AT DIFFERENT SPANWISE LOCATIONS
@@ -56,8 +56,8 @@ y1 = np.linspace(0,p.b/2.+2*dy, len(c))
 #c = p.c_r - d_cLE - d_cTE #chord at each spanwise section
     
 
-CL_9g = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #lift coefficient at N g
-CL_45g = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coefficient at -4.5g
+CL = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #lift coefficient at N g
+#CL_45g = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coefficient at -4.5g
     
                       
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
@@ -65,56 +65,56 @@ CL_45g = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coef
 
 
 def wing_shear(CL, rho, V):
-    dL_9g = CL * 1./2. * rho * V**2. * dy * c #the small lift contribution from every section                      
-    dL_9g_total = np.zeros(len(y)) #make a list of zeroes to later overwrite these in the next loop
+    dL = CL * 1./2. * rho * V**2. * dy * c #the small lift contribution from every section                      
+    dL_total = np.zeros(len(y)) #make a list of zeroes to later overwrite these in the next loop
               
     for i in range(0,len(y)):
         if i == 0:
-            dL_9g_total[i] = sum(CL * 1./2. * rho * V**2. * dy * c) #overwrite the zeroes
+            dL_total[i] = sum(CL * 1./2. * rho * V**2. * dy * c) #overwrite the zeroes
         elif i == 1:
-            dL_9g_total[i] = dL_9g_total[i-1] - dL_9g[0]
+            dL_total[i] = dL_total[i-1] - dL[0]
         else:
-            dL_9g_total[i] = dL_9g_total[i-1] - dL_9g[i-1]
+            dL_total[i] = dL_total[i-1] - dL[i-1]
     '''
     ax1 = fig.add_subplot(221)
-    ax1.plot(y,dL_9g_total)  
-    ax1.set_title('Shear force at 9g')
+    ax1.plot(y,dL_total)  
+    ax1.set_title('Shear force at Nz g')
     ax1.set_ylabel('Shear force [N]')
     ax1.set_xlabel('Wing span [m]')
-    ax1.set_ylim(dL_9g_total[-1],dL_9g_total[0])
+    ax1.set_ylim(dL_total[-1],dL_total[0])
     ax1.set_xlim([y[0],y[-1]])
     plt.show()
     '''
-    return dL_9g, dL_9g_total
-#wing_shear(CL_9g, p.rho_0, p.V_cruise)
+    return dL, dL_total
+#wing_shear(CL, p.rho_0, p.V_cruise)
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #BENDING AT 9g
 
 
 def wing_moment(CL, rho, V):
-    dM_9g = wing_shear(CL, rho, V)[0] * y
-    dM_9g_total = np.zeros(len(y))
+    dM = wing_shear(CL, rho, V)[0] * y
+    dM_total = np.zeros(len(y))
     
     for i in range(0,len(y)):
         if i == 0:
-            dM_9g_total[i] = sum(dM_9g)
+            dM_total[i] = sum(dM)
         elif i == 1:
-            dM_9g_total[i] = dM_9g_total[i-1] - dM_9g[0]
+            dM_total[i] = dM_total[i-1] - dM[0]
         else:
-            dM_9g_total[i] = dM_9g_total[i-1] - dM_9g[i-1]
+            dM_total[i] = dM_total[i-1] - dM[i-1]
     '''
     ax2 = fig.add_subplot(222)
-    ax2.plot(y1,dM_9g_total)  
-    ax2.set_title('Bending moment at 9g')
+    ax2.plot(y1,dM_total)  
+    ax2.set_title('Bending moment at Nz g')
     ax2.set_ylabel('Bending moment [Nm]')
     ax2.set_xlabel('Wing span [m]')
-    ax2.set_ylim(dM_9g_total[-1],dM_9g_total[0])
+    ax2.set_ylim(dM_total[-1],dM_total[0])
     ax2.set_xlim([y[0],y[-1]])
     plt.show()
     '''
-    return dM_9g, dM_9g_total
+    return dM, dM_total
 
-#wing_moment(CL_9g,p.rho_0,p.V_cruise)
+#wing_moment(CL,p.rho_0,p.V_cruise)
 
 
 
