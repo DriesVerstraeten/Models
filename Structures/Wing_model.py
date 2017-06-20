@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #plt.close()
-#fig = plt.figure(figsize = (8.5,6),tight_layout=True)
+fig = plt.figure(figsize = (8.5,6),tight_layout=True)
 
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #CHORD LENGTH AT DIFFERENT SPANWISE LOCATIONS
@@ -86,7 +86,7 @@ def wing_shear(CL, rho, V):
     plt.show()
     '''
     return dL_9g, dL_9g_total
-wing_shear(CL_9g, p.rho_0, p.V_cruise)
+#wing_shear(CL_9g, p.rho_0, p.V_cruise)
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #BENDING AT 9g
 
@@ -114,17 +114,7 @@ def wing_moment(CL, rho, V):
     '''
     return dM_9g, dM_9g_total
 
-#wing_moment_9g(CL_9g,p.rho_0,p.V_cruise)
-
-
-
-
-
-
-
-
-
-
+#wing_moment(CL_9g,p.rho_0,p.V_cruise)
 
 
 
