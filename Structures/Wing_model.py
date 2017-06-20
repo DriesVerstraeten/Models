@@ -12,8 +12,8 @@ import Init_Parameters as p
 import numpy as np
 import matplotlib.pyplot as plt
 
-plt.close()
-fig = plt.figure(figsize = (8.5,6),tight_layout=True)
+#plt.close()
+#fig = plt.figure(figsize = (8.5,6),tight_layout=True)
 
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #CHORD LENGTH AT DIFFERENT SPANWISE LOCATIONS
@@ -56,8 +56,8 @@ y1 = np.linspace(0,p.b/2.+2*dy, len(c))
 #c = p.c_r - d_cLE - d_cTE #chord at each spanwise section
     
 
-CL_9g = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #lift coefficient at 9g
-CL_45g = -4.5 * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coefficient at -4.5g
+CL_9g = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #lift coefficient at N g
+CL_45g = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coefficient at -4.5g
     
                       
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
@@ -75,7 +75,7 @@ def wing_shear(CL, rho, V):
             dL_9g_total[i] = dL_9g_total[i-1] - dL_9g[0]
         else:
             dL_9g_total[i] = dL_9g_total[i-1] - dL_9g[i-1]
-    
+    '''
     ax1 = fig.add_subplot(221)
     ax1.plot(y,dL_9g_total)  
     ax1.set_title('Shear force at 9g')
@@ -84,10 +84,9 @@ def wing_shear(CL, rho, V):
     ax1.set_ylim(dL_9g_total[-1],dL_9g_total[0])
     ax1.set_xlim([y[0],y[-1]])
     plt.show()
-    
+    '''
     return dL_9g, dL_9g_total
-wing_shear(CL_9g,p.rho_0,p.V_cruise)
-
+wing_shear(CL_9g, p.rho_0, p.V_cruise)
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #BENDING AT 9g
 

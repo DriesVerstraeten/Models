@@ -59,6 +59,33 @@ def wingbox_mass():
     wingbox_mass = total_volume * p.rho_CF
     return wingbox_mass
 
-print wingbox_mass()
+wingbox_mass = wingbox_mass()
+
+Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area = mi.wingbox_MOI_total()
+
+def LE_TE_mass():
+    LE_volume = 2* LE_area * t/2 
+    TE_volume = 2* TE_area * t /2
+    volume_total = LE_volume + TE_volume
+    mass = volume_total * p.rho_CF
+    return mass
+
+LE_TE_mass = LE_TE_mass()
+
+def rib_mass():
+    ribs_volume = 2* ribs_area * t
+    ribs_mass = sum(ribs_volume * p.rho_CF)
+    return ribs_mass
+    
+rib_mass = rib_mass()
+    
+def wing_total_mass():
+    return wingbox_mass + LE_TE_mass + rib_mass
+
+print wing_total_mass()
+    
+    
+    
+    
 
     
