@@ -3,6 +3,7 @@ import Material_properties as mat
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import scipy.integrate as integrate
 """
 INPUTS OF DIMENSIONS ARE HERE FOR NOW. everything in METERS
 """
@@ -18,10 +19,10 @@ b_t = 0.001 #thickness
 b_l = 2 #length
 #ATTENTION boom is just a check for the fuselage part which connects the tail. So input of boom size can be just the dimensions of that part. Loads on the tail will most likely be low anyway.
 #Vertical tail dimensions
-v_r = p.cr_ht#root cord length
-v_t = p.ct_ht#tip cord length
-v_b = p.b_ht / 2#vertical tail span
-v_w = p.W_ht#weight of the vertical tail. gonna be recalculated a bit later
+v_r = 1.255#root cord length
+v_t = 0.3766#tip cord length
+v_b = 2.45 #vertical tail span
+#v_w = p.W_ht#weight of the vertical tail. gonna be recalculated a bit later
 
 
 """
@@ -47,6 +48,10 @@ def y_tail_inv(dy,i): #from root to tip, verified
 
 def c_tail(dy,i): #from tip to root, works
     c_tail = np.linspace(p.ct_ht,p.cr_ht,dy+1)
+    return c_tail[i]
+
+def c_ver_tail(dy,i): #from tip to root, works
+    c_tail = np.linspace(0.3766,1.255,dy+1)
     return c_tail[i]
 
 def tail_force(dy,f,i): #from tip to root, works
@@ -229,7 +234,7 @@ def boom_plots(dx,f,g):#works
 
 def force_vert(dz,f):#works not anymore ARRRRRRRRRRRRRRRGH
     v_c = np.linspace(v_r,v_t,dz)
-    mid_w = (f+0.00) / dz
+    mid_w = (f) / dz
     w_distr = mid_w * v_c / v_c[dz/2]
     return np.sum(w_distr)
 
@@ -290,19 +295,19 @@ def boom_shear_stress_v(dtheta,dx,i,g):#works
     plt.show()
     return
 
-def torque_vert(dz,g):#works
-    z_v = np.linspace(0,v_b,dz)
-    v_c = np.linspace(v_r,v_t,dz)
-    mid_w = v_w / dz
-    w_distr = mid_w * v_c / v_c[dz/2]
-    force = g*p.g*w_distr
-    moment = force * z_v
-    torque = np.sum(moment)
-    return torque
+#def torque_vert(dz,g):#works
+#    z_v = np.linspace(0,v_b,dz)
+#    v_c = np.linspace(v_r,v_t,dz)
+#    mid_w = v_w / dz
+#    w_distr = mid_w * v_c / v_c[dz/2]
+#    force = g*p.g*w_distr
+#    moment = force * z_v
+ #   torque = np.sum(moment)
+ #   return torque
 
-def torque_stress(dx, dz, g, i):#works
-    t_stress = torque_vert(dz,g) / (2 * b_t * math.pi * r_boom(dx,i)**2)
-    return t_stress
+#def torque_stress(dx, dz, g, i):#works
+#    t_stress = torque_vert(dz,g) / (2 * b_t * math.pi * r_boom(dx,i)**2)
+#    return t_stress
 
 def total_shear_stress_boom(dx,dz,dtheta,fh,fv,i):#works
     theta = np.linspace(0, 2*math.pi, dtheta)
@@ -326,19 +331,19 @@ def total_shear_stress_boom(dx,dz,dtheta,fh,fv,i):#works
     plt.plot(theta, shear_stress_2)
     plt.ylabel('Shear stress from horizontal tail, N/m^2')
     plt.xlabel('Location (from top), radian')
-    shear_stress_tot = shear_stress_1 + shear_stress_2 + torque_stress(dx,dz,fv,i)
-    plt.subplot(133)
-    plt.plot(theta, shear_stress_tot)
-    plt.ylabel('Total shear stress, N/m^2')
-    plt.xlabel('Location (from top), radian')
-    plt.show()
-    a = max(shear_stress_tot)
-    b = min(shear_stress_tot)
-    if abs(a) >= abs(b):
-        c = a
-    else:
-        c = b
-    return c
+#    shear_stress_tot = shear_stress_1 + shear_stress_2 + torque_stress(dx,dz,fv,i)
+#    plt.subplot(133)
+#    plt.plot(theta, shear_stress_tot)
+#    plt.ylabel('Total shear stress, N/m^2')
+#    plt.xlabel('Location (from top), radian')
+#    plt.show()
+#    a = max(shear_stress_tot)
+#    b = min(shear_stress_tot)
+#    if abs(a) >= abs(b):
+#        c = a
+#    else:
+#        c = b
+    return 
 
 def total_bending_stress_boom(dx,dr,i,fh,fv,g):
     x_coord = np.zeros(dr)
@@ -371,79 +376,80 @@ def total_bending_stress_boom(dx,dr,i,fh,fv,g):
         c = b
     return c
 
-def wingbox_MOI(dy,start,end,t1,rho): #t1 is thickness of 2 fiber sheets together, t2 is half-thickness of the whole sandwich
+def wingbox_MOI(dy,t,start,end,rho): #t1 is thickness of 2 fiber sheets together, t2 is half-thickness of the whole sandwich
     
     airfoil_coordinates = np.genfromtxt('NACA0012.txt',skip_header=0)
-    
     Ixx = []
-    Iyy = []
-    Ixy = []
-    
+    x_span = []
+    x_NA = []
+    y_NA = []
+    c_1 = np.zeros(dy)
+    for i in range (0,dy):
+        c_1[i] = c_ver_tail(dy,i)
     xcoordinates = np.zeros(len(airfoil_coordinates)) 
     ycoordinates = np.zeros(len(airfoil_coordinates)) 
         
     for i in range(len(airfoil_coordinates)):
         xcoordinates[i] = airfoil_coordinates[i][0]
         ycoordinates[i] = airfoil_coordinates[i][1] 
-    
-    
-    for i in range(0,dy):
-        xcoordinates1 = xcoordinates * c_tail(dy,i)
-        ycoordinates1 = ycoordinates * c_tail(dy,i)
+        
+    for i in range(len(c_1+1)):
+        xcoordinates1 = xcoordinates * c_1[i]
+        ycoordinates1 = ycoordinates * c_1[i]
         
         fit1 = np.polyfit(xcoordinates1[0:66],ycoordinates1[0:66],5)
-        f1 = np.poly1d(fit1)
+        f1 = np.poly1d(fit1) #upper skin
         f11 = f1.deriv(1)
         
-        fit2 = np.polyfit(xcoordinates1[68:133],ycoordinates1[68:133],5)
-        f2 = np.poly1d(fit2)
+        fit2 = np.polyfit(xcoordinates1[66:133],ycoordinates1[66:133],5)
+        f2 = np.poly1d(fit2) #lower skin
         f22 = f2.deriv(1)
-    
-        front_spar = start * c_tail(dy,i)
-        back_spar = end * c_tail(dy,i)
-        
-        sections = dy            
-        dx = 1./sections             
-        area_section = dx * t1
-        x = np.arange(front_spar,back_spar+dx,dx)
-    
-        arc_length_US = sum(np.sqrt(1+f11(x)**2)*dx) #upper skin
-        arc_length_LS = sum(np.sqrt(1+f22(x)**2)*dx) #lower skin
-        
+
+        front_spar = start * c_1[i]
+        back_spar =  end * c_1[i]
+
+        #sections = 100.             
+        #dx = 1./sections             
+        x = np.linspace(front_spar,back_spar,dy)
+        dx = (back_spar - front_spar)/dy
+        area_section = dx * t #multiplied by two because it is a honeycomb structure
+        x_span.append(x)
+
+        arc_length_US = integrate.quad(lambda x: np.sqrt(1+f11(x)**2), front_spar, back_spar) #upper skin
+        arc_length_LS = integrate.quad(lambda x: np.sqrt(1+f22(x)**2), front_spar, back_spar) #lower skin
+                           
         front_spar_length = np.abs(f1(front_spar)) + np.abs(f2(front_spar))
         back_spar_length = np.abs(f1(back_spar)) + np.abs(f2(back_spar))
         
-        front_spar_area = (np.abs(f1(front_spar)) + np.abs(f2(front_spar)))*t1
-        back_spar_area = (np.abs(f1(back_spar)) + np.abs(f2(back_spar)))*t1
-        
-        total_area = (arc_length_US + arc_length_LS)*t1 + front_spar_area + back_spar_area
-        if (i == dy/2):
+        front_spar_area = (front_spar_length)*t
+        back_spar_area = (back_spar_length)*t
+
+        total_area = (arc_length_US[0] + arc_length_LS[0])*t + front_spar_area + back_spar_area
+        if i == dy/2:
             area = total_area
-        y_NA = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
-        x_NA = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area*back_spar) / total_area
-                     
-        Ixx_section = 2*dx*t1**3/12 + area_section * sum(f1(x)**2 + f2(x)**2) + t1/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA))**2)
-        Iyy_section = (front_spar_area * (front_spar-x_NA)**2) + (back_spar_area * (back_spar-x_NA)**2) + area_section*(sum(x**2)-2*x_NA*sum(x)+len(x)*x_NA**2)
-        Ixy_section = area_section*(sum((x-x_NA)*(f1(x)-y_NA)) + sum((x-x_NA)*(f2(x)-y_NA))) + front_spar_area * (front_spar - x_NA) * ((f1(front_spar) + f2(front_spar))/2 - y_NA) + back_spar_area * (back_spar - x_NA) * ((f1(back_spar) + f2(back_spar))/2 - y_NA)
-    
+        y_NA_sec = (area_section * (sum(f1(x)) + sum(f2(x))) + front_spar_area*(f1(front_spar) + f2(front_spar))/2 + back_spar_area*(f1(back_spar) + f2(back_spar))/2)/ total_area 
+        x_NA_sec = (area_section * sum(x) * 2 + front_spar_area * front_spar + back_spar_area * back_spar) / total_area
+                   
+        x_NA.append(x_NA_sec)
+        y_NA.append(y_NA_sec)
+        '''front_spar_area * (front_spar-x_NA[i])**2 + back_spar_area * (back_spar-x_NA[i])**2'''
+        Ixx_section = area_section*(sum(f1(x)**2) + sum(f2(x)**2)) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA[i]))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA[i]))**2)
         Ixx.append(Ixx_section)
-        Iyy.append(Iyy_section)
-        Ixy.append(Ixy_section)
         
-    weight = area*rho*p.b_ht/2
-   
-    return Ixx, Iyy, Ixy, weight, xcoordinates1, ycoordinates1, f1, f2, y_NA, x_NA, x 
+    W = area * rho * v_b
+
+    return np.array(Ixx), f1, f2, y_NA, x_NA, x, x_span, W
 
 def bending_box(dx,dy,start,end,t,rho,f,i,Ixx):    #bending stress calc
     airfoil_coordinates = np.genfromtxt('NACA0012.txt',skip_header=0)
-    x_x = np.linspace(start*c_tail(dy,i),end*c_tail(dy,i),dx)
+    x_x = np.linspace(start*c_ver_tail(dy,i),end*c_ver_tail(dy,i),dx)
     xcoordinates = np.zeros(len(airfoil_coordinates)) 
     ycoordinates = np.zeros(len(airfoil_coordinates)) 
     for j in range(len(airfoil_coordinates)):
         xcoordinates[j] = airfoil_coordinates[j][0]
         ycoordinates[j] = airfoil_coordinates[j][1] 
-    xcoordinates1 = xcoordinates * c_tail(dy,i)
-    ycoordinates1 = ycoordinates * c_tail(dy,i)
+    xcoordinates1 = xcoordinates * c_ver_tail(dy,i)
+    ycoordinates1 = ycoordinates * c_ver_tail(dy,i)
     fit1 = np.polyfit(xcoordinates1[0:66],ycoordinates1[0:66],5)
     f1 = np.poly1d(fit1)
 #    f11 = f1.deriv(1)
@@ -531,14 +537,14 @@ def highest_bending_box(dx,dy,start,end,t1,rho,f,Ixx):
 
 def shear_box(dx,dy,start,end,i,t,rho,fh,T,Ixx): #shear stress calc
     airfoil_coordinates = np.genfromtxt('NACA0012.txt',skip_header=0)
-    x_x = np.linspace(start*c_tail(dy,i),end*c_tail(dy,i),dx)
+    x_x = np.linspace(start*c_ver_tail(dy,i),end*c_ver_tail(dy,i),dx)
     xcoordinates = np.zeros(len(airfoil_coordinates)) 
     ycoordinates = np.zeros(len(airfoil_coordinates)) 
     for j in range(len(airfoil_coordinates)):
         xcoordinates[j] = airfoil_coordinates[j][0]
         ycoordinates[j] = airfoil_coordinates[j][1] 
-    xcoordinates1 = xcoordinates * c_tail(dy,i)
-    ycoordinates1 = ycoordinates * c_tail(dy,i)
+    xcoordinates1 = xcoordinates * c_ver_tail(dy,i)
+    ycoordinates1 = ycoordinates * c_ver_tail(dy,i)
     fit1 = np.polyfit(xcoordinates1[0:66],ycoordinates1[0:66],5)
     f1 = np.poly1d(fit1)
     f11 = f1.deriv(1)
@@ -558,27 +564,27 @@ def shear_box(dx,dy,start,end,i,t,rho,fh,T,Ixx): #shear stress calc
     slope1 = np.zeros(dx)
     slope2 = np.zeros(dx)
     for j in range (0,dx):
-        slope1[j] = abs((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f11(x_x[j]))))
-        slope2[j] = abs((-start*c_tail(dy,i)+end*c_tail(dy,i))/dx)/(math.cos(math.atan(f22(x_x[j]))))
+        slope1[j] = abs((-start*c_tail(dy,i)+end*c_ver_tail(dy,i))/dx)/(math.cos(math.atan(f11(x_x[j]))))
+        slope2[j] = abs((-start*c_tail(dy,i)+end*c_ver_tail(dy,i))/dx)/(math.cos(math.atan(f22(x_x[j]))))
     q1 = np.zeros(dx)
     q2 = np.zeros(dx)
     q3 = np.zeros(dx)
     encl_area = 0
     for j in range (0,dx):
         encl_area = encl_area + (x_y_up[j]-x_y_down[j])/dx
-    qt = 2 * encl_area * T
+    qt = T / (2 * encl_area) 
     q1[dx/2-1] = 0
     for j in range (dx/2,dx):
-        q1[j] = q1[j-1] - tail_shear(dy,fh,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
+        q1[j] = q1[j-1] - tail_shear(dy,fh,i)*slope1[j]*t*x_y_up[j]/Ixx
     q2[0] = q1[dx-1]
     for j in range (1,dx):
-        q2[j] = q2[j-1] - tail_shear(dy,fh,i)*(abs(x_y_down[dx-1]-x_y_up[dx-1])/dx)*t*x_y_right[j]/Ixx[i]
+        q2[j] = q2[j-1] - tail_shear(dy,fh,i)*(abs(x_y_down[dx-1]-x_y_up[dx-1])/dx)*t*x_y_right[j]/Ixx
     q3[0] = q2[dx-1]
     for j in range (1,dx):
-        q3[j] = q3[j-1] - tail_shear(dy,fh,i)*slope2[j]*t*x_y_down[j]/Ixx[i]
+        q3[j] = q3[j-1] - tail_shear(dy,fh,i)*slope2[j]*t*x_y_down[j]/Ixx
     q1[0] = q3[dx-1]
     for j in range (1,dx/2):
-        q1[j] = q1[j-1] - tail_shear(dy,fh,i)*slope1[j]*t*x_y_up[j]/Ixx[i]
+        q1[j] = q1[j-1] - tail_shear(dy,fh,i)*slope1[j]*t*x_y_up[j]/Ixx
     q1 = q1 + qt
     q2 = q2 + qt
     q3 = q3 + qt
@@ -599,13 +605,13 @@ def shear_box(dx,dy,start,end,i,t,rho,fh,T,Ixx): #shear stress calc
 #    plt.ylabel('Shear flow bottom skin, N/m')
 #    plt.xlabel('x - Location')
 #    plt.show()
-    return max(abs(q2))
+    return max(abs(min(q1)),abs(max(q1)),abs(min(q2)),abs(max(q2)),abs(min(q3)),abs(max(q3)))
 
 def highest_shear_box(dx,dy,start,end,t,rho,fh,T,Ixx):
     y = np.linspace(0,p.b_ht/2,dy)
     stress = np.zeros(dy)
     for i in range (0,dy):
-        stress[i] = shear_box(dx,dy,start,end,i,t,rho,fh,T,Ixx)/t
+        stress[i] = shear_box(dx,dy,start,end,i,t,rho,fh,T,Ixx[i]) / t
     plt.figure(figsize=(7,5))
     plt.suptitle('Highest shear stress in the tailbox')
     plt.plot(y,stress)
@@ -620,44 +626,50 @@ def highest_shear_box(dx,dy,start,end,t,rho,fh,T,Ixx):
         c = b
     return c
 
-#   master_function(500,500,100,100,100,100,0.0,0.6,0.002,0,0) - input i used to test the code. first 2 are forces (on horizontal tail, then on vertical tail.). next 4 are meshes (leave at 500 max, otherwise will take too long). start and end are spar locations (so for 0.0 and 0.6 there is only one spar at 0.6 of the cord). spar should be at where elevator or whtever control surface is!. 0.002 is thickness of the skin in m, and last 2 numbers are the material reference to a Material_properties.py. 
+#   master_function(32000*2/3,28800*4/3,0,100,100,100,100,0.0,0.6,0.002,0.02,mat.rho_carb,mat.rho_core) - input i used to test the code. first 2 are forces (on horizontal tail, then on vertical tail.). next 4 are meshes (leave at 500 max, otherwise will take too long). start and end are spar locations (so for 0.0 and 0.6 there is only one spar at 0.6 of the cord). spar should be at where elevator or whtever control surface is!. 0.002 is thickness of the skin in m, and last 2 numbers are the material reference to a Material_properties.py. 
 
-def master_function(fh,fv,T,dx,dy,dz,dtheta,start,end,t,m1,m2):
+def rho_true(t1,t2,rho1,rho2):
+    rho = (rho1*t1+rho2*t2)/(t1+t2)
+    return rho
+                   
+def master_function(fh,fv,T,dx,dy,dz,dtheta,start,end,t1,t2,rho1,rho2):
 #    Ixx = wingbox_MOI(dy,start,end,t,mat.rho[m1])[0]
 #    Ixy = wingbox_MOI(dy,start,end,t,mat.rho[m1])[2]
 #    Iyy = wingbox_MOI(dy,start,end,t,mat.rho[m1])[1]
-    Ixx = wingbox_MOI(dx,start,end,t,mat.rho[m1])[0]
+    rho = rho_true(t1,t2,rho1,rho2)
+    Ixx_ben = wingbox_MOI(dx,(t1*2),start,end,rho)[0]
+    Ixx_shear = wingbox_MOI(dx,t2,start,end,rho)[0]
     tail_plots(dy,fh)
     boom_plots(dx,fh,1)
     boom_plots_vertical(dx,fv)
-    a = total_shear_stress_boom(dx,dz,dtheta,fh,fv,dz-1)
-    b = total_bending_stress_boom(dx,dtheta,dx-1,fh,fv,1)
-    c = highest_bending_box(dx,dy,start,end,t,mat.rho[m2],fh,Ixx)
-    d = highest_shear_box(dx,dy,start,end,t,mat.rho[m2],fh,T,Ixx)
-    print ('TAILBOX ANALYSIS:')  
-    print ('Weight of the tailbox:')
-    print wingbox_MOI(dy,start,end,t,mat.rho[m1])[3]
-    print 'highest shear stress in the tailbox:'
+#    a = total_shear_stress_boom(dx,dz,dtheta,fh,fv,dz-1)
+#    b = total_bending_stress_boom(dx,dtheta,dx-1,fh,fv,1)
+    c = highest_bending_box(dx,dy,start,end,t1,mat.rho_carb,fv,Ixx_ben)
+    d = highest_shear_box(dx,dy,start,end,t2,mat.rho_carb,fv,T,Ixx_shear)
+    print ('HOR TAILBOX ANALYSIS:')  
+    print ('Weight of the hor tailbox:')
+    print wingbox_MOI(dx,(t1*2+t2),start,end,rho)[7]
+    print 'highest shear stress in the hor tailbox:'
     print d
-    print 'highest bending stress in the tailbox:'
+    print 'highest bending stress in the hor tailbox:'
     print c
-    print ('BOOM ANALYSIS:')
-    print ('Weight of the boom:')
-    print W_boom(mat.rho[m2])
-    print 'highest shear stress in the boom:'
-    print a
-    print 'highest bending stress in the boom:'
-    print b
+#    print ('BOOM ANALYSIS:')
+#    print ('Weight of the boom:')
+#    print W_boom(mat.rho[m2])
+#    print 'highest shear stress in the boom:'
+#    print a
+#    print 'highest bending stress in the boom:'
+#    print b
 #    if abs(a) >= mat.Fty[m2]:
 #        print 'This material is expected to yield in bending'
 #    else:
 #        print 'This material is not expected to yield in bending'
-#    if abs(a) >= mat.Ftu[m2]:
-#        print 'This material is expected to fail in bending'
-#    else:
-#        print 'This material is not expected to fail in bending'
-#    if abs(b) >= mat.Fsu[m2]:
-#        print 'This material is expected to fail in shear'
-#    else:
-#        print 'This material is not expected to fail in shear'
+    if abs(c) >= mat.sigma_carb:
+        print 'Hor tail is expected to fail in bending'
+    else:
+        print 'Hor tail is not expected to fail in bending'
+    if abs(d) >= mat.tau_core:
+        print 'Hor tail is expected to fail in shear'
+    else:
+        print 'Hor tail is not expected to fail in shear'
     return
