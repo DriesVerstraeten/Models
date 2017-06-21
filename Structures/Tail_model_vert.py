@@ -436,7 +436,7 @@ def wingbox_MOI(dy,t,start,end,rho): #t1 is thickness of 2 fiber sheets together
         Ixx_section = area_section*(sum(f1(x)**2) + sum(f2(x)**2)) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA[i]))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA[i]))**2)
         Ixx.append(Ixx_section)
         
-    W = area * rho * p.b_ht + area * 0.420 * v_b / t
+    W = area * rho * v_b + area * 0.420 * v_b / t
 
     return np.array(Ixx), f1, f2, y_NA, x_NA, x, x_span, W
 

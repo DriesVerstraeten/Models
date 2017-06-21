@@ -65,7 +65,7 @@ def wingbox_mass():
 
 wingbox_mass = wingbox_mass()
 
-Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area = mi.wingbox_MOI_total()
+Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area, total_volume_wings = mi.wingbox_MOI_total()
 
 def LE_TE_mass():
     LE_volume = 2* LE_area * t/2 
