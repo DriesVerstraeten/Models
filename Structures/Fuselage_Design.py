@@ -1,7 +1,7 @@
 import numpy as np
 
 import sys
-sys.path.insert(0, 'C:\Users\Claudia\Models')
+sys.path.insert(0,'C:\Users\Claudia\Models')
 import Init_Parameters as p
 import Wing_model as w
 import Fuselage_composite_final as fc
@@ -10,7 +10,8 @@ import Fuselage_composite_final as fc
 L_f     = p.Lf   # m 
                  # This depends on the aerodynamic mesh and the location of the
                  # forces and moments
-c_r    = p.c_r
+
+c_r    = w.C1
 n       =  2*6
 
 
@@ -131,7 +132,8 @@ sigma_c = 657.*10**6
 e_t     = sigma_t/E_x
 e_c     = sigma_c/E_y
 t_f_min = 0.3
-tau     = (sigma_t-sigma_c)/2
+tau     = (-sigma_t+sigma_c)/2
+
 sigma_hoop    = 100*10**6
 d =fc.thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,sigma_c,\
     tau,t_c_min,dp,sigma_hoop,rho_f,rho_c,E_x,E_c)
