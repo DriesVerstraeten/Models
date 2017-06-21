@@ -28,7 +28,7 @@ t_loiter = 2700. #s - loiter time
 #AIRCRAFT PARAMETERS
 L_m = 0.7 #main gear length, cm
 L_n = 0.7 #nose gear length, cm
-MTOW = 1724.4. #max TO weight, in kg!!!!!!!!
+MTOW = 1768.4 #max TO weight, in kg!!!!!!!!
 
 #FUSELAGE PARAMETERS
 Lt =  6.5 #m - Tail length
@@ -36,16 +36,16 @@ Lf = 10   #m - fuselage length
 
 
 #WING PARAMETERS
-S = 14.31 #m2 - Wing surface area
+S = 15.51 #m2 - Wing surface area
 A = 7.35 #Aspect Ratio
-b = 10. #m - wing span
-bh = 2.997 #m - horizontal wing span
-c_r = 2.011 #m - root chord
-c_t = 0.844 #m - tip chord
-c_rh = 0.832 #m - horizontal root chord
-c_th = 0.67 #m - horizontal tip chord
-MAC = 1.46 #m - mean aerodynamic chord
-Y = 2.327 #m - lateral MAC position
+b = 10.677 #m - wing span
+#bh = 2.997 #m - horizontal wing span
+#c_r = 2.011 #m - root chord
+#c_t = 0.844 #m - tip chord
+#c_rh = 0.832 #m - horizontal root chord
+#c_th = 0.67 #m - horizontal tip chord
+#MAC = 1.46 #m - mean aerodynamic chord
+#Y = 2.327 #m - lateral MAC position
 X_le_mac = 1.94
 theta_LE = np.radians(3.336) 
 theta_TE = np.radians(9.919)
@@ -54,19 +54,19 @@ hr1 = 0.115 #m - UPDATE IF AIRFOIL IS UPDATED
 hr2 = 0.09897 #m - UPDATE IF AIRFOIL IS UPDATED
 ht1 = 0.046 #m - UPDATE IF AIRFOIL IS UPDATED
 ht2 = 0.0123 #m - UPDATE IF AIRFOIL IS UPDATED
-wt = fuel_chord_length * c_t
-S1 = 0.5*(hr1+hr2)*wr #surface area at root
-S2 = 0.5*(ht1+ht2)*wt #surface area at tip
-V_fuel = Lf/3. * (S1+S2 + (S1*S2)**0.5) #maximum fuel volume in main wing
+#wt = fuel_chord_length * c_t
+#S1 = 0.5*(hr1+hr2)*wr #surface area at root
+#S2 = 0.5*(ht1+ht2)*wt #surface area at tip
+#V_fuel = Lf/3. * (S1+S2 + (S1*S2)**0.5) #maximum fuel volume in main wing
 
 t_skin = 0.002 #m - skin thickness
 
 
 #TAIL
-S_ht = 3.9 #ft2 to m2
-cr_ht = 1.75 #root cord hor tail
-ct_ht = 0.52 #tip cord hor tail
-b_ht = 3.42 #span hor tail
+S_ht = 1.587 #ft2 to m2
+cr_ht = 1.37 #root cord hor tail
+ct_ht = 0.3*cr_ht #tip cord hor tail
+b_ht = 1.78 #span hor tail
 #W_ht = 13.432 #mass hor tail
 
 
