@@ -19,13 +19,13 @@ import matplotlib.pyplot as plt
 #    W_wing = wing mass [kg]
 #    c = 1.568 # MAC
 #    x_ac = 0.3
-#    downwash = 0.427
+#    downwash = 0.136
 #    Cmac = -0.121
 #    CL_Ah_land = 2.3
 #    CL_alpha_Ah_land = 5.11
 #    CL_h_land = -0.55
 #    CL_alpha_h_land = 3.852
-#    VhV2 = 0.85**2 # (Vh/V)^2
+#    VhV2  # (Vh/V)^2
 #    xcg_OEW
 #    xcg_wing
 #    lh = tail arm [m]
@@ -88,7 +88,7 @@ def StabTailSizing(OEW,W_wing,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_land,C
         mass_tot.append(mass_tot[-1] + mass[i])
         xcg_for_load.append(((moment / mass_tot[-1])-x_lemac_array) / c)
         
-    order_aft = [0,2,2,1,1,3] # Full loading. Passengers first   
+    order_aft = [0,2,1,1,2,3] # Full loading. Passengers first   
     xcg_aft_load = [(xcg_OEW_array - x_lemac_array) / c]
     mass_tot = [OEW]
     moment = xcg_OEW_array * OEW
@@ -206,9 +206,9 @@ def StabTailSizingPlots(OEW,W_wing,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_l
 
 
 #### RUN FUNCTIONS: ####
-#StabTailSizingPlots(1043,132,1.46,0.25,0.136,-0.124,2.1,3.59,-0.44,2.7,1,2.35,2.61,6.0,0.001,0.001)
-##
-#x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(1043,132,1.46,0.25,0.136,-0.124,2.1,3.59,-0.44,2.7,1,2.35,2.61,6.0,0.001,0.001)
+StabTailSizingPlots(1043,132,1.46,0.25,0.136,-0.124,2.1,3.59,-0.44,2.7,1,2.35,2.61,6.0,0.001,0.001)
+#
+x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(1043,132,1.46,0.25,0.136,-0.124,2.1,3.59,-0.44,2.7,1,2.35,2.61,6.0,0.001,0.001)
 ############
 #OEW,W_wing,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_land,CL_h_land,CL_alpha_h_land,VhV2,xcg_OEW,xcg_wing,lh, x_lemac_acc, ShS_acc
 

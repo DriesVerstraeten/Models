@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
 import Common.CalcISA as ISA
-from FPP.propulsion import Analyse_prop
+#from FPP.propulsion import Analyse_prop
 
 # CalcCruise() and CruisePlots() combine all the other functions (except calcAltMax())
 
@@ -36,21 +36,13 @@ from FPP.propulsion import Analyse_prop
 # V_max
 # V_array = array with analysed speeds
 
-
-
-import os
-airfoil_path = os.getcwd() + '\Polars\Eppler_prop.npz'
+#################### Prop model ############
+#import os
+#airfoil_path = os.getcwd() + '\Polars\Eppler_prop.npz'
 #h=1200
 #V=100
 #rpm = 2800
-#
-#
-##V_array = np.arange(5,150,1)
-#
-W_cruise =1600*9.81
-V_array =np.arange(10,180,0.01)
-S=15.56
-h_cruise = 9000
+
 #thrust, torque, power_available = Analyse_prop(airfoil_path, h, V, rps)
 #PowerAva_simple = []
 #V_array_simple = [10,40,80,120,150]
@@ -59,6 +51,14 @@ h_cruise = 9000
 #    PowerAva_simple.append(power_available)
 #fit = np.polyfit(V_array_simple, PowerAva_simple, 1)
 #PowerAva = V_array * fit[0] + fit[1]
+##################################################
+
+
+W_cruise =1600*9.81
+V_array =np.arange(10,180,0.01)
+S=15.56
+h_cruise = 9000
+
 
 ###################################################################################################
 def calcPowerReq(W,V,S,h): # Calc Power Required [W] in steady cruise conditions for one or multiple TAS. Weight in Newton.
@@ -198,7 +198,7 @@ def calcPowerCruise(W_cruise,V_array,S,h_cruise): # Calc Power Required for most
     return PowerCruise_eff, V_Cruise_eff, LD_Cruise_eff, rho_Cruise, PowerAva, cp_Cruise_eff # have to include engine efficiency at different speeds !!!!!!!!!!!!
 
 
-#PowerReq, LD, rho_Cruise = calcPowerReq(W_cruise,V_array,S,10000)
+#PowerReq, LD, rho_Cruise = calcPowerReq(W_cruise,V_array,S,6000)
 #PowerAva = calcPowerAva(h_cruise,rho_Cruise)
 #where = np.where(PowerReq < PowerAva)
 #PowerReq = PowerReq[where]
@@ -251,7 +251,7 @@ def calcPowerCruise(W_cruise,V_array,S,h_cruise): # Calc Power Required for most
 
 
 def calcAltOpt(W_cruise,V_array,S):
-    h_max_an = 11000
+    h_max_an = 13200
     PowerCruise_alt = []
     V_Cruise_alt = []
     cp_Cruise_alt = []
@@ -301,8 +301,8 @@ def calcAltOpt(W_cruise,V_array,S):
 ##    plt.plot(h_cruise,PowerAva_alt)
 #    plt.show()
 
-    plt.plot(h_cruise,V_Cruise_alt)
-    plt.show()
+#    plt.plot(h_cruise,V_Cruise_alt)
+#    plt.show()
     
     #### Create folder to store plots in       
     import os
@@ -339,7 +339,7 @@ def calcAltOpt(W_cruise,V_array,S):
     plt.show()
     return PowerCruise_alt, PowerAva_alt, kilometrage
 
-#PowerCruise_alt, PowerAva_alt, kilometrage = calcAltOpt(1600*9.81,np.arange(5,150,0.1),15.56)
+#PowerCruise_alt, PowerAva_alt, kilometrage = calcAltOpt(1600*9.81,np.arange(5,150,0.01),15.56)
 
 
 ########################################################################################################
@@ -555,7 +555,9 @@ def CruisePlots(MTOW,OEW,Vfuelmax,S,V_acc):
 #Range, Speed = CruisePlots(1700,1043,0.56,15.56,0.01)
 #
 #R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array, MTOW_req, Fuel_req = calcCruise(1700,1043,0.56,444,15.56,1400000,0.01)
-################################
+#
+#PowerCruise_alt, PowerAva_alt, kilometrage = calcAltOpt(1600*9.81,np.arange(50,150,0.01),15.56)
+##############################
 
 
 
