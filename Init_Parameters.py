@@ -31,7 +31,7 @@ L_n = 0.7 #nose gear length, cm
 MTOW = 1768.4 #max TO weight, in kg!!!!!!!!
 
 #FUSELAGE PARAMETERS
-Lt =  6.5 #m - Tail length
+Lt =  4.5 #m - Tail length
 Lf = 10   #m - fuselage length
 
 
