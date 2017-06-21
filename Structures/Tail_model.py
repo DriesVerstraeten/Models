@@ -15,14 +15,14 @@ box_h = 0.1*p.cr_ht #m, height at root. apply scaling for other points. scales l
 #boom design. In composite iteration it is basically the fuselage part which connects tail to the rest. vertical tail is going to be produced as integrated part of the fuselage, horizontal will be attached.
 b_rr = 0.9 #root radius
 b_rt = 0.4 #tail radius
-b_t = 0.001 #thickness
-b_l = 2 #length
+b_t = 0.01 #thickness
+b_l = 6 #length
 #ATTENTION boom is just a check for the fuselage part which connects the tail. So input of boom size can be just the dimensions of that part. Loads on the tail will most likely be low anyway.
 #Vertical tail dimensions
 v_r = 1.255#root cord length
 v_t = 0.3766#tip cord length
 v_b = 2.45 #vertical tail span
-#v_w = p.W_ht#weight of the vertical tail. gonna be recalculated a bit later
+v_w = 14
 
 
 """
@@ -295,19 +295,19 @@ def boom_shear_stress_v(dtheta,dx,i,g):#works
     plt.show()
     return
 
-#def torque_vert(dz,g):#works
-#    z_v = np.linspace(0,v_b,dz)
-#    v_c = np.linspace(v_r,v_t,dz)
-#    mid_w = v_w / dz
-#    w_distr = mid_w * v_c / v_c[dz/2]
-#    force = g*p.g*w_distr
-#    moment = force * z_v
- #   torque = np.sum(moment)
- #   return torque
+def torque_vert(dz,g):#works
+    z_v = np.linspace(0,v_b,dz)
+    v_c = np.linspace(v_r,v_t,dz)
+    mid_w = v_w / dz
+    w_distr = mid_w * v_c / v_c[dz/2]
+    force = g*p.g*w_distr
+    moment = force * z_v
+    torque = np.sum(moment)
+    return torque
 
-#def torque_stress(dx, dz, g, i):#works
-#    t_stress = torque_vert(dz,g) / (2 * b_t * math.pi * r_boom(dx,i)**2)
-#    return t_stress
+def torque_stress(dx, dz, g, i):#works
+    t_stress = torque_vert(dz,g) / (2 * b_t * math.pi * r_boom(dx,i)**2)
+    return t_stress
 
 def total_shear_stress_boom(dx,dz,dtheta,fh,fv,i):#works
     theta = np.linspace(0, 2*math.pi, dtheta)
@@ -331,19 +331,19 @@ def total_shear_stress_boom(dx,dz,dtheta,fh,fv,i):#works
     plt.plot(theta, shear_stress_2)
     plt.ylabel('Shear stress from horizontal tail, N/m^2')
     plt.xlabel('Location (from top), radian')
-#    shear_stress_tot = shear_stress_1 + shear_stress_2 + torque_stress(dx,dz,fv,i)
-#    plt.subplot(133)
-#    plt.plot(theta, shear_stress_tot)
-#    plt.ylabel('Total shear stress, N/m^2')
-#    plt.xlabel('Location (from top), radian')
-#    plt.show()
-#    a = max(shear_stress_tot)
-#    b = min(shear_stress_tot)
-#    if abs(a) >= abs(b):
-#        c = a
-#    else:
-#        c = b
-    return 
+    shear_stress_tot = shear_stress_1 + shear_stress_2 + torque_stress(dx,dz,fv,i)
+    plt.subplot(133)
+    plt.plot(theta, shear_stress_tot)
+    plt.ylabel('Total shear stress, N/m^2')
+    plt.xlabel('Location (from top), radian')
+    plt.show()
+    a = max(shear_stress_tot)
+    b = min(shear_stress_tot)
+    if abs(a) >= abs(b):
+        c = a
+    else:
+        c = b
+    return c
 
 def total_bending_stress_boom(dx,dr,i,fh,fv,g):
     x_coord = np.zeros(dr)
@@ -628,13 +628,13 @@ def highest_shear_box(dx,dy,start,end,t,rho,fh,T,Ixx):
 
 #   master_function(32000*2/3,28800*4/3,0,100,100,100,100,0.0,0.6,0.002,0.02,mat.rho_carb,mat.rho_core) - input i used to test the code. first 2 are forces (on horizontal tail, then on vertical tail.). next 4 are meshes (leave at 500 max, otherwise will take too long). start and end are spar locations (so for 0.0 and 0.6 there is only one spar at 0.6 of the cord). spar should be at where elevator or whtever control surface is!. 0.002 is thickness of the skin in m, and last 2 numbers are the material reference to a Material_properties.py. 
 #master_function(32000*2/3,28800*4/3,0,100,100,100,100,0.0,0.6,0.0006,0.04,mat.rho_carb,mat.rho_core) VERTICAL TAIL
-#master_function(32000*2/3,28800*4/3,0,100,100,100,100,0.0,0.6,0.0006,0.038,mat.rho_carb,mat.rho_core) HORIZONTAL
+#master_function(32000*2/3,28800*4/3,0,100,100,100,100,0.0,0.6,0.001,0.02,mat.rho_carb,mat.rho_core,0) HORIZONTAL
                 
 def rho_true(t1,t2,rho1,rho2):
     rho = (rho1*t1+rho2*t2)/(t1+t2)
     return rho
                    
-def master_function(fh,fv,T,dx,dy,dz,dtheta,start,end,t1,t2,rho1,rho2):
+def master_function(fh,fv,T,dx,dy,dz,dtheta,start,end,t1,t2,rho1,rho2,m2):
 #    Ixx = wingbox_MOI(dy,start,end,t,mat.rho[m1])[0]
 #    Ixy = wingbox_MOI(dy,start,end,t,mat.rho[m1])[2]
 #    Iyy = wingbox_MOI(dy,start,end,t,mat.rho[m1])[1]
@@ -666,10 +666,14 @@ def master_function(fh,fv,T,dx,dy,dz,dtheta,start,end,t1,t2,rho1,rho2):
 #        print 'This material is expected to yield in bending'
 #    else:
 #        print 'This material is not expected to yield in bending'
-    if (abs(c) + abs(d)) >= mat.sigma_carb_1:
-        print 'Hor tail is expected to fail in bending'
-    else:
-        print 'Hor tail is not expected to fail in bending'
+#    if abs(b) >= mat.Fsu[m2]:
+#        print 'This material is expected to yield in bending'
+#    else:
+#        print 'This material is not expected to yield in bending'
+#    if (abs(c) + abs(d)) >= mat.sigma_carb_1:
+#        print 'Hor tail is expected to fail in bending'
+#    else:
+#        print 'Hor tail is not expected to fail in bending'
 #    if abs(d) >= mat.sigma_carb:
 #        print 'Hor tail is expected to fail in shear'
 #    else:

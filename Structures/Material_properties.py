@@ -194,4 +194,12 @@ Ftu = Ftu * 6894757.293178
 Fsu = Fsu * 6894757.293178   
 Fbru = Fbru * 6894757.293178   
     
+#Our funny material
+rho_carb = 1800
+E_carb = 365*10**9
+sigma_carb_1 = 4.5*10**9*0.2
+sigma_carb_2 = 23 * 10**9
+tau_core = 560 * 6894.76
+rho_core = 96.1
+
     
