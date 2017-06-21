@@ -11,6 +11,11 @@ Current properties calculated:  Temperature
                                 Density
                                 Dynamic viscosity (a bit funky atm I think)
                                 speed of sound
+                                
+                                
+TODO:
+    Rewrite functions to accept arrays
+    Find better approximation for viscosity (need to check them first)
 
 Created on Tue Apr 28 09:09:24 2015
 

@@ -363,7 +363,7 @@ class BET(object):
             * CL_CD[:,1]*(velocity + induced_vel)/VE
             
             wnew = induced_vel-f/f_der
-            print wnew
+            print 'New induced velocity: ', wnew
             #print induced_vel
             #print f/f_der
             diff = np.abs(wnew-induced_vel)

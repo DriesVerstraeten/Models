@@ -18,7 +18,7 @@ c_1 = wm.c_1
 c_2 = wm.c_2
 c_3 = wm.c_3
 Mx = wm.wing_moment(wm.CL,p.rho_0,p.V_cruise)[1]
-Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area = mi.wingbox_MOI_total()
+Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area, total_volume_wings = mi.wingbox_MOI_total()
 
 def piecewise_poly_1():
     

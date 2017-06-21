@@ -25,7 +25,7 @@ element (momentum?) theory
 import numpy as np
 import Common.CalcISA as ISA
 import BEM
-import bem
+#import bem
 import Init_Parameters as p
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar
