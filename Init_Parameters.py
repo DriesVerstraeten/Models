@@ -70,11 +70,11 @@ t_skin = 0.002 #m - skin thickness
 
 
 #TAIL
-S_ht = 21.634 * 0.092903 #ft2 to m2
-cr_ht = 0.7857 #root cord hor tail
-ct_ht = 0.629 #tip cord hor tail
-b_ht = 2.828 #span hor tail
-W_ht = 13.432 #mass hor tail
+S_ht = 3.9 #ft2 to m2
+cr_ht = 1.75 #root cord hor tail
+ct_ht = 0.52 #tip cord hor tail
+b_ht = 3.42 #span hor tail
+#W_ht = 13.432 #mass hor tail
 
 
 #MATERIAL PROPERTIES

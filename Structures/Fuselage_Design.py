@@ -19,8 +19,10 @@ p_fus   = 0.1985
 x_cg    = 0.42*p.MAC+ p.X_le_mac
 x_ac    = 0.25*p.MAC+ p.X_le_mac
 q_fus   = n*((p.MTOW*9.81)*p_fus)/L_f
+
 L_w_y   = w.wing_shear(w.CL_9g,p.rho_0,p.V_cruise)[-1][0]
 L_h_y   = q_fus*L_f-L_w_y
+
 
 # MESH OF THE FUSELAGE @ EVERY CM ALONG FUSELAGE LENGTH 
 dl      = 0.01   # cm
