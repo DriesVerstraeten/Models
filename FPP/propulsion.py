@@ -25,6 +25,7 @@ element (momentum?) theory
 import numpy as np
 import Common.CalcISA as ISA
 import BEM
+import bem
 import Init_Parameters as p
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize_scalar
@@ -32,20 +33,21 @@ import os
 import matplotlib.pyplot as plt
 
 #could be stored in the parameter file
-D = 1.9         #Prop diameter in meter
-N = 5           #Number of blades
+D = 2.0         #Prop diameter in meter
+N = 4           #Number of blades
 d_spin = 0.4    #Spinner diameter
 
 #initial parameters
-dx = 0.05        #Element length in meter
+dx = 0.01        #Element length in meter
 
 
 def chord_distr(x, D):
     """
     Defines a chord distribution over a vector x
     """
-    unit_chord = np.array([.1, .14, .16, .16])
-    x1 = np.array([0,.33,.66,1])
+    #unit_chord = np.array([.05, .056, .062, .068, .07,  .068])
+    unit_chord = np.array([.09, .11, .12, .13, .13, .12, .1, .08, 0.04])
+    x1 = np.array([0, .1, .2,.4,.6, .8, .9, .95, 1.])
     
     chord_distr = interp1d(x1, unit_chord)
     x_scaled = x/x[-1]
@@ -85,11 +87,16 @@ def Analyse_prop(airfoil_path, h, V, rpm, pitch):
     chord_ref = interp1d(x,chord_distr(x, x[-1]))
     rps = rpm/60.
     chord = chord_ref(x)
-    beta = np.linspace(1.2,0.4,len(x))
+    beta = np.linspace(1.4,0.5,len(x))
     thickness = thick_distr(x)
     '''
+    print chord
+    print beta
+    ''
     plt.plot(x, chord, '-r')
+    ''
     plt.plot(x, beta, '-k')
+    ''
     plt.plot(x, thickness, '-g')
     '''
     prop_blade = BEM.blade(x, chord, beta, thickness)
@@ -109,21 +116,3 @@ def Analyse_prop(airfoil_path, h, V, rpm, pitch):
     #print eta_prop
     #print eta
     return thrust, torque, power_available, power, eta_prop, eta_p
-
-def Power_to_pitch(Power, h, V, rpm, airfoil_path):
-    """
-    Analyse a propellor to provide a pitch while having a power input.
-    
-    """
-    global Power_g, h_g, V_g, rpm_g, airfoil_path_g
-    Power_g, h_g, V_g, rpm_g, airfoil_path_g = Power, h, V, rpm, airfoil_path
-    pitch = minimize_scalar(minim_func)#, bounds=(-np.pi/2,np.pi/2), method='bounded')
-    return pitch.x
-    
-def minim_func(pitch):
-    """
-    function to use in the optimiser
-    """
-    Power_given = Analyse_prop(airfoil_path_g, h_g, V_g, rpm_g, pitch)[3]
-    return np.abs(Power_g-Power_given)
-    
