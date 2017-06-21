@@ -5,11 +5,16 @@ Created on Fri Jun 16 11:31:38 2017
 
 @author: driesverstraeten
 """
+
+import time
+start_time = time.time()
+
 import MOI as mi
 import Init_Parameters as p
 import Wing_model as wm
 import wing_bending_stress as bs
 import numpy as np
+
 
 
 FS_location = mi.FS_location
@@ -86,10 +91,10 @@ rib_mass = rib_mass()
 def wing_total_mass():
     return wingbox_mass + LE_TE_mass + rib_mass
 
-print wing_total_mass()
+print "WEIGHT CALC:", wing_total_mass(), "kg"
     
     
     
-    
+print("WEIGHT CALCULATOR --- %s seconds ---" % (time.time() - start_time))
 
     
