@@ -552,9 +552,9 @@ def CruisePlots(MTOW,OEW,Vfuelmax,S,V_acc):
     
 
 ####### RUN FUNCTIONS: ###########
-#Range, Speed = CruisePlots(1700,1043,0.56,15.56,0.01)
-#
-#R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array, MTOW_req, Fuel_req = calcCruise(1700,1043,0.56,444,15.56,1400000,0.01)
+Range, Speed = CruisePlots(1724,1043,0.56,15.56,0.01)
+
+R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array, MTOW_req, Fuel_req = calcCruise(1724,1043,0.56,444,15.56,1400000,0.01)
 #
 #PowerCruise_alt, PowerAva_alt, kilometrage = calcAltOpt(1600*9.81,np.arange(50,150,0.01),15.56)
 ##############################
