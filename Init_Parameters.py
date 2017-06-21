@@ -18,8 +18,8 @@ g = 9.80665 #gravitational acceleration
 
 #MISSION PARAMETERS
 Nz = 12. #ultimate load factor
-h_cruise = 5486.4 #5486.4m or 18000 ft - cruise altitude
-V_cruise = 92.6 #m/s or 180 knots - cruise speed
+h_cruise = 7620 #5486.4m or 18000 ft - cruise altitude
+V_cruise = 123.5 #m/s or 180 knots - cruise speed
 W_PL = 444. #kg - Payload
 d_range = 1400. #km - Design Range
 t_loiter = 2700. #s - loiter time
@@ -36,15 +36,15 @@ Lf = 10   #m - fuselage length
 
 
 #WING PARAMETERS
-S = 15.51 #m2 - Wing surface area
+S = 15.4465 #m2 - Wing surface area
 A = 7.35 #Aspect Ratio
-b = 10.677 #m - wing span
+b = 10.655 #m - wing span
 #bh = 2.997 #m - horizontal wing span
 #c_r = 2.011 #m - root chord
 #c_t = 0.844 #m - tip chord
 #c_rh = 0.832 #m - horizontal root chord
 #c_th = 0.67 #m - horizontal tip chord
-MAC = 1.578 #m - mean aerodynamic chord
+MAC = 1.5746 #m - mean aerodynamic chord
 #Y = 2.327 #m - lateral MAC position
 X_le_mac = 2.04
 theta_LE = np.radians(3.336) 
