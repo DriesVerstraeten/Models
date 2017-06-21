@@ -8,6 +8,7 @@ Author: Dries
 # THIS FILE IS STRICTLY AND ONLY FOR PARAMETERS - NO CALCULATIONS!
 
 import numpy as np 
+import Stability_control.HorizontalTail as ht
 
 
 #ATMOSPHERIC PARAMETERS
@@ -17,7 +18,7 @@ g = 9.80665 #gravitational acceleration
 
 
 #MISSION PARAMETERS
-Nz = 9. #ultimate load factor
+Nz = 12. #ultimate load factor
 h_cruise = 5486.4 #5486.4m or 18000 ft - cruise altitude
 V_cruise = 92.6 #m/s or 180 knots - cruise speed
 W_PL = 444. #kg - Payload
@@ -36,8 +37,8 @@ MTOW = 1677. #max TO weight, in kg!!!!!!!!
 
 
 #FUSELAGE PARAMETERS
-Lt =  5.7 #m - Tail length
-Lf = 9.04#m - fuselage length
+Lt =  6. #m - Tail length
+Lf = 10. #m - fuselage length
 
 
 #WING PARAMETERS
@@ -51,6 +52,7 @@ c_rh = 0.832 #m - horizontal root chord
 c_th = 0.67 #m - horizontal tip chord
 MAC = 1.568 #m - mean aerodynamic chord
 Y = 2.327 #m - lateral MAC position
+X_le_mac = 2.373 
 theta_LE = np.radians(3.336) 
 theta_TE = np.radians(9.919)
 
@@ -65,15 +67,15 @@ S1 = 0.5*(hr1+hr2)*wr #surface area at root
 S2 = 0.5*(ht1+ht2)*wt #surface area at tip
 V_fuel = Lf/3. * (S1+S2 + (S1*S2)**0.5) #maximum fuel volume in main wing
 
-t_skin = 0.0015 #m - skin thickness
+t_skin = 0.002 #m - skin thickness
 
 
 #TAIL
-S_ht = 21.634 * 0.092903 #ft2 to m2
-cr_ht = 0.7857 #root cord hor tail
-ct_ht = 0.629 #tip cord hor tail
-b_ht = 2.828 #span hor tail
-W_ht = 13.432 #mass hor tail
+S_ht = ht.ShS_opt #ft2 to m2
+cr_ht = 1.16 #root cord hor tail
+ct_ht = 0.3*cr_ht #tip cord hor tail
+b_ht = 3.42 #span hor tail
+#W_ht = 13.432 #mass hor tail
 
 
 #MATERIAL PROPERTIES

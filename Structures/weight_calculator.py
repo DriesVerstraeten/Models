@@ -18,20 +18,24 @@ c = wm.c
 dy = wm.dy
 t = p.t_skin
 
-h = wm.bsection
-a1 = np.abs(bs.poly1_out[2][0])+np.abs(bs.poly1_out[4][0])
-c1 = np.abs(bs.poly1_out[2][-1])+np.abs(bs.poly1_out[4][-1])
-a2 = c1
-c2 = np.abs(bs.poly2_out[2][-1])+np.abs(bs.poly2_out[4][-1])
-a3 = c2
-c3 = np.abs(bs.poly3_out[2][-1])+np.abs(bs.poly3_out[4][-1])
+poly1_out = bs.poly1_out
+poly2_out = bs.poly2_out
+poly3_out = bs.poly3_out
 
-a4 = np.abs(bs.poly1_out[3][0])+np.abs(bs.poly1_out[5][0])
-c4 = np.abs(bs.poly1_out[3][-1])+np.abs(bs.poly1_out[5][-1])
+h = wm.bsection
+a1 = np.abs(poly1_out[2][0])+np.abs(poly1_out[4][0])
+c1 = np.abs(poly1_out[2][-1])+np.abs(poly1_out[4][-1])
+a2 = c1
+c2 = np.abs(poly2_out[2][-1])+np.abs(poly2_out[4][-1])
+a3 = c2
+c3 = np.abs(poly3_out[2][-1])+np.abs(poly3_out[4][-1])
+
+a4 = np.abs(poly1_out[3][0])+np.abs(poly1_out[5][0])
+c4 = np.abs(poly1_out[3][-1])+np.abs(poly1_out[5][-1])
 a5 = c4
-c5 = np.abs(bs.poly2_out[3][-1])+np.abs(bs.poly2_out[5][-1])
+c5 = np.abs(poly2_out[3][-1])+np.abs(poly2_out[5][-1])
 a6 = c5
-c6 = np.abs(bs.poly3_out[3][-1])+np.abs(bs.poly3_out[5][-1])
+c6 = np.abs(poly3_out[3][-1])+np.abs(poly3_out[5][-1])
 
 a_FS = np.hstack((a1,a2,a3))
 c_FS = np.hstack((c1,c2,c3))
@@ -59,6 +63,33 @@ def wingbox_mass():
     wingbox_mass = total_volume * p.rho_CF
     return wingbox_mass
 
-print wingbox_mass()
+wingbox_mass = wingbox_mass()
+
+Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area = mi.wingbox_MOI_total()
+
+def LE_TE_mass():
+    LE_volume = 2* LE_area * t/2 
+    TE_volume = 2* TE_area * t /2
+    volume_total = LE_volume + TE_volume
+    mass = volume_total * p.rho_CF
+    return mass
+
+LE_TE_mass = LE_TE_mass()
+
+def rib_mass():
+    ribs_volume = 2* ribs_area * t
+    ribs_mass = sum(ribs_volume * p.rho_CF)
+    return ribs_mass
+    
+rib_mass = rib_mass()
+    
+def wing_total_mass():
+    return wingbox_mass + LE_TE_mass + rib_mass
+
+print wing_total_mass()
+    
+    
+    
+    
 
     

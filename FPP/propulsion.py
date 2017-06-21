@@ -25,25 +25,29 @@ element (momentum?) theory
 import numpy as np
 import Common.CalcISA as ISA
 import BEM
+import bem
 import Init_Parameters as p
 from scipy.interpolate import interp1d
+from scipy.optimize import minimize_scalar
 import os
+import matplotlib.pyplot as plt
 
 #could be stored in the parameter file
-D = 2.1         #Prop diameter in meter
+D = 2.0         #Prop diameter in meter
 N = 4           #Number of blades
 d_spin = 0.4    #Spinner diameter
 
 #initial parameters
-dx = 0.1        #Element length in meter
+dx = 0.01        #Element length in meter
 
 
 def chord_distr(x, D):
     """
     Defines a chord distribution over a vector x
     """
-    unit_chord = np.array([.1, .14, .16, .16])
-    x1 = np.array([0,.33,.66,1])
+    #unit_chord = np.array([.05, .056, .062, .068, .07,  .068])
+    unit_chord = np.array([.09, .11, .12, .13, .13, .12, .1, .08, 0.04])
+    x1 = np.array([0, .1, .2,.4,.6, .8, .9, .95, 1.])
     
     chord_distr = interp1d(x1, unit_chord)
     x_scaled = x/x[-1]
@@ -62,7 +66,7 @@ def thick_distr(x):
     return thick
 
 
-def Analyse_prop(airfoil_path, h, V, rpm, pitch = 0.0):
+def Analyse_prop(airfoil_path, h, V, rpm, pitch):
     """
     Analyse a propellor
     
@@ -83,22 +87,32 @@ def Analyse_prop(airfoil_path, h, V, rpm, pitch = 0.0):
     chord_ref = interp1d(x,chord_distr(x, x[-1]))
     rps = rpm/60.
     chord = chord_ref(x)
-    beta = np.linspace(1.2,0.4,len(x))
+    beta = np.linspace(1.4,0.5,len(x))
     thickness = thick_distr(x)
-    
+    '''
+    print chord
+    print beta
+    ''
+    plt.plot(x, chord, '-r')
+    ''
+    plt.plot(x, beta, '-k')
+    ''
+    plt.plot(x, thickness, '-g')
+    '''
     prop_blade = BEM.blade(x, chord, beta, thickness)
     
     e851 = BEM.airfoil(airfoil_path)
     
-    BEM_analysis = BEM.BET(prop_blade, d_spin/2, N, e851)
+    BEM_analysis = BEM.BET(prop_blade, d_spin/2, N, h, e851)
     rho = ISA.Dens(h)
     thrust, torque, power = BEM_analysis.thrust_torque(V, rps, rho, pitch)
     eta_p = 2/(1+np.sqrt(1+thrust/(0.5*rho*V**2*D**2)))
     
     power_available = thrust*V
     eta_prop = power_available/power
+    #eta = BEM_analysis.efficiency(V, rps, rho, pitch = pitch)
     
     #print eta_p
     #print eta_prop
-    return thrust, torque, power_available, power, eta_p
-
+    #print eta
+    return thrust, torque, power_available, power, eta_prop, eta_p
