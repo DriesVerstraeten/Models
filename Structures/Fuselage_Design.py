@@ -7,9 +7,10 @@ import Wing_model as w
 import Fuselage_composite_final as fc
 
 ## FUSELAGE PARAMETERS
-L_f     = p.Lf   # m 
+L_f     = 10   # m 
                  # This depends on the aerodynamic mesh and the location of the
                  # forces and moments
+c_r    = p.c_r
 n       =  2*6
 
 
@@ -20,9 +21,13 @@ x_cg    = 0.42*p.MAC+ p.X_le_mac
 x_ac    = 0.25*p.MAC+ p.X_le_mac
 q_fus   = n*((p.MTOW*9.81)*p_fus)/L_f
 
-L_w_y   = w.wing_shear(w.CL_9g,p.rho_0,p.V_cruise)[-1][0]
+L_w_y   = w.wing_shear(w.CL,p.rho_0,p.V_cruise)[-1][0]
 L_h_y   = q_fus*L_f-L_w_y
 
+q_w     = 3*L_w_y/c_r
+L_h_y   = q_fus*L_f-L_w_y
+x_ac_back  = L_f-(x_ac + c_r*2./3)
+x_ac_front = L_f-(x_ac - c_r*1./3)
 
 # MESH OF THE FUSELAGE @ EVERY CM ALONG FUSELAGE LENGTH 
 dl      = 0.01   # cm
@@ -75,6 +80,7 @@ r= np.concatenate((r_s_i,r_s_ii_front))
 r= np.append(r,r_s_ii_const)
 r= np.append(r,r_s_ii_back)
 r= np.append(r,r_s_iii)
+
 S_y = np.zeros(np.shape(x))
 M_x = np.zeros(np.shape(x))
 for space in range(np.shape(x)[0]):
@@ -88,26 +94,47 @@ S_x = np.zeros(np.shape(x)[0])
 M_y = np.zeros(np.shape(x)[0])
 T= np.zeros(np.shape(x)[0])
 
+##S_y = np.zeros(np.shape(x))
+##M_x = np.zeros(np.shape(x))
+##for space in range(np.shape(x)[0]):
+##    if x[space] < x_ac_back:
+##        S_y[space] = q_fus*x[space]-L_h_y
+##        M_x[space] = q_fus*x[space]**2/2-L_h_y*x[space]
+##    if x[space] > x_ac_back and x[space] < x_ac_front:
+##        S_y[space] = q_fus*x[space]-q_w*c_r/2*(1/3-(x[space]-x_ac_back)**2/ \
+##                                               c_r**2)-L_h_y
+##        M_x[space] = q_fus*x[space]**2/2-q_w*c_r*(x[space]-x_ac_back)/6* \
+##                     (1-(x[space]-x_ac_back)**2/c_r**2)-L_h_y*x[space]
+##    if x[space] > x_ac_front:
+##        S_y[space] = q_fus*x[space]-L_w_y-L_h_y
+##        M_x[space] = q_fus*x[space]**2/2-L_w_y*(x[space]-x_ac_back)- \
+##                     L_h_y*x[space]
+##M_y = np.zeros(np.shape(x)[0])
+##S_x = np.zeros(np.shape(x)[0])
+##T= np.zeros(np.shape(x)[0])
+
 
 ## Material Properties Core Material
 E_c     = 400*10**6
 t_c_min = 3*10**(-3)
 G_xz    = 85*10**6
 G_yz    = 50*10**6
-rho_c   = 96
+rho_c   = 96.
 
 ## Material Properties Facing Material
 E_x     = 60.1*10**9
 E_y     = 60.1*10**9
 v_xy    = 0.307
-rho_f   = 1580
+rho_f   = 1580.
 sigma_t = 356.*10**6
 sigma_c = 657.*10**6
 e_t     = sigma_t/E_x
 e_c     = sigma_c/E_y
 t_f_min = 0.3
-tau     = 18.3*10**6
+tau     = (-sigma_t+sigma_c)/2
 sigma_hoop    = 100*10**6
-d =fc.thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,sigma_c,tau,t_c_min,dp,sigma_hoop,rho_f,rho_c,E_x,E_c)
-d = fc.shear_i(r,S_x,S_y,T)
-m = np.sum(fc.mass(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,sigma_c,dp,sigma_hoop,rho_f,rho_c,E_x,E_c))
+d =fc.thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,sigma_c,\
+    tau,t_c_min,dp,sigma_hoop,rho_f,rho_c,E_x,E_c)
+m = fc.mass(r,M_x,M_y,S_x,S_y,T,sigma_t,sigma_c,tau,\
+                   t_c_min,dp,sigma_hoop,rho_f,rho_c,E_x,E_c)
+   
