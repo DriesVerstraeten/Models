@@ -14,6 +14,10 @@ General assumptions
 -------------------
 
 The incoming velocity is always perpendicular to the propellor disk
+Drag is constant up until the Mdd, where wave drag is added (20*(M-M_cr)**4)
+CL and CD are calculated using XFOIL, thus are only really valid up until
+    Mach=0.3-0.4
+The propellor blade has no sweep
 
 """
 
@@ -114,7 +118,7 @@ def LTS(velocity, rps, radius):
 '''
 def fast_interpolation(x, y, new_x, axis):
     """
-    from https://stackoverflow.com/a/13504757
+    rom https://stackoverflow.com/a/13504757
     
     Computes an interpolation in multiple dimensions, but with greater 
     efficiency than multiple interp1d calls
@@ -156,15 +160,21 @@ def cl_corr(cl, M):
 
 def cd_corr(cd, M):
     """
-    Applies the Frankl-Voishel correction to the Cd, and the drag divergence if
-    M exceeds 0.7 (rough estimation)
+    Applies the drag divergence if M exceeds 0.7 (rough estimation)
     
-    Del_mdd = 0.018
     """
-    return cd*(0.000162*M**5 - 0.00383*M**4 + 0.0332*M**3
-               - 0.118*M**2 + 0.0204*M + 0.996)
+    #cdf = cdf*(0.000162*M**5 - 0.00383*M**4 + 0.0332*M**3
+    #           - 0.118*M**2 + 0.0204*M + 0.996)
+    M_cr = 0.7
+    cd = np.where(M>M_cr,cd+20*(M-M_cr)**4 , cd)
+    return cd
 
 class fast_interpolation:
+    """
+    From ricklupton's py-bem
+    Fast interpolation on a 3D array
+    More info: https://stackoverflow.com/a/13504757
+    """
     def __init__(self, x, y, axis=-1):
         assert len(x) == y.shape[axis]
         self.x = x
@@ -281,19 +291,21 @@ class BET(object):
         phi = advance_angle(velocity, rps,r)
         h = self.height
         
-        alpha = twist-phi-pitch
-        print 'alpha before: ', alpha
+        alpha = twist-phi+pitch
+        print 'AoA: ', alpha
         ind_vel = np.ones(twist.shape)
         
-        VE, alpha = self.induced_velocity(ind_vel, velocity, rps, alpha)
+        VE, alphai = self.induced_velocity(ind_vel, velocity, rps, alpha)
         
-        print 'alpha after: ', alpha
         
-        force_coeffs = self.force_coeffs(alpha, M_corr=True, LTS=VE, T=ISA.Temp(h))
+        #print 'induced AoA: ', alphai
+        #VE = LTS(velocity, rps, r)
+        #print VE
+        force_coeffs = self.force_coeffs(alpha+alphai, M_corr=True, LTS=VE, T=ISA.Temp(h))
         forces = 0.5*rho*VE**2*force_coeffs * chord
         return forces
         
-    def thrust_torque(self, velocity, rps, rho, P, pitch = 0.0):
+    def thrust_torque(self, velocity, rps, rho, pitch = 0.0):
         """
         Generate the forces on the rotordisk
         """
@@ -327,6 +339,7 @@ class BET(object):
         """
         running=True
         tol = 0.001
+        alpha0 = np.copy(alpha)
         alphai = 0.
         r = self.radii
         chord = self.blade.chord
@@ -335,7 +348,7 @@ class BET(object):
         T = ISA.Temp(self.height)
         while running:
             VE = LTS(velocity+induced_vel, rps, r)
-            #print VE
+            print VE
             CL_CD = self.mach_factors(alpha-alphai, VE, T)
             
             
@@ -344,20 +357,20 @@ class BET(object):
             - VE/(velocity + induced_vel)\
             * (CL_CD[:,0]*2*np.pi*rps*r - CL_CD[:,1]*(velocity + induced_vel))
             
-            print 'grad: ', np.gradient(f)
+            #print 'grad: ', np.gradient(f)
             f_der = 8*np.pi*r/(chord*Nb)\
             - CL_CD[:,0]*2*np.pi*rps*r*(1/VE - VE/(velocity + induced_vel)**2)\
             * CL_CD[:,1]*(velocity + induced_vel)/VE
             
             wnew = induced_vel-f/f_der
-            #print wnew
+            print wnew
             #print induced_vel
             #print f/f_der
             diff = np.abs(wnew-induced_vel)
             #print diff
             max_iter += 1
             if np.all(diff)<=tol or max_iter==10:
-                return LTS(velocity+wnew, rps, r), _wrap_angle(alphai)
+                return LTS(velocity+wnew, rps, r), alpha0-alphai
             else:
                 induced_vel = wnew
                 alphai = np.arctan(wnew/VE)
@@ -392,7 +405,8 @@ class BET(object):
 
         P_tip = Nb/2.*(r[-1]-r)/(r*np.sin(phi))
         P_root = Nb/2.*(r-r[0])/(r*np.sin(phi))
-        F_tip = 2/np.pi*np.cos(np.exp(-1*P_tip))**(-1)
-        F_root = 2/np.pi*np.cos(np.exp(-1*P_root))**(-1)
+        F_tip = 2/np.pi*np.arccos(np.exp(-1*P_tip))
+        F_root = 2/np.pi*np.arccos(np.exp(-1*P_root))
+        print F_tip*F_root
         return F_tip*F_root
         
