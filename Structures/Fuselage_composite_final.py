@@ -73,21 +73,16 @@ def thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,sigma_c,tau,t_c_min,dp,sigma_hoop,rho_
     t_bt = bending_i(M_x,M_y,r)[0]/sigma_t
     print(t_bt)
     t_bc = bending_i(M_x,M_y,r)[1]/sigma_c
+    print(t_bc)
     t_s  = shear_i(r,S_x,S_y,T)/tau
     print(t_s)
     t_h  = ip(r,dp,sigma_hoop)
+    print(t_h)
     t    = np.array([t_bt, t_bc, t_s, t_h])
-    t_eq = np.round(np.amax(t),3)
+    t_eq = np.round(np.amax(t),4)
     print(t_eq)
-    #t_f  = t_eq/2*E_x/(71.7*10**9)
-    #t_f   = np.round(t_eq/2*23.1/(26),4)
-    #delta = 36*t_f**2-4*(4*t_f**2-t_eq**2)*3
-    #delta = 36*t_f**2-4*(4*t_f**2-t_eq**3*71.7*10**9/(2*t_f*E_x))*3
-    #h_c = (-6*t_f + delta**(0.5))/(2*3)
-    #h_c = t_eq-2*t_f
     h_c = t_c_min
-    t_f = np.round((t_eq*rho_f-h_c*rho_c)/(2*rho_f),3)
-    #t_f = (t_eq-h_c)/2
+    t_f = np.round((t_eq*rho_f-h_c*rho_c)/(2*rho_f),4)
     return t_f, h_c
 
 def mass(r,M_x,M_y,S_x,S_y,T,sigma_t,sigma_c,tau,t_c_min,dp,sigma_hoop,rho_f,rho_c,E_x,E_c):
