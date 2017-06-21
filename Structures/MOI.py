@@ -297,11 +297,12 @@ def wingbox_MOI_total():
     LE_area = sum(np.hstack((LE_area_1, LE_area_2, LE_area_3)))
     TE_area = sum(np.hstack((TE_area_1, TE_area_2, TE_area_3)))
     ribs_area = np.hstack((ribs_area_1[0], ribs_area_2[0], ribs_area_3[0]))
+    total_volume_wings = 2*wm.dy*(sum(np.hstack((ribs_area_1, ribs_area_2, ribs_area_3))))
     
-    return Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area
+    return Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area, total_volume_wings
 
 
-Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area = wingbox_MOI_total()
+Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area, total_volume = wingbox_MOI_total()
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
