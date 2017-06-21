@@ -26,18 +26,13 @@ t_loiter = 2700. #s - loiter time
 
 
 #AIRCRAFT PARAMETERS
-e = 0.85 #Oswald's factor
-cp = 0.000000113 #kg/J - turboprop SFC
-Cd0 = 0.02 #-
-n_p = 0.82 #propeller efficiency 
 L_m = 0.7 #main gear length, cm
 L_n = 0.7 #nose gear length, cm
-MTOW = 1677. #max TO weight, in kg!!!!!!!!
-
+MTOW = 1724.4. #max TO weight, in kg!!!!!!!!
 
 #FUSELAGE PARAMETERS
-Lt =  5.7 #m - Tail length
-Lf = 9.04#m - fuselage length
+Lt =  6.5 #m - Tail length
+Lf = 10   #m - fuselage length
 
 
 #WING PARAMETERS
@@ -49,16 +44,14 @@ c_r = 2.011 #m - root chord
 c_t = 0.844 #m - tip chord
 c_rh = 0.832 #m - horizontal root chord
 c_th = 0.67 #m - horizontal tip chord
-MAC = 1.568 #m - mean aerodynamic chord
+MAC = 1.46 #m - mean aerodynamic chord
 Y = 2.327 #m - lateral MAC position
-X_le_mac = 2.373 
+X_le_mac = 1.94
 theta_LE = np.radians(3.336) 
 theta_TE = np.radians(9.919)
 
-fuel_chord_length = 0.425 #42.5% of the chord
 hr1 = 0.115 #m - UPDATE IF AIRFOIL IS UPDATED
 hr2 = 0.09897 #m - UPDATE IF AIRFOIL IS UPDATED
-wr = fuel_chord_length * c_r #
 ht1 = 0.046 #m - UPDATE IF AIRFOIL IS UPDATED
 ht2 = 0.0123 #m - UPDATE IF AIRFOIL IS UPDATED
 wt = fuel_chord_length * c_t
