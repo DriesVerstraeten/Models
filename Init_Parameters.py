@@ -18,7 +18,7 @@ g = 9.80665 #gravitational acceleration
 
 
 #MISSION PARAMETERS
-Nz = 12. #ultimate load factor
+Nz = 1. #ultimate load factor
 h_cruise = 5486.4 #5486.4m or 18000 ft - cruise altitude
 V_cruise = 92.6 #m/s or 180 knots - cruise speed
 W_PL = 444. #kg - Payload
