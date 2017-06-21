@@ -55,7 +55,7 @@ def StabTailSizing(OEW,W_wing,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_land,C
     ##### Calc xcg_OEW for different x_lemacs ###
 #    xcg_OEW = 2.9 # [m] # Starting value. Must be updated with xcg_OEW_opt
 #    xcg_wing = 2.9 # [m] # Starting value 
-    xcg_wingMAC = 0.3 # cg of wing wrt MAC
+    xcg_wingMAC = 0.35 # cg of wing wrt MAC
 #    OEW = 997. # [kg]
 #    W_wing = 209. # [kg]
     xcg_fuelMAC = 0.35 # xcg of fuel wrt MAC
