@@ -28,7 +28,7 @@ t_loiter = 2700. #s - loiter time
 #AIRCRAFT PARAMETERS
 L_m = 0.7 #main gear length, cm
 L_n = 0.7 #nose gear length, cm
-MTOW = 1768.4 #max TO weight, in kg!!!!!!!!
+MTOW = 1712.16 #max TO weight, in kg!!!!!!!!
 
 #FUSELAGE PARAMETERS
 Lt =  4.5 #m - Tail length
@@ -46,7 +46,7 @@ b = 10.677 #m - wing span
 #c_th = 0.67 #m - horizontal tip chord
 MAC = 1.578 #m - mean aerodynamic chord
 #Y = 2.327 #m - lateral MAC position
-X_le_mac = 1.94
+X_le_mac = 2.04
 theta_LE = np.radians(3.336) 
 theta_TE = np.radians(9.919)
 
@@ -63,10 +63,10 @@ t_skin = 0.002 #m - skin thickness
 
 
 #TAIL
-S_ht = 1.587 #ft2 to m2
-cr_ht = 1.37 #root cord hor tail
+S_ht = 1.78365 #ft2 to m2
+cr_ht = 1.4528 #root cord hor tail
 ct_ht = 0.3*cr_ht #tip cord hor tail
-b_ht = 1.78 #span hor tail
+b_ht = 1.88873 #span hor tail
 #W_ht = 13.432 #mass hor tail
 
 
