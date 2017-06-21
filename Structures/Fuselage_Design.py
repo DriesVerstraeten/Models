@@ -77,11 +77,11 @@ S_y = np.zeros(np.shape(x))
 M_x = np.zeros(np.shape(x))
 for space in range(np.shape(x)[0]):
     if x[space] < (L_f-x_ac):
-        S_y[space] = q_fus*x[space]
-        M_x[space] = q_fus*x[space]**2/2
+        S_y[space] = q_fus*x[space]-L_h_y
+        M_x[space] = q_fus*x[space]**2/2-L_h_y*x[space]
     if x[space] > (L_f-x_ac):
-        S_y[space] = q_fus*x[space]-L_w_y
-        M_x[space] = q_fus*x[space]**2/2-L_w_y*(x[space]-x_ac)
+        S_y[space] = q_fus*x[space]-L_w_y-L_h_y
+        M_x[space] = q_fus*x[space]**2/2-L_w_y*(x[space]-x_ac)-L_h_y*x[space]
 S_x = np.zeros(np.shape(x)[0])
 M_y = np.zeros(np.shape(x)[0])
 T= np.zeros(np.shape(x)[0])
@@ -99,14 +99,13 @@ E_x     = 60.1*10**9
 E_y     = 60.1*10**9
 v_xy    = 0.307
 rho_f   = 1580
-sigma_t = 900*10**6 #$356.*10**6
+sigma_t = 356.*10**6
 sigma_c = 657.*10**6
 e_t     = sigma_t/E_x
 e_c     = sigma_c/E_y
 t_f_min = 0.3
-tau     = 11.5*10**6
+tau     = 18.3*10**6
 sigma_hoop    = 100*10**6
-d =fc.thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,sigma_c,tau,t_c_min,dp,sigma_hoop,E_x,E_c)
-#d = fc.shear_i(r,S_x,S_y,T)
+d =fc.thickness(r,M_x,M_y,S_x,S_y,T,sigma_t,sigma_c,tau,t_c_min,dp,sigma_hoop,rho_f,rho_c,E_x,E_c)
+d = fc.shear_i(r,S_x,S_y,T)
 m = np.sum(fc.mass(r,M_x,M_y,S_x,S_y,T,sigma_t,tau,t_c_min,sigma_c,dp,sigma_hoop,rho_f,rho_c,E_x,E_c))
-#b = fc.bending_i(M_x,M_y,r)[0]/sigma_t
