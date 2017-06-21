@@ -8,6 +8,7 @@ Author: Dries
 # THIS FILE IS STRICTLY AND ONLY FOR PARAMETERS - NO CALCULATIONS!
 
 import numpy as np 
+import Stability_control.HorizontalTail as ht
 
 
 #ATMOSPHERIC PARAMETERS
@@ -36,8 +37,8 @@ MTOW = 1677. #max TO weight, in kg!!!!!!!!
 
 
 #FUSELAGE PARAMETERS
-Lt =  5.7 #m - Tail length
-Lf = 9.04#m - fuselage length
+Lt =  6. #m - Tail length
+Lf = 10. #m - fuselage length
 
 
 #WING PARAMETERS
@@ -70,9 +71,9 @@ t_skin = 0.002 #m - skin thickness
 
 
 #TAIL
-S_ht = 3.9 #ft2 to m2
-cr_ht = 1.75 #root cord hor tail
-ct_ht = 0.52 #tip cord hor tail
+S_ht = ht.ShS_opt #ft2 to m2
+cr_ht = 1.16 #root cord hor tail
+ct_ht = 0.3*cr_ht #tip cord hor tail
 b_ht = 3.42 #span hor tail
 #W_ht = 13.432 #mass hor tail
 

@@ -208,5 +208,5 @@ def StabTailSizingPlots(OEW,W_wing,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_l
 #### RUN FUNCTIONS: ####
 #StabTailSizingPlots(997,209,1.568,0.3,0.427,-0.121,2.3,5.11,-0.55,3.852,0.85**2,2.9,2.9,5.425,0.001,0.001)
 #
-#x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(997,209,1.568,0.3,0.427,-0.121,2.3,5.11,-0.55,3.852,0.85**2,2.9,2.9,5.425,0.001,0.001)
+x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(997,209,1.568,0.3,0.427,-0.121,2.3,5.11,-0.55,3.852,0.85**2,2.9,2.9,5.425,0.001,0.001)
 ############
