@@ -436,7 +436,7 @@ def wingbox_MOI(dy,t,start,end,rho): #t1 is thickness of 2 fiber sheets together
         Ixx_section = area_section*(sum(f1(x)**2) + sum(f2(x)**2)) + t/12 * (front_spar_length**3 + front_spar_area*(f1(front_spar) + f2(front_spar - y_NA[i]))**2 + back_spar_length**3 + back_spar_area*(f1(back_spar) + f2(back_spar - y_NA[i]))**2)
         Ixx.append(Ixx_section)
         
-    W = area * rho * v_b + area * 0.420 * v_b / t
+    W = area * rho * p.b_ht + area * 0.420 * v_b / t
 
     return np.array(Ixx), f1, f2, y_NA, x_NA, x, x_span, W
 
@@ -640,14 +640,14 @@ def master_function(fh,fv,T,dx,dy,dz,dtheta,start,end,t1,t2,rho1,rho2):
 #    Iyy = wingbox_MOI(dy,start,end,t,mat.rho[m1])[1]
     rho = rho_true(t1,t2,rho1,rho2)
     Ixx_ben = wingbox_MOI(dx,(t1*2),start,end,rho)[0]
-    Ixx_shear = wingbox_MOI(dx,t2,start,end,rho)[0]
+#    Ixx_shear = wingbox_MOI(dx,t2,start,end,rho)[0]
     tail_plots(dy,fh)
     boom_plots(dx,fh,1)
     boom_plots_vertical(dx,fv)
 #    a = total_shear_stress_boom(dx,dz,dtheta,fh,fv,dz-1)
 #    b = total_bending_stress_boom(dx,dtheta,dx-1,fh,fv,1)
     c = highest_bending_box(dx,dy,start,end,t1,mat.rho_carb,fh,Ixx_ben)
-    d = highest_shear_box(dx,dy,start,end,t2,mat.rho_carb,fh,T,Ixx_shear)
+    d = highest_shear_box(dx,dy,start,end,t2,mat.rho_carb,fh,T,Ixx_ben)
     print ('HOR TAILBOX ANALYSIS:')  
     print ('Weight of the hor tailbox:')
     print wingbox_MOI(dx,(t1*2+t2),start,end,rho)[7]
@@ -666,12 +666,12 @@ def master_function(fh,fv,T,dx,dy,dz,dtheta,start,end,t1,t2,rho1,rho2):
 #        print 'This material is expected to yield in bending'
 #    else:
 #        print 'This material is not expected to yield in bending'
-    if abs(c) >= mat.sigma_carb:
+    if (abs(c) + abs(d)) >= mat.sigma_carb_1:
         print 'Hor tail is expected to fail in bending'
     else:
         print 'Hor tail is not expected to fail in bending'
-    if abs(d) >= mat.tau_core:
-        print 'Hor tail is expected to fail in shear'
-    else:
-        print 'Hor tail is not expected to fail in shear'
+#    if abs(d) >= mat.sigma_carb:
+#        print 'Hor tail is expected to fail in shear'
+#    else:
+#        print 'Hor tail is not expected to fail in shear'
     return
