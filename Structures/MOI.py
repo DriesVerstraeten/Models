@@ -5,14 +5,14 @@ Created on Tue Jun  6 15:17:57 2017
 
 @author: driesverstraeten
 """
+import time
+start_time = time.time()
 
 import Init_Parameters as p
 import Wing_model as wm
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.integrate as integrate
-import time 
-start_time = time.time()
 
 t = p.t_skin
 c_1 = wm.c_1
@@ -302,9 +302,11 @@ def wingbox_MOI_total():
     return Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area, total_volume_wings
 
 
-Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area, total_volume = wingbox_MOI_total()
+Ixx, Iyy, Ixy, x_NA, y_NA, x_span, LE_area, TE_area, ribs_area, total_volume_wings = wingbox_MOI_total()
 
-print("--- %s seconds ---" % (time.time() - start_time))
+print "MOI:", total_volume_wings, "m^3"
+
+print("MOI --- %s seconds ---" % (time.time() - start_time))
 
 '''
 plt.plot(wm.y,Ixx, color = 'r')

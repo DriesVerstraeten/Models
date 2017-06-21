@@ -5,13 +5,15 @@ Created on Thu Jun  8 16:56:43 2017
 
 @author: driesverstraeten
 """
+import time
+start_time = time.time()
+
 import MOI as mi
 import Wing_model as wm
 import Init_Parameters as p
 import numpy as np
 import matplotlib.pyplot as plt
-import time 
-start_time = time.time()
+
 
 
 c_1 = wm.c_1
@@ -308,7 +310,7 @@ plt.show()
 maxbendstress = wingbox_bending_stress()[0]
 maxbendstressu = wingbox_bending_stress()[2]
 '''
-print("--- %s seconds ---" % (time.time() - start_time))
+print("BENDING STRESS --- %s seconds ---" % (time.time() - start_time))
 
 
 
