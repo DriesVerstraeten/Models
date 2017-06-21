@@ -63,10 +63,10 @@ t_skin = 0.002 #m - skin thickness
 
 
 #TAIL
-S_ht = 1.78365 #ft2 to m2
-cr_ht = 1.4528 #root cord hor tail
+S_ht = 1.7756 #ft2 to m2
+cr_ht = 1.44959 #root cord hor tail
 ct_ht = 0.3*cr_ht #tip cord hor tail
-b_ht = 1.88873 #span hor tail
+b_ht = 1.88446 #span hor tail
 #W_ht = 13.432 #mass hor tail
 
 
