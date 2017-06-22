@@ -31,7 +31,7 @@ MTOW = 1712.16 #max TO weight, in kg!!!!!!!!
 
 #FUSELAGE PARAMETERS
 Lt =  4.5 #m - Tail length
-Lf = 10   #m - fuselage length
+Lf = 7.5   #m - fuselage length
 
 
 #WING PARAMETERS
