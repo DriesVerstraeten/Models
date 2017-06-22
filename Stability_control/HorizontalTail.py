@@ -61,15 +61,15 @@ def StabTailSizing(OEW,W_wing,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_land,C
     xcg_fuelMAC = 0.35 # xcg of fuel wrt MAC
 #    c = 1.568 # MAC
     
-    moment_Aw = xcg_OEW * OEW - xcg_wing * W_wing    
+    moment_Aw = xcg_OEW * (OEW-W_wing) # xcg_OEW * OEW - xcg_wing * W_wing    
     x_lemac_array = np.arange(1.5,3.0,x_lemac_acc) # Set range and accuracy of analysis !!!
     xcg_fuel_array = x_lemac_array + xcg_fuelMAC * c
     xcg_OEW_array = (moment_Aw + (x_lemac_array + xcg_wingMAC * c) * W_wing) / OEW    
     ###########################
     ##### Calc most forward and most aft xcg for different loading situations ###
-    xcg_cargo = 3.5 # [m]
-    xcg_pilot = 2.0
-    xcg_pax = 3.0
+    xcg_cargo = 4.05 # [m]
+    xcg_pilot = 2.65
+    xcg_pax = 3.55
 
     cargo = 100. # [kg]
     pilot = 86.
@@ -88,7 +88,7 @@ def StabTailSizing(OEW,W_wing,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_land,C
         mass_tot.append(mass_tot[-1] + mass[i])
         xcg_for_load.append(((moment / mass_tot[-1])-x_lemac_array) / c)
         
-    order_aft = [0,2,1,1,2,3] # Full loading. Passengers first   
+    order_aft = [0,1,2,2,1,3] # Full loading. Passengers first   
     xcg_aft_load = [(xcg_OEW_array - x_lemac_array) / c]
     mass_tot = [OEW]
     moment = xcg_OEW_array * OEW
@@ -204,11 +204,33 @@ def StabTailSizingPlots(OEW,W_wing,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_l
     return
 
 
+OEW = 928.47
+W_wing = 295.75
+c = 1.5578
+x_ac = 0.25
+downwash = 0.115
+Cmac = -0.125
+CL_Ah_land = 1.952
+CL_alpha_Ah_land = 3.60
+CL_h_land = -0.598
+CL_alpha_h_land = 2.713
+VhV2 = 1
+xcg_OEW = 2.51  # without wing
+xcg_wing = 2
+lh = 4.5
+x_lemac_acc = 0.001
+ShS_acc = 0.001
+
+
 
 #### RUN FUNCTIONS: ####
-#StabTailSizingPlots(1043,352,1.46,0.25,0.136,-0.124,2.1,3.59,-0.44,2.7,1,2.35,2.61,6.0,0.001,0.001)
+#StabTailSizingPlots(1043,352,1.46,0.25,0.136,-0.124,2.1,3.59,-0.44,2.7,1,2.66,2.61,6.0,0.001,0.001)
 ##
-x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(1043,352,1.46,0.25,0.136,-0.124,2.1,3.59,-0.44,2.7,1,2.35,2.61,6.0,0.001,0.001)
+#x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(1043,352,1.46,0.25,0.136,-0.124,2.1,3.59,-0.44,2.7,1,2.66,2.61,6.0,0.001,0.001)
+
+#StabTailSizingPlots(OEW,W_wing,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_land,CL_h_land,CL_alpha_h_land,VhV2,xcg_OEW,xcg_wing,lh, x_lemac_acc, ShS_acc)
+##
+#x_lemac_array, xcg_for_load, xcg_aft_load, xcg_pil_load, mass_tot, mass_tot_pil, xcg_for, xcg_aft, xcg_control, xcg_stab, ShS_array, ShS_opt, x_lemac_opt, xcg_OEW_opt, xcg_for_opt, xcg_aft_opt, where_opt = StabTailSizing(OEW,W_wing,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_land,CL_h_land,CL_alpha_h_land,VhV2,xcg_OEW,xcg_wing,lh, x_lemac_acc, ShS_acc)
 ############
 #OEW,W_wing,c,x_ac,downwash,Cmac,CL_Ah_land,CL_alpha_Ah_land,CL_h_land,CL_alpha_h_land,VhV2,xcg_OEW,xcg_wing,lh, x_lemac_acc, ShS_acc
 

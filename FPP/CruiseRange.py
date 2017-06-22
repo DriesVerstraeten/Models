@@ -62,9 +62,9 @@ h_cruise = 9000
 
 ###################################################################################################
 def calcPowerReq(W,V,S,h): # Calc Power Required [W] in steady cruise conditions for one or multiple TAS. Weight in Newton.
-    CD0 = 0.0115
+    CD0 = 0.011125
     A = 7.35
-    e = 0.6
+    e = 0.583
     rho = ISA.Dens(h)
     CL = W / (0.5*rho*V**2*S)
     CD = CD0 + CL**2 / (np.pi*A*e) # 0.020 + 0.05236 * (CL - 0.2)**2 #calcCD(CL,V) #########!!!!!!!! drag polar from aero
@@ -198,7 +198,7 @@ def calcPowerCruise(W_cruise,V_array,S,h_cruise): # Calc Power Required for most
     return PowerCruise_eff, V_Cruise_eff, LD_Cruise_eff, rho_Cruise, PowerAva, cp_Cruise_eff # have to include engine efficiency at different speeds !!!!!!!!!!!!
 
 
-#PowerReq, LD, rho_Cruise = calcPowerReq(W_cruise,V_array,S,6000)
+#PowerReq, LD, rho_Cruise = calcPowerReq(W_cruise,V_array,S,11800)
 #PowerAva = calcPowerAva(h_cruise,rho_Cruise)
 #where = np.where(PowerReq < PowerAva)
 #PowerReq = PowerReq[where]
@@ -213,7 +213,7 @@ def calcPowerCruise(W_cruise,V_array,S,h_cruise): # Calc Power Required for most
 #plt.plot(V_array,LD)
 #plt.show()
 #
-#plt.plot(V_array,cp)
+#plt.plot(V_array,1./cp)
 #plt.show()
 #
 #
@@ -251,12 +251,12 @@ def calcPowerCruise(W_cruise,V_array,S,h_cruise): # Calc Power Required for most
 
 
 def calcAltOpt(W_cruise,V_array,S):
-    h_max_an = 13200
+    h_max_an = 13000
     PowerCruise_alt = []
     V_Cruise_alt = []
     cp_Cruise_alt = []
     PowerAva_alt = []
-    h_acc = 50
+    h_acc = 10
     h_cruise = np.arange(0,h_max_an+h_acc,h_acc)
     for h in h_cruise:
         PowerCruise_eff, V_Cruise_eff, LD_Cruise_eff, rho_Cruise, PowerAva, cp_Cruise_eff = calcPowerCruise(W_cruise,V_array,S,h)
@@ -291,7 +291,7 @@ def calcAltOpt(W_cruise,V_array,S):
 #    PowerSetting = PowerCruise_alt[0:where] / PowerAva_alt[0:where]
 #    cp_func = calcCP()
 #    cp = cp_func(PowerSetting)
-    kilometrage = V_Cruise_alt / (PowerCruise_alt * cp_Cruise_alt) * 0.001
+    kilometrage = V_Cruise_alt / (PowerCruise_alt * cp_Cruise_alt / 0.82) * 0.001
     
 
 #    plt.plot(h_cruise,cp_Cruise_alt)
@@ -311,30 +311,32 @@ def calcAltOpt(W_cruise,V_array,S):
         os.makedirs(directory)
     #### Plot altitude vs power req ################
     fig, ax1 = plt.subplots(figsize=(10,5))
-    ax1.plot(h_cruise,PowerCruise_alt*0.001, color='green', label='Power Required')
-    ax1.plot(h_cruise,PowerAva_alt*0.001, color='green', linestyle='dashed', label='Power Available')
+    ax1.plot(h_cruise/0.3048,PowerCruise_alt*0.001, color='green', label='Power Required')
+    ax1.plot(h_cruise/0.3048,PowerAva_alt*0.001, color='green', linestyle='dashed', label='Power Available')
 #    ax1.plot(h_max,PowerCruise_alt[where]*0.001,color='black',marker='D',label='Maximum Altitude ('+str(h_max)+' m)')
-    ax1.set_xlabel('Altitude [m]')
+    ax1.set_xlabel('Altitude [ft]')
     ax1.set_ylabel('Power [kW]', color='g')
-#    ax1.set_xlim()
+    ax1.set_xlim(0,h_max_an/0.3048)
     ax1.set_ylim(50,400)
     ax1.tick_params('y', colors='g')
     plt.legend(loc=2)
     
     ax2 = ax1.twinx()
-    ax2.plot(h_cruise,V_Cruise_alt,color='red',label='Most efficient TAS')
-    ax2.set_ylabel('TAS [m/s]', color='r')
-#    ax2.set_xlim()
-#    ax2.set_ylim()
+    ax2.plot(h_cruise/0.3048,V_Cruise_alt*1.9438,color='red',label='Most efficient TAS')
+    ax2.set_ylabel('TAS [kn]', color='r')
+    ax2.set_xlim(0,h_max_an/0.3048)
+    ax2.set_ylim(180,300)
     ax2.tick_params('y', colors='r')
     plt.legend()
     plt.savefig(directory + '\AltMax.png', format='png', bbox_inches='tight', dpi=400)
     plt.show()
     #############################################
     #### Plot metrage vs alt ###########################################
-    plt.plot(h_cruise,kilometrage*0.804)
-    plt.xlabel('Altitude [m]')
+    plt.plot(h_cruise/0.3048,kilometrage*0.804)
+    plt.xlabel('Altitude [ft]')
     plt.ylabel('Fuel Efficiency [km/L]')
+    plt.xlim(0,h_max_an/0.3048)
+#    plt.ylim(4,9.5)
     plt.savefig(directory + '\Mileage.png', format='png', bbox_inches='tight', dpi=400)
     plt.show()
     return PowerCruise_alt, PowerAva_alt, kilometrage
@@ -436,7 +438,7 @@ def calcCruise(MTOW,OEW,Vfuelmax,PL,S,R_req,V_acc): # Payload [kg], speed analys
 #    OEW = 950 # [kg]
     Mfuelmax = Vfuelmax * 804 # Maximum fuel tank capacity [kg]
 #    S = 20 # Wing surface [m^2]
-    prop_eff = 0.9
+    prop_eff = 0.82
     cp = 1.04302E-7 # [kg/J] used for loiter phase only
     E = 45*60 # Required endurance / Loiter duration [s]
     h_cruise = 25000 * 0.3048 # Cruise altitude [m]
@@ -445,7 +447,7 @@ def calcCruise(MTOW,OEW,Vfuelmax,PL,S,R_req,V_acc): # Payload [kg], speed analys
     Mff_start = 0.965 # 0.990*0.995*0.995*0.985 # Fuel fraction from start to cruise altitude
     Mff_end = 0.98 # 0.985*0.995 # Fuel fraction from end loiter phase to end flight
     V_array = np.arange(10,160,V_acc) # Set range and accuracy of speed analysis [m/s] !!!!!!!
-    V_Cruise_spec = 123.47 # 92.6 # Specified cruise speed [m/s]
+    V_Cruise_spec = 128.6 # 92.6 # Specified cruise speed [m/s]
     
     W_loiter = ((OEW + PL) / Mff_end) * g * 1.005 # Weight at end of loiter phase [kg], multiplied by some factor
     PowerLoiter, V_Loiter, LD_Loiter = calcPowerLoiter(W_loiter,V_array,S,h_loiter)
@@ -485,7 +487,7 @@ def calcCruise(MTOW,OEW,Vfuelmax,PL,S,R_req,V_acc): # Payload [kg], speed analys
 #        PowerCruise, V_Cruise, LD_Cruise = calcPowerCruise(W,rho,V,S)
 #        R += (prop_eff * LD_Cruise / (g*cp) ) * np.log(M_cruise[i] / M_cruise[i+1])
     PowerLoiter, V_Loiter, LD_Loiter = calcPowerLoiter(W_cruise,V_array,S,h_cruise) # For plot
-    return R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array, MTOW_req, Fuel_req
+    return R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array, MTOW_req, Fuel_req, W_cruise
 
 ########################################################################################################
 
@@ -502,18 +504,20 @@ def CruisePlots(MTOW,OEW,Vfuelmax,S,V_acc):
         os.makedirs(directory)
     
     ###### Power required vs Power available graph ###
-    R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array, MTOW_req, Fuel_req = calcCruise(MTOW,OEW,Vfuelmax,444,S,R_req,V_acc)
+    R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array, MTOW_req, Fuel_req, W_cruise = calcCruise(MTOW,OEW,Vfuelmax,444,S,R_req,V_acc)
     plt.figure(figsize=(10,5))
-    plt.plot(V_array, PowerReq*0.001, label='Power Required')
-    plt.plot(V_array, PowerAva*0.001, linestyle='dashed', label='Power Available')
-    plt.plot(V_min, PowerReq[np.where(V_array == V_min)]*0.001, marker='v', label='V_min ('+str(round(V_min,1))+' m/s, '+str(int(round(PowerReq[np.where(V_array == V_min)]*0.001,0)))+' kW)' )
-    plt.plot(V_Loiter, PowerReq[np.where(V_array == V_Loiter)]*0.001, marker='D', label='Loiter ('+str(round(V_Loiter,1))+' m/s, '+str(int(round(PowerReq[np.where(V_array == V_Loiter)]*0.001,0)))+' kW)' )
-    plt.plot(V_Cruise_eff, PowerReq[np.where(V_array == V_Cruise_eff)]*0.001, marker='s', label='Cruise_eff ('+str(round(V_Cruise_eff,1))+' m/s, '+str(int(round(PowerReq[np.where(V_array == V_Cruise_eff)]*0.001,0)))+' kW)' )
-    plt.plot(V_Cruise_spec, PowerCruise_spec*0.001, marker='o', label='Cruise_spec ('+str(round(V_Cruise_spec,1))+' m/s, '+str(int(round(PowerCruise_spec*0.001,0)))+' kW)' )
-    plt.plot(V_max, PowerReq[np.where(V_array == V_max)]*0.001, marker='^', label='V_max ('+str(round(V_max,1))+' m/s, '+str(int(round(PowerReq[np.where(V_array == V_max)]*0.001,0)))+' kW)' )
-    plt.xlabel('TAS [m/s]')
+    plt.plot(V_array*1.9438, PowerReq*0.001, label='Power Required')
+    plt.plot(V_array*1.9438, PowerAva*0.001, linestyle='dashed', label='Power Available')
+    plt.plot(V_min*1.9438, PowerReq[np.where(V_array == V_min)]*0.001, marker='v', label='V_min ('+str(round(V_min*1.9438,1))+' kn, '+str(int(round(PowerReq[np.where(V_array == V_min)]*0.001,0)))+' kW)' )
+    plt.plot(V_Loiter*1.9438, PowerReq[np.where(V_array == V_Loiter)]*0.001, marker='D', label='Loiter ('+str(int(round(V_Loiter*1.9438,0)))+' kn, '+str(int(round(PowerReq[np.where(V_array == V_Loiter)]*0.001,0)))+' kW)' )
+    plt.plot(V_Cruise_eff*1.9438, PowerReq[np.where(V_array == V_Cruise_eff)]*0.001, marker='s', label='Cruise_eff ('+str(int(round(V_Cruise_eff*1.9438,0)))+' kn, '+str(int(round(PowerReq[np.where(V_array == V_Cruise_eff)]*0.001,0)))+' kW)' )
+    plt.plot(V_Cruise_spec*1.9438, PowerCruise_spec*0.001, marker='o', label='Cruise_spec ('+str(int(round(V_Cruise_spec*1.9438,0)))+' kn, '+str(int(round(PowerCruise_spec*0.001,0)))+' kW)' )
+    plt.plot(V_max*1.9438, PowerReq[np.where(V_array == V_max)]*0.001, marker='^', label='V_max ('+str(int(round(V_max*1.9438,0)))+' kn, '+str(int(round(PowerReq[np.where(V_array == V_max)]*0.001,0)))+' kW)' )
+    plt.xlabel('TAS [kn]')
     plt.ylabel('Power [kW]')
-    plt.legend(bbox_to_anchor=(1.5,1.0))
+    plt.xlim(0,310)
+    plt.ylim(0,300)
+    plt.legend(bbox_to_anchor=(1.45,1.0))
     plt.savefig(directory + '\PowerCurve.png', format='png', bbox_inches='tight', dpi=400)
     plt.show()
     ############################
@@ -541,7 +545,7 @@ def CruisePlots(MTOW,OEW,Vfuelmax,S,V_acc):
     plt.figure(figsize=(10,5))
     fig = plt.plot(Range,[444, 444, MTOW-OEW-Mfuelmax, 111, 0], linestyle='-', marker='o')
     plt.ylim((0, 500))
-    plt.legend(iter(fig), ('Range at Most Efficient Speed ('+str(int(round(Speed[0][0]*1.9438,0)))+' kt)', 'Range at Specified Speed ('+str(int(round(Speed[0][1]*1.9438,0)))+' kt)', 'Range at Maximum Speed ('+str(int(round(Speed[0][2]*1.9438,0)))+' kt)'), markerscale=0.8, loc=3)
+    plt.legend(iter(fig), ('Range at Most Efficient Speed ('+str(int(round(Speed[0][0]*1.9438,0)))+' kn)', 'Range at Specified Speed ('+str(int(round(Speed[0][1]*1.9438,0)))+' kn)', 'Range at Maximum Speed ('+str(int(round(Speed[0][2]*1.9438,0)))+' kn)'), markerscale=0.8, loc=3)
     plt.xlabel('Range [km]')
     plt.ylabel('Payload [kg]')
     plt.savefig(directory + '\PayloadRangeDiagram.png', format='png', bbox_inches='tight', dpi=400)
@@ -552,11 +556,11 @@ def CruisePlots(MTOW,OEW,Vfuelmax,S,V_acc):
     
 
 ####### RUN FUNCTIONS: ###########
-Range, Speed = CruisePlots(1724,1043,0.56,15.56,0.01)
-
-R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array, MTOW_req, Fuel_req = calcCruise(1724,1043,0.56,444,15.56,1400000,0.01)
+#Range, Speed = CruisePlots(1675.6,928.47,0.56,15.12,0.001)
 #
-#PowerCruise_alt, PowerAva_alt, kilometrage = calcAltOpt(1600*9.81,np.arange(50,150,0.01),15.56)
+#R_eff, R_spec, R_Vmax, V_Cruise_eff, V_Cruise_spec, V_max, PowerReq, PowerAva, PowerCruise_spec, V_min, V_Loiter, V_array, MTOW_req, Fuel_req, W_cruise = calcCruise(1675.6,928.47,0.56,444,15.12,1400000,0.001)
+###
+#PowerCruise_alt, PowerAva_alt, kilometrage = calcAltOpt(W_cruise,np.arange(50,150,0.01),15.12)
 ##############################
 
 
