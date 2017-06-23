@@ -141,7 +141,7 @@ def MOI_section_2():
     
     
     
-    for i in range(1):
+    for i in range(len(c_2)):
         xcoordinates1 = xcoordinates * c_2[i]
         ycoordinates1 = ycoordinates * c_2[i]
         

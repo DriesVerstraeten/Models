@@ -86,7 +86,7 @@ def wing_shear(CL, rho, V):
     plt.show()
     
     return dL, dL_total
-#wing_shear(CL, p.rho_0, p.V_cruise)[1][0]
+#print wing_shear(CL, p.rho_0, p.V_cruise)[1][0]
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #BENDING AT 9g
 

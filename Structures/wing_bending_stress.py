@@ -195,7 +195,7 @@ fig = plt.figure(figsize = (5,4), tight_layout = True)
 #b = a[:,-1]-y_NA
 #plt.plot(wm.y,  a[:,-1])
 
-print max(maxpoints_LS)
+#print max(maxpoints_US)
 
 ax1 = fig.add_subplot(111)
 ax1.plot(wm.y,maxpoints_US, color='b', label='Upper skin')
