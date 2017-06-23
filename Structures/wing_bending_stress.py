@@ -166,21 +166,26 @@ def wingbox_bending_stress():
         y_BS = np.linspace(y_position_BS_u[i],y_position_BS_l[i],len(wm.y))-y_NA[i]
         
         
-        sigma_bending_US[i,:] =   - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_US - Ixy[i] * x)
-        sigma_bending_LS[i,:] =   - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_LS - Ixy[i] * x)
-        sigma_bending_FS[i,:] =   - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_FS - Ixy[i] * x[0])
-        sigma_bending_BS[i,:] =   - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_BS - Ixy[i] * x[-1])
+        sigma_bending_US[i,:] =  - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_US - Ixy[i] * x)
+        sigma_bending_LS[i,:] =  - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_LS - Ixy[i] * x)
+        sigma_bending_FS[i,:] =  - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_FS - Ixy[i] * x[0])
+        sigma_bending_BS[i,:] =  - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_BS - Ixy[i] * x[-1])
     
     return sigma_bending_US, sigma_bending_LS, sigma_bending_FS, sigma_bending_BS
 
 sigma_bending_US, sigma_bending_LS, sigma_bending_FS, sigma_bending_BS = wingbox_bending_stress()
 
-maxpoints = np.ones(len(wm.y))
+maxpoints_US = np.ones(len(wm.y))
+maxpoints_LS = np.ones(len(wm.y))
 for i in range(len(wm.y)):
-    
-    maxpoints[i] = np.max(sigma_bending_US[i])
+    maxpoints_US[i] = np.max(sigma_bending_US[i])
+    maxpoints_LS[i] = np.max(sigma_bending_LS[i])
 
 plt.close()
+fig = plt.figure(figsize = (5,4), tight_layout = True)
+
+
+
 #plt.plot(wm.y, y_US[0])
 #plt.plot(x_span[0],sigma_bending_US[0], color='r')
 #plt.plot(x_span[0],sigma_bending_LS[0], color='b')
@@ -189,7 +194,17 @@ plt.close()
 #a= y_position_US - y_NA
 #b = a[:,-1]-y_NA
 #plt.plot(wm.y,  a[:,-1])
-plt.plot(wm.y,maxpoints, color='b')
+
+print max(maxpoints_LS)
+
+ax1 = fig.add_subplot(111)
+ax1.plot(wm.y,maxpoints_US, color='b', label='Upper skin')
+ax1.plot(wm.y,maxpoints_LS, color='r', label='Lower skin')
+
+#ax1.set_title('Maximum bending stresses [-6g]')
+ax1.set_ylabel('Bending stress [Pa]')
+ax1.set_xlabel('Wing span [m]')
+ax1.legend()
 plt.show()
 
 

@@ -56,11 +56,7 @@ def MOI_section_1():
         fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
         f2 = np.poly1d(fit2) #lower skin
         f22 = f2.deriv(1)
-        
-        #plt.plot(xcoordinates1,ycoordinates1)
-        #plt.axes().set_aspect('equal','datalim')
-        #plt.show()
-        
+
         front_spar = FS_location * c_1[i]
         back_spar = BS_location * c_1[i]
 
@@ -70,7 +66,20 @@ def MOI_section_1():
         dx = (back_spar - front_spar)/len(wm.y)
         area_section = dx * t * 2 #multiplied by two because it is a honeycomb structure
         x_span.append(x)
-        
+        '''
+        if i == 0:
+            plt.plot(xcoordinates1,ycoordinates1)
+            plt.axes().set_aspect('equal','datalim')
+            plt.plot(x,f1(x),color='k')
+            plt.plot(x,f2(x),color='k')
+            plt.plot(x,f1(x)-0.008,color='k')
+            plt.plot(x,f2(x)+0.008,color='k')
+            plt.plot((front_spar,front_spar),(f1(front_spar),f2(front_spar)),color = 'k')
+            plt.plot((back_spar,back_spar),(f1(back_spar),f2(back_spar)),color = 'k')
+            plt.xlabel('Chord [m]')
+            plt.ylabel('Thickness [m]')
+            plt.show()
+         '''   
         x_LE = np.linspace(0,front_spar,len(wm.y))
         x_TE = np.linspace(back_spar,c_1[i],len(wm.y))
 
@@ -132,7 +141,7 @@ def MOI_section_2():
     
     
     
-    for i in range(len(c_2)):
+    for i in range(1):
         xcoordinates1 = xcoordinates * c_2[i]
         ycoordinates1 = ycoordinates * c_2[i]
         
@@ -144,10 +153,6 @@ def MOI_section_2():
         f2 = np.poly1d(fit2) #lower skin
         f22 = f2.deriv(1)
         
-        #plt.plot(xcoordinates1,ycoordinates1)
-        #plt.axes().set_aspect('equal','datalim')
-        #plt.show()
-        
         front_spar = FS_location * c_2[i]
         back_spar = BS_location * c_2[i]
 
@@ -157,6 +162,7 @@ def MOI_section_2():
         dx = (back_spar - front_spar)/len(wm.y)
         area_section = dx * t * 2.
         x_span.append(x)
+
         
         x_LE = np.linspace(0,front_spar,len(wm.y))
         x_TE = np.linspace(back_spar,c_2[i],len(wm.y))
@@ -314,7 +320,7 @@ print("MOI --- %s seconds ---" % (time.time() - start_time))
 #plt.plot(wm.y,Iyy, color = 'b')
 #plt.plot(wm.y,Ixy, color = 'g')
 #plt.plot(wm.y,Ixx*Iyy - Ixy**2, 'r')
-plt.show()
+#plt.show()
 
 
 '''

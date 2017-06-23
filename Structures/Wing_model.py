@@ -12,8 +12,8 @@ import Init_Parameters as p
 import numpy as np
 import matplotlib.pyplot as plt
 
-#plt.close()
-#fig = plt.figure(figsize = (8.5,6),tight_layout=True)
+plt.close()
+fig = plt.figure(figsize = (9,3),tight_layout=True)
 
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #CHORD LENGTH AT DIFFERENT SPANWISE LOCATIONS
@@ -56,7 +56,7 @@ y1 = np.linspace(0,p.b/2.+2*dy, len(c))
 #c = p.c_r - d_cLE - d_cTE #chord at each spanwise section
     
 
-CL = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #lift coefficient at N g
+CL = 12 * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #lift coefficient at N g
 #CL_45g = p.Nz * p.g * p.MTOW / (0.5 * p.rho_0 * p.V_cruise**2. * p.S) #Lift coefficient at -4.5g
     
                       
@@ -75,18 +75,18 @@ def wing_shear(CL, rho, V):
             dL_total[i] = dL_total[i-1] - dL[0]
         else:
             dL_total[i] = dL_total[i-1] - dL[i-1]
-    '''
-    ax1 = fig.add_subplot(221)
+    
+    ax1 = fig.add_subplot(121)
     ax1.plot(y,dL_total)  
-    ax1.set_title('Shear force at Nz g')
+    ax1.set_title('Shear force at -6 g')
     ax1.set_ylabel('Shear force [N]')
     ax1.set_xlabel('Wing span [m]')
     ax1.set_ylim(dL_total[-1],dL_total[0])
     ax1.set_xlim([y[0],y[-1]])
     plt.show()
-    '''
+    
     return dL, dL_total
-#wing_shear(CL, p.rho_0, p.V_cruise)
+#wing_shear(CL, p.rho_0, p.V_cruise)[1][0]
 ########## ########## ########## ########## ########## ########## ########## ########## ########## ##########
 #BENDING AT 9g
 
@@ -102,19 +102,19 @@ def wing_moment(CL, rho, V):
             dM_total[i] = dM_total[i-1] - dM[0]
         else:
             dM_total[i] = dM_total[i-1] - dM[i-1]
-    '''
-    ax2 = fig.add_subplot(222)
+    
+    ax2 = fig.add_subplot(122)
     ax2.plot(y1,dM_total)  
-    ax2.set_title('Bending moment at Nz g')
+    ax2.set_title('Bending moment at -6 g')
     ax2.set_ylabel('Bending moment [Nm]')
     ax2.set_xlabel('Wing span [m]')
     ax2.set_ylim(dM_total[-1],dM_total[0])
     ax2.set_xlim([y[0],y[-1]])
     plt.show()
-    '''
+    
     return dM, dM_total
 
-#wing_moment(CL,p.rho_0,p.V_cruise)
+#wing_moment(CL,p.rho_0,p.V_cruise)[1][0]
 
 
 
