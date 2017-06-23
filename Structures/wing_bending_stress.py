@@ -87,15 +87,15 @@ def piecewise_poly_2():
         
         fit1 = np.polyfit(xcoordinates1[0:133],ycoordinates1[0:133],5)
         f1 = np.poly1d(fit1)
-        y_position_US.append(f1(x_span[i]))
-        y_position_FS_u.append(f1(x_span[i][0]))
-        y_position_BS_u.append(f1(x_span[i][-1]))
+        y_position_US.append(f1(x_span[len(c_1)+i]))
+        y_position_FS_u.append(f1(x_span[len(c_1)+i][0]))
+        y_position_BS_u.append(f1(x_span[len(c_1)+i][-1]))
         
         fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
         f2 = np.poly1d(fit2)
-        y_position_LS.append(f2(x_span[i]))
-        y_position_FS_l.append(f2(x_span[i][0]))
-        y_position_BS_l.append(f2(x_span[i][-1]))
+        y_position_LS.append(f2(x_span[len(c_1)+i]))
+        y_position_FS_l.append(f2(x_span[len(c_1)+i][0]))
+        y_position_BS_l.append(f2(x_span[len(c_1)+i][-1]))
     
     return np.array(y_position_US), np.array(y_position_LS), np.array(y_position_FS_u), np.array(y_position_BS_u), np.array(y_position_FS_l), np.array(y_position_BS_l)
 
@@ -127,15 +127,15 @@ def piecewise_poly_3():
         
         fit1 = np.polyfit(xcoordinates1[0:133],ycoordinates1[0:133],5)
         f1 = np.poly1d(fit1)
-        y_position_US.append(f1(x_span[i]))
-        y_position_FS_u.append(f1(x_span[i][0]))
-        y_position_BS_u.append(f1(x_span[i][-1]))
+        y_position_US.append(f1(x_span[len(c_1)+len(c_2)+i]))
+        y_position_FS_u.append(f1(x_span[len(c_1)+len(c_2)+i][0]))
+        y_position_BS_u.append(f1(x_span[len(c_1)+len(c_2)+i][-1]))
         
         fit2 = np.polyfit(xcoordinates1[133:],ycoordinates1[133:],5)
         f2 = np.poly1d(fit2)
-        y_position_LS.append(f2(x_span[i]))
-        y_position_FS_l.append(f2(x_span[i][0]))
-        y_position_BS_l.append(f2(x_span[i][-1]))
+        y_position_LS.append(f2(x_span[len(c_1)+len(c_2)+i]))
+        y_position_FS_l.append(f2(x_span[len(c_1)+len(c_2)+i][0]))
+        y_position_BS_l.append(f2(x_span[len(c_1)+len(c_2)+i][-1]))
     
     return np.array(y_position_US), np.array(y_position_LS), np.array(y_position_FS_u), np.array(y_position_BS_u), np.array(y_position_FS_l), np.array(y_position_BS_l)
 
@@ -166,10 +166,10 @@ def wingbox_bending_stress():
         y_BS = np.linspace(y_position_BS_u[i],y_position_BS_l[i],len(wm.y))-y_NA[i]
         
         
-        sigma_bending_US[i,:] = - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_US - Ixy[i] * x)
-        sigma_bending_LS[i,:] = - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_LS - Ixy[i] * x)
-        sigma_bending_FS[i,:] = - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_FS - Ixy[i] * x[0])
-        sigma_bending_BS[i,:] = - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_BS - Ixy[i] * x[-1])
+        sigma_bending_US[i,:] =   - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_US - Ixy[i] * x)
+        sigma_bending_LS[i,:] =   - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_LS - Ixy[i] * x)
+        sigma_bending_FS[i,:] =   - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_FS - Ixy[i] * x[0])
+        sigma_bending_BS[i,:] =   - Mx[i] / (Ixx[i] * Iyy[i] - Ixy[i]**2) * (Iyy[i] * y_BS - Ixy[i] * x[-1])
     
     return sigma_bending_US, sigma_bending_LS, sigma_bending_FS, sigma_bending_BS
 
@@ -180,11 +180,15 @@ for i in range(len(wm.y)):
     
     maxpoints[i] = np.max(sigma_bending_US[i])
 
+plt.close()
 #plt.plot(wm.y, y_US[0])
 #plt.plot(x_span[0],sigma_bending_US[0], color='r')
 #plt.plot(x_span[0],sigma_bending_LS[0], color='b')
 #plt.plot(np.ones(len(wm.y))*x_span[0][0],sigma_bending_FS[0], color='y')
 #plt.plot(np.ones(len(wm.y))*x_span[0][-1],sigma_bending_BS[0], color='m')
+#a= y_position_US - y_NA
+#b = a[:,-1]-y_NA
+#plt.plot(wm.y,  a[:,-1])
 plt.plot(wm.y,maxpoints, color='b')
 plt.show()
 

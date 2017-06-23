@@ -309,14 +309,15 @@ print "MOI:", total_volume_wings, "m^3"
 
 print("MOI --- %s seconds ---" % (time.time() - start_time))
 
-'''
-plt.plot(wm.y,Ixx, color = 'r')
-plt.plot(wm.y,Iyy, color = 'b')
-plt.plot(wm.y,Ixy, color = 'g')
+#plt.close()
+#plt.plot(wm.y,Ixx, color = 'r')
+#plt.plot(wm.y,Iyy, color = 'b')
+#plt.plot(wm.y,Ixy, color = 'g')
+#plt.plot(wm.y,Ixx*Iyy - Ixy**2, 'r')
 plt.show()
 
 
-
+'''
 
 
 
